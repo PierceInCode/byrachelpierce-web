@@ -1,10 +1,9 @@
-'use client';
-
 /**
- * Collection Page — placeholder for the full art gallery.
+ * Collection Page — placeholder for the full art gallery. (Server Component)
  *
  * Will eventually display filterable artwork with Lightspeed integration.
- * For now, shows category grid and “coming soon” note.
+ * For now, shows category grid and "coming soon" note.
+ * All hover effects use CSS classes defined in globals.css.
  */
 
 import type { Metadata } from 'next';
@@ -143,6 +142,7 @@ export default function CollectionPage() {
               <Link
                 key={cat.slug}
                 href={`/collection/${cat.slug}`}
+                className="card-hover"
                 style={{
                   display: 'block',
                   borderRadius: 'var(--radius-xl)',
@@ -151,16 +151,6 @@ export default function CollectionPage() {
                   boxShadow: 'var(--shadow-sm)',
                   border: '1px solid var(--color-border)',
                   transition: 'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.boxShadow = 'var(--shadow-md)';
-                  el.style.transform = 'translateY(-3px)';
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.boxShadow = 'var(--shadow-sm)';
-                  el.style.transform = 'translateY(0)';
                 }}
               >
                 <div
