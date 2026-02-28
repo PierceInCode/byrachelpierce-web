@@ -1,19 +1,17 @@
-'use client';
-
 /**
- * Homepage — by Rachel Pierce
+ * Homepage — by Rachel Pierce (Server Component)
  *
  * Sections:
  *  1. Hero
  *  2. Featured Collection (category grid)
- *  3. About Teaser (“From Television to Canvas”)
+ *  3. About Teaser ("From Television to Canvas")
  *  4. Mural Trail CTA
  *  5. Shop CTA
  *
  * The CrossSellModule is rendered inside Footer, so it naturally
  * appears on every page between content and the teal footer bar.
  *
- * This is a Server Component.
+ * All hover effects use CSS classes defined in globals.css.
  */
 
 import type { Metadata } from 'next';
@@ -26,7 +24,7 @@ export const metadata: Metadata = {
     'Original paintings, prints, and murals by Rachel Pierce. Vibrant coastal art — sea turtles, birds, florals, and island life. Visit our gallery on Sanibel Island, Florida.',
 };
 
-// ── Shared button styles ──────────────────────────────────────────────────────
+// ── Shared button styles ──────────────────────────────────────────────
 
 const btnPrimary: React.CSSProperties = {
   display: 'inline-flex',
@@ -67,7 +65,7 @@ const btnSecondary: React.CSSProperties = {
   transition: 'border-color 180ms cubic-bezier(0.16,1,0.3,1), background-color 180ms cubic-bezier(0.16,1,0.3,1)',
 };
 
-// ── External link icon ──────────────────────────────────────────────────────
+// ── External link icon ────────────────────────────────────────────────
 
 function ExternalLinkIcon() {
   return (
@@ -91,7 +89,7 @@ function ExternalLinkIcon() {
   );
 }
 
-// ── Category visual data (teal gradient tones per category) ───────────────────
+// ── Category visual data (teal gradient tones per category) ───────────
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   'beach-coastal':    'linear-gradient(135deg, #e0f5fb 0%, #b3e6f2 100%)',
@@ -108,7 +106,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 // Featured categories shown on homepage (subset)
 const FEATURED_CATEGORIES = COLLECTION_CATEGORIES.slice(0, 6);
 
-// ── Homepage ──────────────────────────────────────────────────────────────
+// ── Homepage ──────────────────────────────────────────────────────────
 
 export default function HomePage() {
   return (
@@ -204,15 +202,8 @@ export default function HomePage() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
               <Link
                 href="/collection"
+                className="btn-primary"
                 style={btnPrimary}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-coral-dark)';
-                  (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-coral)';
-                  (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)';
-                }}
               >
                 Explore the Collection
               </Link>
@@ -305,6 +296,7 @@ export default function HomePage() {
                 key={cat.slug}
                 href={`/collection/${cat.slug}`}
                 aria-label={`Browse ${cat.label} artwork`}
+                className="card-hover"
                 style={{
                   display: 'block',
                   borderRadius: 'var(--radius-xl)',
@@ -313,16 +305,6 @@ export default function HomePage() {
                   boxShadow: 'var(--shadow-sm)',
                   border: '1px solid var(--color-border)',
                   transition: 'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.boxShadow = 'var(--shadow-md)';
-                  el.style.transform = 'translateY(-3px)';
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.boxShadow = 'var(--shadow-sm)';
-                  el.style.transform = 'translateY(0)';
                 }}
               >
                 {/* Placeholder image area */}
@@ -463,6 +445,7 @@ export default function HomePage() {
               </p>
               <Link
                 href="/story"
+                className="btn-teal"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -478,12 +461,6 @@ export default function HomePage() {
                   textDecoration: 'none',
                   minHeight: '48px',
                   transition: 'background-color 180ms cubic-bezier(0.16,1,0.3,1)',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-hotpink)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-teal)';
                 }}
               >
                 Read Rachel&apos;s Story →
@@ -572,13 +549,8 @@ export default function HomePage() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 <Link
                   href="/murals/trail"
+                  className="btn-primary"
                   style={btnPrimary}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-coral-dark)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-coral)';
-                  }}
                 >
                   Explore the Trail
                 </Link>
