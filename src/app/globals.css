@@ -1,10 +1,5 @@
 @import 'tailwindcss';
 
-/* Import Leaflet's required CSS.
-   This MUST come before any non-import rules per the CSS spec.
-   Leaflet uses this CSS for map tiles, popups, markers, and zoom controls. */
-@import 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-
 /**
  * Brand design tokens for by Rachel Pierce
  * All custom properties are registered via the Tailwind v4 @theme block,
@@ -237,8 +232,10 @@ nav a {
 }
 
 /* ── Leaflet Map Styles ──────────────────────────────────────────── */
-/* (The Leaflet CSS import itself is at the top of this file, right after
-   the Tailwind import — CSS @import rules must come before any other rules.) */
+/* Leaflet's own CSS (leaflet.css) is imported via JavaScript in MuralMap.tsx.
+   We can't use @import in this file because Tailwind v4's @import 'tailwindcss'
+   expands into CSS rules, and the CSS spec requires @import to precede all rules.
+   The styles below are OUR custom overrides for map markers, popups, etc. */
 
 /* Map container responsive sizing */
 .mural-map-container {

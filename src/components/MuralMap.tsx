@@ -19,6 +19,20 @@ import { useEffect, useRef, useState } from 'react';
 // The actual Leaflet library is loaded dynamically inside useEffect (below).
 import type L from 'leaflet';
 
+// ── Leaflet CSS ────────────────────────────────────────────────────────────────
+//
+// WHY import the CSS here instead of in globals.css?
+// Tailwind v4 uses @import 'tailwindcss' which expands into many CSS rules.
+// The CSS spec requires @import statements to come BEFORE all other rules.
+// Since Tailwind's expansion creates rules, any @import after it is invalid.
+//
+// Importing the CSS from a 'use client' component via JavaScript is the
+// recommended Next.js approach for third-party CSS from node_modules.
+// Next.js/Turbopack will bundle this CSS and inject it into the page
+// only when this component loads — which also means pages without the
+// map never download Leaflet's CSS at all. Free performance win.
+import 'leaflet/dist/leaflet.css';
+
 import { MURAL_LOCATIONS } from '@/lib/mural-data';
 import type { MuralLocation } from '@/types';
 
