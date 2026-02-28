@@ -1,11 +1,14 @@
 /**
  * Murals Hub Page — overview of Rachel Pierce's mural work on Sanibel Island.
- * Links to the Mural Selfie Trail.
+ * Links to the Mural Selfie Trail. Now includes an interactive Leaflet map.
  */
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MURAL_LOCATIONS } from '@/lib/mural-data';
+// MuralMapWrapper handles the client/server boundary for us.
+// This page remains a Server Component — no 'use client' needed here.
+import MuralMapWrapper from '@/components/MuralMapWrapper';
 
 export const metadata: Metadata = {
   title: 'Murals',
@@ -124,39 +127,13 @@ export default function MuralsPage() {
                 margin: 0,
               }}
             >
-              Interactive map coming soon
+              Explore the map to find each mural location
             </p>
           </div>
 
-          {/* Under Construction note */}
-          <div
-            role="status"
-            style={{
-              backgroundColor: 'var(--color-teal-light)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1.25rem 1.5rem',
-              marginBottom: '2rem',
-              border: '1px solid rgba(54,181,205,0.25)',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: 'var(--font-nav)',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-teal-dark)',
-                margin: 0,
-              }}
-            >
-              🗺️ An interactive map and photo gallery for each mural is under construction.
-              For now, explore all {MURAL_LOCATIONS.length} locations on the{' '}
-              <Link
-                href="/murals/trail"
-                style={{ color: 'var(--color-teal-dark)', fontWeight: 600, textDecoration: 'underline' }}
-              >
-                Mural Selfie Trail page
-              </Link>
-              .
-            </p>
+          {/* Interactive map */}
+          <div style={{ marginBottom: '2rem' }}>
+            <MuralMapWrapper />
           </div>
 
           {/* Mural cards */}

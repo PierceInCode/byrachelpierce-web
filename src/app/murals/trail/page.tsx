@@ -1,12 +1,17 @@
 /**
  * Mural Trail Page — the Sanibel Mural Selfie Trail.
  * Lists all 14 mural stops with addresses and descriptions.
- * Future: integrate interactive map.
+ * Now includes a live interactive Leaflet map.
  */
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MURAL_LOCATIONS } from '@/lib/mural-data';
+// MuralMapWrapper is a 'use client' component that lazy-loads Leaflet.
+// Importing it into this Server Component is perfectly fine — Next.js App Router
+// allows Server Components to render Client Components as children.
+// The server renders the loading skeleton HTML; the browser hydrates and loads the map.
+import MuralMapWrapper from '@/components/MuralMapWrapper';
 
 export const metadata: Metadata = {
   title: 'Mural Selfie Trail',
@@ -85,7 +90,7 @@ export default function MuralTrailPage() {
             {[
               { number: String(MURAL_LOCATIONS.length), label: 'Mural Locations' },
               { number: 'Free', label: 'Self-Guided Tour' },
-              { number: '📍', label: 'Map Coming Soon' },
+              { number: '🗺️', label: 'Interactive Map' },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -126,57 +131,19 @@ export default function MuralTrailPage() {
         </div>
       </section>
 
-      {/* Map placeholder */}
-      <div
-        role="region"
-        aria-label="Interactive mural map — coming soon"
+      {/* Interactive Mural Map */}
+      <section
+        aria-label="Interactive mural map"
         style={{
-          backgroundColor: 'var(--color-teal-light)',
-          borderBottom: '1px solid rgba(54,181,205,0.2)',
-          padding: '1.25rem 0',
+          backgroundColor: 'var(--color-offwhite)',
+          borderBottom: '1px solid var(--color-border)',
+          padding: 'clamp(1.5rem, 3vw, 2.5rem) 0',
         }}
       >
         <div className="container-site">
-          <div
-            style={{
-              backgroundColor: 'rgba(54,181,205,0.1)',
-              border: '2px dashed rgba(54,181,205,0.4)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '3rem',
-              textAlign: 'center',
-              minHeight: '200px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.75rem',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: 'var(--text-xl)',
-                fontStyle: 'italic',
-                color: 'var(--color-teal-dark)',
-                margin: 0,
-              }}
-            >
-              Interactive Map
-            </p>
-            <p
-              style={{
-                fontFamily: 'var(--font-nav)',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-slate-light)',
-                letterSpacing: '0.06em',
-                margin: 0,
-              }}
-            >
-              Coming Soon — Mapbox/Google Maps integration planned
-            </p>
-          </div>
+          <MuralMapWrapper />
         </div>
-      </div>
+      </section>
 
       {/* Trail stops list */}
       <section
