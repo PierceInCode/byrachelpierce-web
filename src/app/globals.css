@@ -1,0 +1,232 @@
+@import 'tailwindcss';
+
+/**
+ * Brand design tokens for by Rachel Pierce
+ * All custom properties are registered via the Tailwind v4 @theme block,
+ * making them available as utility classes (e.g. bg-teal, text-coral, font-heading).
+ */
+@theme {
+  /* ── Brand Colors ─────────────────────────────────────────────── */
+  --color-teal: #36b5cd;
+  --color-teal-dark: #2a9ab0;
+  --color-teal-light: #e8f7fb;
+  --color-coral: #fd8473;
+  --color-coral-dark: #e86b59;
+  --color-hotpink: #ff008c;
+  --color-slate: #577083;
+  --color-slate-light: #8099aa;
+  --color-slate-dark: #3d5264;
+  --color-white: #ffffff;
+  --color-offwhite: #fafaf8;
+  --color-border: #e8edf0;
+
+  /* ── Typography ───────────────────────────────────────────────── */
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-nav: 'Jura', 'Trebuchet MS', sans-serif;
+  --font-body: 'Avenir', 'Helvetica Neue', Arial, sans-serif;
+
+  /* ── Fluid Type Scale (clamp: min / ideal / max) ─────────────────── */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.8125rem);
+  --text-sm: clamp(0.875rem, 0.825rem + 0.25vw, 0.9375rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.0625rem);
+  --text-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 1.875rem);
+  --text-3xl: clamp(1.875rem, 1.65rem + 1.125vw, 2.5rem);
+  --text-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3.25rem);
+  --text-5xl: clamp(2.75rem, 2.2rem + 2.75vw, 4.5rem);
+
+  /* ── Spacing Scale (4px base grid) ───────────────────────────── */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-32: 8rem;
+
+  /* ── Transitions ────────────────────────────────────────────────── */
+  --transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Border Radius ──────────────────────────────────────────────── */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(54, 181, 205, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(54, 181, 205, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(54, 181, 205, 0.16), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Base Reset & Global Styles ────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-slate);
+  background-color: var(--color-white);
+  line-height: 1.65;
+  min-height: 100dvh;
+}
+
+/* ── Heading Defaults ────────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-slate-dark);
+}
+
+/* ── Link Defaults ───────────────────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+/* ── Image Defaults ──────────────────────────────────────────────────── */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Focus Styles (WCAG AA) ──────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Selection ───────────────────────────────────────────────────────── */
+::selection {
+  background-color: var(--color-teal-light);
+  color: var(--color-slate-dark);
+}
+
+/* ── Utility: Image Placeholder ────────────────────────────────────────── */
+.img-placeholder {
+  background: linear-gradient(
+    135deg,
+    var(--color-teal-light) 0%,
+    #c8edf5 50%,
+    var(--color-teal-light) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-teal-dark);
+  font-family: var(--font-nav);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Utility: Container ───────────────────────────────────────────────────── */
+.container-site {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+/* ── Utility: Section Spacing ───────────────────────────────────────────── */
+.section-pad {
+  padding-block: clamp(3rem, 7vw, 6rem);
+}
+
+/* ── Utility: Prose Width ────────────────────────────────────────────────── */
+.prose-width {
+  max-width: 68ch;
+}
+
+/* ── Smooth Hover Transitions on Interactive Elements ────────────────────── */
+button,
+a,
+[role='button'] {
+  transition: color var(--transition-base), background-color var(--transition-base),
+    border-color var(--transition-base), box-shadow var(--transition-base),
+    opacity var(--transition-base), transform var(--transition-base);
+}
+
+/* ── Minimum Touch Targets (WCAG 2.5.8) ─────────────────────────────────── */
+button,
+[role='button'],
+input[type='submit'],
+input[type='button'],
+label[for],
+nav a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ── Hover Utility Classes (for Server Components — no JS needed) ────────────── */
+
+/* Primary button: coral → coral-dark */
+.btn-coral:hover {
+  background-color: var(--color-coral-dark) !important;
+  transform: translateY(-1px);
+}
+
+/* Teal button: teal → hotpink */
+.btn-teal:hover {
+  background-color: var(--color-hotpink) !important;
+}
+
+/* Ghost border button: teal */
+.btn-ghost-teal:hover {
+  background-color: var(--color-teal) !important;
+  color: var(--color-white) !important;
+}
+
+/* Card hover: lift effect */
+.card-hover:hover {
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* Nav text hover: white + bg */
+.nav-link-hover:hover {
+  color: var(--color-white) !important;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Text link hover: hotpink */
+.text-link-teal:hover {
+  color: var(--color-hotpink) !important;
+}
+
+/* Category card hover */
+.category-card:hover {
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-3px) !important;
+}
