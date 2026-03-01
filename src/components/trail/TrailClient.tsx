@@ -73,8 +73,31 @@ export default function TrailClient() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch('/api/trail/status');
-      const data: TrailStatusResponse = await res.json();
+      // Fetch trail status AND session data in parallel.
+      // We need both: trail status tells us progress, session tells us
+      // the user's email (for display on the completion screen).
+      //
+      // Previously these were separate calls with a race condition —
+      // the component could transition to COMPLETED before the email
+      // was loaded, resulting in "emailed to ." with a blank address.
+      const [statusRes, sessionRes] = await Promise.all([
+        fetch('/api/trail/status'),
+        fetch('/api/auth/session'),
+      ]);
+
+      const data: TrailStatusResponse = await statusRes.json();
+
+      // Extract email from the Auth.js session endpoint.
+      // This always returns { user: { name, email, image } } when
+      // the user is signed in, or {} when signed out.
+      try {
+        const session = await sessionRes.json();
+        if (session?.user?.email) {
+          setEmail(session.user.email);
+        }
+      } catch {
+        // Session parse failed — not critical, email is just for display
+      }
 
       if (!data.authenticated) {
         // Check URL params — Auth.js redirects here with ?check-email=true
@@ -90,7 +113,6 @@ export default function TrailClient() {
 
       // User is authenticated — load their progress
       if (data.progress) {
-        setEmail(data.progress.checkedInMuralIds.length > 0 ? '' : ''); // Will be set from session
         setTotalCheckIns(data.progress.totalCheckIns);
         setRequiredCheckIns(data.progress.requiredCheckIns);
         setCheckedInMuralIds(data.progress.checkedInMuralIds);
@@ -111,24 +133,9 @@ export default function TrailClient() {
     }
   }, []);
 
-  // Fetch the user's email from the Auth.js session endpoint
-  // (separate from trail status because the status route doesn't return the email)
-  const fetchSessionEmail = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/session');
-      const session = await res.json();
-      if (session?.user?.email) {
-        setEmail(session.user.email);
-      }
-    } catch {
-      // Not critical — the email is just for display
-    }
-  }, []);
-
   useEffect(() => {
     fetchStatus();
-    fetchSessionEmail();
-  }, [fetchStatus, fetchSessionEmail]);
+  }, [fetchStatus]);
 
   // ── Handlers ───────────────────────────────────────────────────────
 
