@@ -135,6 +135,12 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         //
         // L.map(element, options) creates a new map instance attached to the given DOM element.
         // The options object configures the initial view, zoom limits, and interaction behavior.
+        //
+        // IMPORTANT: The map container div is ALWAYS in the layout with its full height
+        // (never display:none). This is critical because Leaflet measures the container's
+        // pixel dimensions at init time to calculate how many tiles to fetch. If the
+        // container is hidden (display:none → 0×0px), Leaflet would only load tiles for
+        // the top-left corner, causing the grey area you see in the rest of the map.
         const map = L.map(mapContainerRef.current, {
           // Initial center: approximate geographic center of Sanibel Island
           // Leaflet coordinates are always [latitude, longitude]
@@ -295,21 +301,37 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
           bounds.extend(L.latLng(mural.lat, mural.lng));
         });
 
-        // ── Fit Map to All Markers ─────────────────────────────────────────────
+        // ── Hide the loading overlay, then recalculate tile coverage ───────────
         //
-        // fitBounds adjusts the center and zoom level so that all markers are
-        // visible within the map viewport, with some padding so they're not
-        // right at the edge. Padding is in pixels.
-        if (bounds.isValid()) {
-          map.fitBounds(bounds, {
-            padding: [40, 40], // [top/bottom pixels, left/right pixels]
-            maxZoom: 14,       // Don't zoom in too close even if there are clustered markers
-          });
-        }
-
-        // ── Mark loading as complete ───────────────────────────────────────────
-        // This triggers a re-render that hides the loading skeleton and reveals the map.
+        // setIsLoading(false) triggers a React re-render that hides the loading overlay.
+        // But React state updates are batched and painted asynchronously — the DOM
+        // doesn't actually change until the browser's next paint cycle.
+        //
+        // After that paint, we call map.invalidateSize() to force Leaflet to re-measure
+        // its container and load tiles for the full visible area. Then fitBounds to
+        // ensure all markers are visible.
+        //
+        // requestAnimationFrame schedules a callback to run right before the browser's
+        // next repaint — guaranteeing the DOM has been updated. Think of it as
+        // Dispatcher.BeginInvoke in WPF: "run this after the current render cycle."
         setIsLoading(false);
+
+        requestAnimationFrame(() => {
+          if (cancelled || !map) return;
+
+          // invalidateSize() tells Leaflet: "your container's pixel dimensions may
+          // have changed — recalculate and fetch any missing tiles."
+          // This is the standard Leaflet fix for containers that were hidden or resized.
+          map.invalidateSize({ animate: false });
+
+          // Now fit the map to show all markers with proper padding.
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, {
+              padding: [40, 40], // [top/bottom pixels, left/right pixels]
+              maxZoom: 14,       // Don't zoom in too close even if there are clustered markers
+            });
+          }
+        });
 
       } catch (err) {
         // ── Handle errors, but only for the "active" effect ────────────────────
@@ -381,8 +403,18 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
   //
   // The rendering logic here follows a simple state machine:
   //   1. error state → show error message
-  //   2. loading state → show loading skeleton
-  //   3. normal → render the map container div
+  //   2. loading + normal → wrapper div with map always in layout + loading overlay on top
+  //
+  // IMPORTANT LAYOUT NOTE:
+  // The map container div is NEVER hidden with display:none. Instead, it's always
+  // in the DOM at its full height (500px desktop, 350px mobile — set in globals.css).
+  // The loading skeleton is absolutely positioned ON TOP of the map container.
+  // This ensures Leaflet can correctly measure the container dimensions when it
+  // initializes, and tiles load for the full viewport — not just a 0×0 corner.
+  //
+  // Previous bug: using `display: isLoading ? 'none' : 'block'` caused Leaflet
+  // to init on a 0×0 container, resulting in grey tiles everywhere except the
+  // top-left corner where Leaflet thought the viewport was.
 
   if (error) {
     return (
@@ -419,37 +451,47 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
   }
 
   return (
-    // React.Fragment shorthand (<> </>) — renders two sibling elements without
-    // a wrapper div, keeping the DOM clean.
-    <>
-      {/* Loading skeleton — shown while Leaflet is being dynamically imported.
-          `display` toggles between 'flex' (visible) and 'none' (hidden).
-          We keep the map div in the DOM even while loading (just hidden) so that
-          the mapContainerRef is available for Leaflet to attach to as soon as
-          the import resolves. If we conditionally rendered it, the ref would be
-          null when the async import finished. */}
-      {isLoading && (
-        <div className="mural-map-loading" aria-busy="true" aria-label="Loading map">
-          <div className="mural-map-loading-icon" aria-hidden="true">🗺️</div>
-          <p className="mural-map-loading-text">LOADING MAP</p>
-        </div>
-      )}
-
+    // Wrapper div with position:relative so the loading overlay can be positioned
+    // absolutely on top of the map container. The map div is ALWAYS rendered at
+    // full size — the loading overlay just covers it while Leaflet initializes.
+    <div style={{ position: 'relative' }}>
       {/* The actual map container div.
           `ref={mapContainerRef}` is how React gives us a direct reference to this DOM node.
           Leaflet's L.map() call needs this real DOM element to attach to.
           The CSS class `mural-map-container` in globals.css handles sizing and border-radius.
-          We hide this div (not remove it) while loading via the style below. */}
+
+          CRITICAL: This div is ALWAYS visible and in-layout (no display:none).
+          Leaflet measures the container at initialization time to decide how many
+          map tiles to request. If the container is hidden (0×0 pixels), Leaflet
+          loads tiles only for the top-left corner → grey everywhere else. */}
       <div
         ref={mapContainerRef}
         className="mural-map-container"
-        // Hide the map container while loading — keeps it in the DOM for Leaflet to attach,
-        // but invisible until the map is ready. This prevents a flash of the empty container.
-        style={{ display: isLoading ? 'none' : 'block' }}
-        // Accessibility: label the map region for screen readers
         role="region"
         aria-label="Interactive mural map — Sanibel Island, Florida"
       />
-    </>
+
+      {/* Loading overlay — absolutely positioned on top of the map container.
+          Covers the map while Leaflet loads tiles in the background. Once loading
+          is complete, this overlay disappears, revealing the fully-tiled map beneath.
+          Using position:absolute instead of conditional rendering ensures the map
+          div stays in the DOM at its full size throughout the loading process. */}
+      {isLoading && (
+        <div
+          className="mural-map-loading"
+          aria-busy="true"
+          aria-label="Loading map"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 10,
+            borderRadius: 'var(--radius-xl)',
+          }}
+        >
+          <div className="mural-map-loading-icon" aria-hidden="true">🗺️</div>
+          <p className="mural-map-loading-text">LOADING MAP</p>
+        </div>
+      )}
+    </div>
   );
 }
