@@ -1,28 +1,39 @@
 /**
  * Mural Trail Page — the Sanibel Mural Selfie Trail.
- * Lists all 14 mural stops with addresses and descriptions.
- * Now includes a live interactive Leaflet map.
+ *
+ * This page combines:
+ *   1. A hero section introducing the trail
+ *   2. The TRAIL GAMIFICATION section (sign-in, progress, check-ins)
+ *   3. An interactive Leaflet map of all 14 locations
+ *   4. A full list of all trail stops with addresses and descriptions
+ *
+ * The TrailClient component is a 'use client' component that manages
+ * the interactive trail experience (auth, check-ins, progress tracking).
+ * Everything else on this page is a Server Component (renders on the server).
+ *
+ * C# ANALOGY:
+ *   This is like a Razor Page where most of the HTML is server-rendered,
+ *   but one section contains a Blazor WebAssembly component for interactivity.
+ *   The Server Component parts are like @Html.Partial() — rendered once on the server.
+ *   The TrailClient is like a <component type="typeof(TrailApp)" render-mode="WebAssembly" />.
  */
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MURAL_LOCATIONS } from '@/lib/mural-data';
-// MuralMapWrapper is a 'use client' component that lazy-loads Leaflet.
-// Importing it into this Server Component is perfectly fine — Next.js App Router
-// allows Server Components to render Client Components as children.
-// The server renders the loading skeleton HTML; the browser hydrates and loads the map.
 import MuralMapWrapper from '@/components/MuralMapWrapper';
+import TrailClient from '@/components/trail/TrailClient';
 
 export const metadata: Metadata = {
   title: 'Mural Selfie Trail',
   description:
-    'Follow the Sanibel Mural Selfie Trail — 14 large-scale murals by Rachel Pierce scattered across Sanibel Island, Florida. Find each location and snap your selfie.',
+    'Follow the Sanibel Mural Selfie Trail — 14 large-scale murals by Rachel Pierce scattered across Sanibel Island, Florida. Visit any 3 to earn a reward at the gallery.',
 };
 
 export default function MuralTrailPage() {
   return (
     <>
-      {/* Hero */}
+      {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section
         style={{
           background: 'linear-gradient(145deg, #145f70 0%, var(--color-teal) 100%)',
@@ -31,6 +42,7 @@ export default function MuralTrailPage() {
           overflow: 'hidden',
         }}
       >
+        {/* Decorative circle */}
         <div
           aria-hidden="true"
           style={{
@@ -81,16 +93,16 @@ export default function MuralTrailPage() {
             }}
           >
             Rachel Pierce has painted {MURAL_LOCATIONS.length} large-scale murals
-            across Sanibel Island. Follow this trail to find every location,
-            learn the story behind each artwork, and collect your selfies.
+            across Sanibel Island. Visit any 3, check in below, and earn a special
+            reward at the gallery.
           </p>
 
           {/* Trail stats */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
             {[
               { number: String(MURAL_LOCATIONS.length), label: 'Mural Locations' },
-              { number: 'Free', label: 'Self-Guided Tour' },
-              { number: '🗺️', label: 'Interactive Map' },
+              { number: '3', label: 'Visits to Complete' },
+              { number: '🎁', label: 'Gallery Reward' },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -131,7 +143,24 @@ export default function MuralTrailPage() {
         </div>
       </section>
 
-      {/* Interactive Mural Map */}
+      {/* ── Trail Gamification (Sign-in + Progress + Check-ins) ────────── */}
+      {/* This section is the core interactive experience. TrailClient is a
+          client component that manages authentication state, check-ins, and
+          progress display. It renders different UI based on the user's state. */}
+      <section
+        aria-label="Mural trail check-in"
+        style={{
+          backgroundColor: 'var(--color-offwhite)',
+          padding: 'clamp(2rem, 4vw, 3rem) 0',
+          borderBottom: '1px solid var(--color-border)',
+        }}
+      >
+        <div className="container-site" style={{ maxWidth: '640px' }}>
+          <TrailClient />
+        </div>
+      </section>
+
+      {/* ── Interactive Mural Map ─────────────────────────────────────── */}
       <section
         aria-label="Interactive mural map"
         style={{
@@ -141,11 +170,21 @@ export default function MuralTrailPage() {
         }}
       >
         <div className="container-site">
+          <h2
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: 'var(--text-2xl)',
+              color: 'var(--color-slate-dark)',
+              marginBottom: 'clamp(1rem, 2vw, 1.5rem)',
+            }}
+          >
+            Find the Murals
+          </h2>
           <MuralMapWrapper />
         </div>
       </section>
 
-      {/* Trail stops list */}
+      {/* ── Trail stops list ──────────────────────────────────────────── */}
       <section
         aria-labelledby="trail-stops-heading"
         style={{

@@ -1,24 +1,32 @@
-# Nestjs specific
-/dist
-/node_modules
-/build
-/tmp
+# Dependencies
+node_modules/
 
-# Logs
-logs
-*.log
+# Next.js build output
+.next/
+out/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug logs
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
 
-# dotenv environment variable files
-.env
-.env.development
-.env.test
-.env.production
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
 
-# temp directory
-.temp
-.tmp
+# Runtime data (auth sessions, trail progress JSON files)
+# These are generated at runtime and should not be committed.
+data/
+
+# Vercel
+.vercel
