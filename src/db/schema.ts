@@ -10,25 +10,30 @@
  *      verificationTokens).
  *   2. App tables — our own business data (trailProgress, emailList).
  *
+ * IMPORTANT: The Auth.js table shapes MUST match the adapter's expected
+ * types exactly. The official reference schema is in the adapter source:
+ * https://github.com/nextauthjs/next-auth/blob/main/packages/adapter-drizzle/src/lib/sqlite.ts
+ *
+ * Key differences from a typical schema:
+ *   - sessions: sessionToken is the PRIMARY KEY (no separate id column)
+ *   - accounts: composite primary key on (provider, providerAccountId)
+ *   - timestamps use { mode: "timestamp_ms" } not "timestamp"
+ *
  * After changing this file, run `npx drizzle-kit push` to sync the
  * schema to your Turso database.
- *
- * References:
- *   - Auth.js Drizzle adapter: https://authjs.dev/getting-started/adapters/drizzle
- *   - Drizzle SQLite columns:  https://orm.drizzle.team/docs/column-types/sqlite
  */
 
 import {
   sqliteTable,
   text,
   integer,
-  uniqueIndex,
+  primaryKey,
 } from "drizzle-orm/sqlite-core";
 
 /* ------------------------------------------------------------------ */
 /*  AUTH.JS TABLES                                                     */
-/*  These table/column names are dictated by the Drizzle adapter.      */
-/*  Renaming columns will break authentication.                        */
+/*  These MUST match the shapes defined in @auth/drizzle-adapter.      */
+/*  Changing column names, types, or primary keys will break auth.     */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -37,68 +42,74 @@ import {
  */
 export const users = sqliteTable("users", {
   /**
-   * Primary key — Auth.js expects a text ID, not an auto-increment int.
+   * Primary key — text, auto-generated UUID.
    * The .$defaultFn() tells Drizzle to generate a random UUID when
-   * inserting a new row, so Auth.js doesn't have to supply one.
-   *
-   * FIX: Without this default, Auth.js inserts id=null which violates
-   * the NOT NULL constraint on a primary key.
+   * inserting a new row, so the adapter doesn't have to supply one.
    */
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
-  email: text("email").notNull().unique(),
-  // For email-only auth this is set when the magic link is clicked
-  emailVerified: integer("emailVerified", { mode: "timestamp" }),
+  email: text("email").unique(),
+  /**
+   * timestamp_ms mode stores milliseconds as an integer and converts
+   * to/from JS Date objects. The adapter expects this exact mode.
+   */
+  emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
 });
 
 /**
  * accounts — links a user to an auth provider (e.g. "resend" email).
- * For our magic-link flow, one account row is created per user.
+ *
+ * IMPORTANT: No "id" column. The primary key is a composite of
+ * (provider, providerAccountId). This is what the Drizzle adapter
+ * expects for SQLite.
  */
-export const accounts = sqliteTable("accounts", {
-  /**
-   * Same fix as users.id — needs a UUID default so Auth.js can insert
-   * without explicitly providing an ID value.
-   */
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  userId: text("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // "email" for magic links
-  provider: text("provider").notNull(), // "resend"
-  providerAccountId: text("providerAccountId").notNull(),
-  refresh_token: text("refresh_token"),
-  access_token: text("access_token"),
-  expires_at: integer("expires_at"),
-  token_type: text("token_type"),
-  scope: text("scope"),
-  id_token: text("id_token"),
-  session_state: text("session_state"),
-});
+export const accounts = sqliteTable(
+  "accounts",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // "email" for magic links
+    provider: text("provider").notNull(), // "resend"
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (account) => [
+    /**
+     * Composite primary key — the adapter identifies accounts by
+     * the combination of provider + providerAccountId, not a UUID.
+     */
+    primaryKey({ columns: [account.provider, account.providerAccountId] }),
+  ]
+);
 
 /**
  * sessions — server-side session records.
- * Auth.js stores session data here when using a database strategy.
+ *
+ * IMPORTANT: sessionToken is the PRIMARY KEY here — not a separate
+ * "id" column. The Drizzle adapter's TypeScript types enforce this:
+ * DefaultSQLiteSessionsTable requires sessionToken.isPrimaryKey = true.
+ * Having a separate "id" as PK causes a type error at build time.
  */
 export const sessions = sqliteTable("sessions", {
   /**
-   * Same fix — UUID default for the session ID.
-   * This was the column that caused the original SQLITE_CONSTRAINT
-   * error: Auth.js tried to insert a session with id=null.
+   * The session token IS the primary key. Auth.js generates this
+   * value itself — we don't need a $defaultFn here.
    */
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  sessionToken: text("sessionToken").notNull().unique(),
+  sessionToken: text("sessionToken").primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  expires: integer("expires", { mode: "timestamp" }).notNull(),
+  expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
 });
 
 /**
@@ -106,20 +117,18 @@ export const sessions = sqliteTable("sessions", {
  * Auth.js creates one when a magic link is sent, then deletes it
  * after the link is clicked (or when it expires).
  *
- * NOTE: This table has no single-column primary key. Instead it uses
- * a composite unique index on (identifier, token), which is what
- * Auth.js expects for SQLite adapters.
+ * Uses a composite primary key on (identifier, token) — no separate
+ * id column, matching the adapter's expected shape.
  */
 export const verificationTokens = sqliteTable(
   "verificationTokens",
   {
     identifier: text("identifier").notNull(),
-    token: text("token").notNull().unique(),
-    expires: integer("expires", { mode: "timestamp" }).notNull(),
+    token: text("token").notNull(),
+    expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
   },
-  (table) => [
-    // Auth.js looks up tokens by (identifier + token) together
-    uniqueIndex("verification_token_idx").on(table.identifier, table.token),
+  (vt) => [
+    primaryKey({ columns: [vt.identifier, vt.token] }),
   ]
 );
 
