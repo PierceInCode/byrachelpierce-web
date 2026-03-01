@@ -303,10 +303,29 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
     // NOT doing this causes memory leaks — the old map instance lingers in memory.
     //
     // In C# terms, this is your IDisposable.Dispose() implementation.
+    //
+    // REACT STRICT MODE FIX:
+    // In development, React Strict Mode runs effects twice: mount → unmount → mount.
+    // Leaflet's map.remove() tears down listeners and internal state, BUT it leaves
+    // a `_leaflet_id` property stamped on the container DOM element. On the second
+    // mount, Leaflet sees this stale ID and throws "Map container is already initialized."
+    //
+    // The fix: after calling map.remove(), also delete the _leaflet_id from the
+    // container element. This tells Leaflet the container is "fresh" on re-mount.
+    // This is a well-documented workaround in the Leaflet + React ecosystem.
+    // See: https://github.com/PaulLeCam/react-leaflet/issues/1133
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
+      }
+      // Clear Leaflet's internal marker on the DOM element so a subsequent
+      // L.map() call (from Strict Mode re-mount) won't think it's already initialized.
+      // In C# terms: think of _leaflet_id as a static field on the DOM node that
+      // Leaflet uses as a "this element is mine" flag. We're clearing that flag.
+      if (mapContainerRef.current) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (mapContainerRef.current as any)._leaflet_id;
       }
     };
 
