@@ -24,15 +24,16 @@
 
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { recordCheckIn, getRequiredCheckIns } from '@/lib/trail-service';
+import { getTrailStatus, recordCheckIn, getUserEmail } from '@/lib/trail-service';
 import { sendRedemptionEmail, sendGalleryNotification } from '@/lib/trail-emails';
 import type { TrailCheckInResponse } from '@/types';
 
 export async function POST(request: Request) {
   // ── 1. Check authentication ──────────────────────────────────────
-  // auth() reads the JWT session cookie. Returns null if not signed in.
+  // auth() reads the session cookie. Returns null if not signed in.
+  // With our session callback in auth.ts, session.user.id is available.
   const session = await auth();
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return NextResponse.json(
       { success: false, message: 'Please sign in to check in at murals.' },
       { status: 401 }
@@ -62,37 +63,66 @@ export async function POST(request: Request) {
 
   // ── 3. Record the check-in ───────────────────────────────────────
   try {
-    const { progress, justCompleted } = await recordCheckIn(session.user.email, muralId);
+    // Snapshot the status BEFORE recording so we can detect if THIS
+    // specific check-in is what completed the quest.
+    const previousStatus = await getTrailStatus(session.user.id);
+    const wasAlreadyComplete = previousStatus.isComplete;
+
+    // recordCheckIn takes the user's database ID (not email) and the mural ID.
+    // It returns the updated TrailStatus after recording the check-in.
+    const status = await recordCheckIn(session.user.id, muralId);
+
+    // Did THIS check-in complete the quest?
+    const justCompleted = status.isComplete && !wasAlreadyComplete;
 
     // ── 4. If quest just completed, send emails ──────────────────
     // We send both emails in parallel — fire-and-forget style.
     // If an email fails, we still return success to the user because
     // the check-in WAS recorded. Email failures are logged server-side.
-    if (justCompleted && progress.redemptionCode) {
-      // Don't await these — the user shouldn't wait for emails to send.
-      // Promise.allSettled won't throw even if one email fails.
-      Promise.allSettled([
-        sendRedemptionEmail(session.user.email, progress.redemptionCode),
-        sendGalleryNotification(progress),
-      ]).then((results) => {
-        // Log any email failures for debugging (these show in server console)
-        results.forEach((result, i) => {
-          if (result.status === 'rejected') {
-            console.error(`[trail/checkin] Email ${i} failed:`, result.reason);
-          }
+    if (justCompleted && status.redemptionCode) {
+      // Look up the user's email for the notification emails.
+      // (We store userId in trail_progress, but emails need the address.)
+      const userEmail = await getUserEmail(session.user.id);
+
+      if (userEmail) {
+        // Don't await these — the user shouldn't wait for emails to send.
+        // Promise.allSettled won't throw even if one email fails.
+        Promise.allSettled([
+          sendRedemptionEmail(userEmail, status.redemptionCode),
+          sendGalleryNotification({
+            // Build a TrailProgress-compatible object for the email helper.
+            // The email function expects the old TrailProgress shape.
+            email: userEmail,
+            checkIns: status.checkedInMurals.map((id) => ({
+              muralId: id,
+              timestamp: new Date().toISOString(),
+            })),
+            questComplete: true,
+            redemptionCode: status.redemptionCode,
+            completedAt: new Date().toISOString(),
+          }),
+        ]).then((results) => {
+          // Log any email failures for debugging (these show in server console)
+          results.forEach((result, i) => {
+            if (result.status === 'rejected') {
+              console.error(`[trail/checkin] Email ${i} failed:`, result.reason);
+            }
+          });
         });
-      });
+      }
     }
 
     // ── 5. Build and return the response ─────────────────────────
+    // Map TrailStatus fields to the TrailCheckInResponse shape
+    // that the frontend expects.
     const response: TrailCheckInResponse = {
       success: true,
       message: justCompleted
         ? 'Quest complete! Check your email for your redemption code.'
-        : `Checked in! ${progress.checkIns.length}/${getRequiredCheckIns()} murals visited.`,
-      newTotal: progress.checkIns.length,
-      questComplete: progress.questComplete,
-      redemptionCode: progress.questComplete ? progress.redemptionCode : null,
+        : `Checked in! ${status.totalCheckIns}/${status.requiredCheckIns} murals visited.`,
+      newTotal: status.totalCheckIns,
+      questComplete: status.isComplete,
+      redemptionCode: status.isComplete ? status.redemptionCode : null,
     };
 
     return NextResponse.json(response);

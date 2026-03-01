@@ -36,8 +36,17 @@ import {
  * Auth.js creates this automatically the first time someone signs in.
  */
 export const users = sqliteTable("users", {
-  // Auth.js generates a cuid-style string id automatically
-  id: text("id").primaryKey(),
+  /**
+   * Primary key — Auth.js expects a text ID, not an auto-increment int.
+   * The .$defaultFn() tells Drizzle to generate a random UUID when
+   * inserting a new row, so Auth.js doesn't have to supply one.
+   *
+   * FIX: Without this default, Auth.js inserts id=null which violates
+   * the NOT NULL constraint on a primary key.
+   */
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
   email: text("email").notNull().unique(),
   // For email-only auth this is set when the magic link is clicked
@@ -50,7 +59,13 @@ export const users = sqliteTable("users", {
  * For our magic-link flow, one account row is created per user.
  */
 export const accounts = sqliteTable("accounts", {
-  id: text("id").primaryKey(),
+  /**
+   * Same fix as users.id — needs a UUID default so Auth.js can insert
+   * without explicitly providing an ID value.
+   */
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -71,7 +86,14 @@ export const accounts = sqliteTable("accounts", {
  * Auth.js stores session data here when using a database strategy.
  */
 export const sessions = sqliteTable("sessions", {
-  id: text("id").primaryKey(),
+  /**
+   * Same fix — UUID default for the session ID.
+   * This was the column that caused the original SQLITE_CONSTRAINT
+   * error: Auth.js tried to insert a session with id=null.
+   */
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   sessionToken: text("sessionToken").notNull().unique(),
   userId: text("userId")
     .notNull()

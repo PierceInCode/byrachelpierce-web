@@ -15,22 +15,24 @@
  *   app.MapGet("/api/trail/status", async (HttpContext ctx, TrailService svc) => {
  *     var user = ctx.User;
  *     if (!user.Identity.IsAuthenticated) return Results.Ok(new { authenticated = false });
- *     var progress = await svc.GetProgress(user.Email);
+ *     var progress = await svc.GetProgress(user.Id);
  *     return Results.Ok(new TrailStatusResponse { ... });
  *   });
  */
 
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getTrailProgress, getRequiredCheckIns } from '@/lib/trail-service';
+import { getTrailStatus } from '@/lib/trail-service';
 import type { TrailStatusResponse } from '@/types';
 
 export async function GET() {
   // ── 1. Check authentication ──────────────────────────────────────
+  // auth() reads the session cookie and returns the session object.
+  // With our session callback in auth.ts, session.user.id is available.
   const session = await auth();
 
   // Not signed in — return a known shape so the frontend can handle it
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     const response: TrailStatusResponse = {
       authenticated: false,
       progress: null,
@@ -40,26 +42,24 @@ export async function GET() {
 
   // ── 2. Look up the user's trail progress ─────────────────────────
   try {
-    const progress = await getTrailProgress(session.user.email);
+    // getTrailStatus takes the user's database ID (not email).
+    // It returns a TrailStatus object with checkedInMurals[], isComplete, etc.
+    const status = await getTrailStatus(session.user.id);
 
+    // Map the TrailStatus shape from trail-service to the
+    // TrailStatusResponse shape that the frontend expects.
+    // These shapes are slightly different because trail-service uses
+    // internal naming (isComplete, checkedInMurals) while the API
+    // response uses frontend-friendly naming (questComplete, checkedInMuralIds).
     const response: TrailStatusResponse = {
       authenticated: true,
-      progress: progress
-        ? {
-            totalCheckIns: progress.checkIns.length,
-            requiredCheckIns: getRequiredCheckIns(),
-            checkedInMuralIds: progress.checkIns.map((c) => c.muralId),
-            questComplete: progress.questComplete,
-            redemptionCode: progress.redemptionCode,
-          }
-        : {
-            // User is authenticated but hasn't started the trail yet
-            totalCheckIns: 0,
-            requiredCheckIns: getRequiredCheckIns(),
-            checkedInMuralIds: [],
-            questComplete: false,
-            redemptionCode: null,
-          },
+      progress: {
+        totalCheckIns: status.totalCheckIns,
+        requiredCheckIns: status.requiredCheckIns,
+        checkedInMuralIds: status.checkedInMurals,
+        questComplete: status.isComplete,
+        redemptionCode: status.redemptionCode,
+      },
     };
 
     return NextResponse.json(response);

@@ -69,6 +69,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "database",
   },
 
+  /**
+   * Callbacks let us customize the data Auth.js exposes.
+   *
+   * By default, Auth.js only puts name/email/image on session.user.
+   * We need the user's database ID in our API routes (to look up
+   * trail progress), so we add it here.
+   *
+   * For C# developers: this is like a claims transformer — you're
+   * adding extra "claims" to the session principal.
+   *
+   * Reference: https://authjs.dev/guides/extending-the-session
+   */
+  callbacks: {
+    session({ session, user }) {
+      // "user" here is the full row from the users table (database strategy).
+      // We copy the id onto session.user so API routes can read it
+      // via `const session = await auth(); session.user.id`.
+      session.user.id = user.id;
+      return session;
+    },
+  },
+
   pages: {
     /**
      * After a user clicks "Sign in", redirect them to our custom
