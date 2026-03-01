@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from 'react';
 // The actual Leaflet library is loaded dynamically inside useEffect (below).
 import type L from 'leaflet';
 
-// ── Leaflet CSS ────────────────────────────────────────────────────────────────
+// ── Leaflet CSS ────────────────────────────────────────────────────────────────────────
 //
 // WHY import the CSS here instead of in globals.css?
 // Tailwind v4 uses @import 'tailwindcss' which expands into many CSS rules.
@@ -36,7 +36,7 @@ import 'leaflet/dist/leaflet.css';
 import { MURAL_LOCATIONS } from '@/lib/mural-data';
 import type { MuralLocation } from '@/types';
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+// ─── Props ────────────────────────────────────────────────────────────────────────
 
 interface MuralMapProps {
   /** Optional: highlight a specific mural by ID (wired up for future use — e.g., clicking
@@ -47,7 +47,7 @@ interface MuralMapProps {
   onMuralClick?: (muralId: number) => void;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Component ─────────────────────────────────────────────────────────────────────
 
 export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps) {
   // useRef holds a reference to a DOM element across renders without triggering re-renders.
@@ -76,7 +76,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
   // The empty dependency array [] means "run this effect once, on mount only" —
   // like a constructor in C#. The returned function is the cleanup (like IDisposable.Dispose).
   //
-  // ── REACT STRICT MODE & ASYNC RACE CONDITION ────────────────────────
+  // ── REACT STRICT MODE & ASYNC RACE CONDITION ──────────────────────────────
   //
   // In development, React Strict Mode runs effects twice: mount → unmount → mount.
   // Because our map initialization is ASYNC (we await the Leaflet import), there's a
@@ -99,13 +99,13 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
     // Guard: if the container div doesn't exist yet (shouldn't happen, but defensive coding).
     if (!mapContainerRef.current) return;
 
-    // ── Cancellation flag ───────────────────────────────────────────────
+    // ── Cancellation flag ───────────────────────────────────────────────────
     // This variable is captured by closure in both the async IIFE and the cleanup function.
     // When cleanup runs (unmount), it sets cancelled = true. The async code checks this
     // after every await point and aborts if the effect has been superseded.
     let cancelled = false;
 
-    // ── Async IIFE (Immediately Invoked Function Expression) ──────────────────
+    // ── Async IIFE (Immediately Invoked Function Expression) ──────────────────────
     // useEffect's callback can't be async directly (it would return a Promise, but React
     // expects either nothing or a cleanup function). So we wrap async logic in an IIFE.
     // This is a very common pattern in React — think of it as an async void method in C#.
@@ -131,7 +131,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         // Also guard against the container ref being nulled out during unmount.
         if (cancelled || !mapContainerRef.current) return;
 
-        // ── Initialize the Leaflet Map ─────────────────────────────────────────
+        // ── Initialize the Leaflet Map ─────────────────────────────────────
         //
         // L.map(element, options) creates a new map instance attached to the given DOM element.
         // The options object configures the initial view, zoom limits, and interaction behavior.
@@ -142,9 +142,11 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         // container is hidden (display:none → 0×0px), Leaflet would only load tiles for
         // the top-left corner, causing the grey area you see in the rest of the map.
         const map = L.map(mapContainerRef.current, {
-          // Initial center: approximate geographic center of Sanibel Island
+          // Initial center: geographic center of all 14 mural locations across Sanibel.
+          // The murals span from the east end (Lighthouse Cafe area) to
+          // the west (Fire Dept Station #172 on Sanibel Captiva Rd), roughly 11km.
           // Leaflet coordinates are always [latitude, longitude]
-          center: [26.449, -82.07],
+          center: [26.4442, -82.0958],
           zoom: 13,
           // Limit how far the user can zoom out — keeps the map focused on Sanibel
           minZoom: 11,
@@ -160,7 +162,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         // Store the map instance in the ref so the cleanup function can destroy it later
         mapInstanceRef.current = map;
 
-        // ── Tile Layer: the actual map imagery ────────────────────────────────
+        // ── Tile Layer: the actual map imagery ──────────────────────────────
         //
         // Leaflet maps are composed of "tiles" — small square images fetched from a CDN.
         // CartoDB Voyager is a free, no-API-key-required tile set that looks clean and
@@ -183,7 +185,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
           }
         ).addTo(map);
 
-        // ── Add Markers for Each Mural ─────────────────────────────────────────
+        // ── Add Markers for Each Mural ─────────────────────────────────────
         //
         // We'll collect the lat/lng bounds of all markers to auto-fit the map view.
         // L.latLngBounds() creates a bounding rectangle that we expand as we add markers.
@@ -193,7 +195,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         // Iterate over all 14 mural locations and create a marker + popup for each.
         // Array.forEach in JS/TS is equivalent to foreach in C#.
         MURAL_LOCATIONS.forEach((mural: MuralLocation) => {
-          // ── Custom Marker Icon using L.divIcon ─────────────────────────────
+          // ── Custom Marker Icon using L.divIcon ───────────────────────────
           //
           // By default Leaflet uses a blue image pin. L.divIcon lets us create markers
           // from raw HTML/CSS — perfect for our numbered, brand-colored circles.
@@ -220,7 +222,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
             popupAnchor: [0, -40],
           });
 
-          // ── Build the Popup HTML Content ────────────────────────────────────
+          // ── Build the Popup HTML Content ──────────────────────────────────
           //
           // Leaflet popups accept raw HTML strings. We template in the mural data
           // and use CSS classes from globals.css for brand-consistent styling.
@@ -267,7 +269,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
             </div>
           `;
 
-          // ── Create and Place the Marker ─────────────────────────────────────
+          // ── Create and Place the Marker ─────────────────────────────────
           //
           // L.marker([lat, lng], { icon }) creates a marker at the given coordinates.
           // .bindPopup(html, options) attaches a popup that opens on click.
@@ -282,7 +284,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
             })
             .addTo(map);
 
-          // ── Wire up the onMuralClick callback ──────────────────────────────
+          // ── Wire up the onMuralClick callback ────────────────────────────
           //
           // If the parent component passed an onMuralClick prop, attach a click listener.
           // marker.on('click', handler) is Leaflet's event system — similar to C# events.
@@ -328,13 +330,13 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
           if (bounds.isValid()) {
             map.fitBounds(bounds, {
               padding: [40, 40], // [top/bottom pixels, left/right pixels]
-              maxZoom: 14,       // Don't zoom in too close even if there are clustered markers
+              maxZoom: 13,       // Don't zoom in too close — murals span ~11km across Sanibel
             });
           }
         });
 
       } catch (err) {
-        // ── Handle errors, but only for the "active" effect ────────────────────
+        // ── Handle errors, but only for the "active" effect ──────────────────
         // If this effect invocation was already cancelled (Strict Mode unmounted us),
         // we don't want to set error state — the new effect invocation is in charge now.
         if (cancelled) return;
@@ -347,7 +349,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
       }
     })(); // ← the () at the end immediately invokes the async function
 
-    // ── Cleanup Function (the "return" from useEffect) ─────────────────────────
+    // ── Cleanup Function (the "return" from useEffect) ─────────────────────
     //
     // React calls this function when the component UNMOUNTS (navigates away, etc.)
     // or before the effect re-runs (if dependencies changed — not the case here since []).
