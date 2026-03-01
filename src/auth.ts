@@ -1,97 +1,80 @@
 /**
- * Auth.js v5 Configuration
+ * Auth.js v5 configuration — Drizzle + Turso edition
  *
- * This is the central authentication config for the site.
- * Currently it only enables magic-link (email) sign-in via Resend.
+ * This replaces the previous unstorage-based config.  The key change
+ * is swapping UnstorageAdapter for DrizzleAdapter, which stores
+ * users, sessions, and verification tokens in our Turso database.
  *
- * HOW IT WORKS (for C# developers):
- * - Auth.js is analogous to ASP.NET Identity — it handles sessions,
- *   token generation, and provider abstraction.
- * - The Resend "provider" is like configuring an IEmailSender implementation.
- * - The Unstorage "adapter" is like a repository for auth data (users,
- *   tokens). We use the filesystem driver so there's no external DB.
- * - We export `auth`, `signIn`, `signOut`, and `handlers` which are used
- *   throughout the app — similar to injecting IAuthService in .NET DI.
+ * How Auth.js magic links work (simplified):
+ *   1. User enters email → Auth.js calls Resend to send a link
+ *   2. Link contains a token stored in the verificationTokens table
+ *   3. User clicks link → Auth.js verifies the token, creates/finds
+ *      the user in the users table, and starts a session
+ *   4. Subsequent requests read the session cookie to identify the user
  *
- * ENV VARS REQUIRED:
- *   AUTH_RESEND_KEY  — Resend API key (auto-detected by Auth.js)
- *   AUTH_SECRET      — Encryption secret for session tokens
- *   EMAIL_FROM       — Sender address for magic link emails
+ * Exports:
+ *   - handlers: { GET, POST } route handlers for /api/auth/*
+ *   - auth: function to get the current session in server components
+ *   - signIn / signOut: server-side sign-in/out helpers
  */
 
-import NextAuth from 'next-auth';
-import Resend from 'next-auth/providers/resend';
-
-// Unstorage provides a key-value abstraction over many backends.
-// We use the filesystem driver for local dev (writes JSON files to disk).
-// For production on Vercel, switch to vercelKV or similar.
-import { createStorage } from 'unstorage';
-import fsLiteDriver from 'unstorage/drivers/fs-lite';
-import { UnstorageAdapter } from '@auth/unstorage-adapter';
-
-// ── Storage Setup ────────────────────────────────────────────────────
-// Creates a filesystem-backed key-value store in the project's data/ dir.
-// Auth.js stores users, sessions, and verification tokens here.
-// (C# analogy: like configuring a file-based DbContext — good for dev,
-// swap for a real DB in production via an env-based factory.)
-
-const storage = createStorage({
-  driver: fsLiteDriver({
-    base: './data/auth', // Relative to project root
-  }),
-});
-
-// ── Auth.js Config ───────────────────────────────────────────────────
+import NextAuth from "next-auth";
+import Resend from "next-auth/providers/resend";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { db } from "@/db";
+import {
+  users,
+  accounts,
+  sessions,
+  verificationTokens,
+} from "@/db/schema";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // Connect Auth.js to our filesystem storage for user + token persistence.
-  // The email provider REQUIRES a database adapter — magic link tokens
-  // must be stored server-side so they can be verified when clicked.
-  adapter: UnstorageAdapter(storage),
+  /**
+   * DrizzleAdapter connects Auth.js to our Turso database via Drizzle.
+   * We pass explicit table references so Drizzle knows exactly which
+   * tables to query — this avoids any naming-convention surprises.
+   *
+   * For C# developers: this is like telling Identity Framework which
+   * DbSet<T> properties to use for users, roles, etc.
+   */
+  adapter: DrizzleAdapter(db, {
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  }),
 
   providers: [
+    /**
+     * Resend provider sends magic-link emails.
+     * - apiKey: your Resend API key (from .env.local)
+     * - from: the sender address (must match your Resend domain)
+     * - maxAge: how long the magic link stays valid (in seconds)
+     *   We set 24 hours so tourists have time to check email.
+     */
     Resend({
-      // AUTH_RESEND_KEY is auto-detected from env vars by the Resend provider.
-      // We only need to set the "from" address here.
-      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
+      apiKey: process.env.AUTH_RESEND_KEY,
+      from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
+      maxAge: 24 * 60 * 60, // 24 hours in seconds
     }),
   ],
 
-  // Use JWT sessions instead of database sessions.
-  // This means the session data lives in a signed cookie — no need
-  // to look up sessions from storage on every request.
-  // (C# analogy: like using JWT bearer tokens instead of session cookies
-  // backed by a distributed cache.)
+  /**
+   * Use "database" strategy so sessions are stored in the sessions
+   * table (via Drizzle).  This is required for email/magic-link
+   * providers — JWT-only sessions won't work with email sign-in.
+   */
   session: {
-    strategy: 'jwt',
+    strategy: "database",
   },
 
   pages: {
-    // We don't use Auth.js's built-in sign-in page — the trail page
-    // has its own inline email form. But if someone hits the auth
-    // endpoints directly, redirect them to the trail page.
-    signIn: '/murals/trail',
-    // After clicking the magic link, redirect to the trail page.
-    // Auth.js appends a `callbackUrl` param; this is the fallback.
-    verifyRequest: '/murals/trail?check-email=true',
-  },
-
-  callbacks: {
-    // Include the user's email in the JWT token so we can read it
-    // in server-side code without an additional DB lookup.
-    async jwt({ token, user }) {
-      if (user?.email) {
-        token.email = user.email;
-      }
-      return token;
-    },
-    // Expose the email on the session object so client components
-    // can display it (e.g., "Signed in as visitor@example.com").
-    async session({ session, token }) {
-      if (token.email && session.user) {
-        session.user.email = token.email as string;
-      }
-      return session;
-    },
+    /**
+     * After a user clicks "Sign in", redirect them to our custom
+     * trail page instead of the default Auth.js sign-in page.
+     * The trail page has its own email form (EmailSignInForm).
+     */
+    signIn: "/murals/trail",
   },
 });
