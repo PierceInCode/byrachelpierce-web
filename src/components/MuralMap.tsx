@@ -75,11 +75,35 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
   //
   // The empty dependency array [] means "run this effect once, on mount only" —
   // like a constructor in C#. The returned function is the cleanup (like IDisposable.Dispose).
+  //
+  // ── REACT STRICT MODE & ASYNC RACE CONDITION ────────────────────────
+  //
+  // In development, React Strict Mode runs effects twice: mount → unmount → mount.
+  // Because our map initialization is ASYNC (we await the Leaflet import), there's a
+  // race condition:
+  //
+  //   1. First mount: effect fires, async IIFE starts, `await import('leaflet')` begins
+  //   2. Strict Mode unmount: cleanup runs — BUT mapInstanceRef.current is still null
+  //      because the async import hasn't resolved yet! So cleanup does nothing.
+  //   3. Second mount: effect fires, new async IIFE starts
+  //   4. First mount's await resolves: L.map() runs, stamps _leaflet_id on the container
+  //   5. Second mount's await resolves: L.map() sees the _leaflet_id → CRASH
+  //
+  // The fix: use a `cancelled` flag (a closure variable). The cleanup function sets it
+  // to true. After each await, we check it — if the effect was cancelled, we bail out.
+  // This is THE standard React pattern for cancelling async effects.
+  //
+  // In C# terms: this is like a CancellationToken. You pass it into your async method
+  // and check token.IsCancellationRequested after each await. Same concept, different syntax.
   useEffect(() => {
-    // Guard: if the container div doesn't exist yet (shouldn't happen, but defensive coding),
-    // bail out early. Also prevent double-initialization in React Strict Mode (which mounts
-    // components twice in development to catch side effects).
-    if (!mapContainerRef.current || mapInstanceRef.current) return;
+    // Guard: if the container div doesn't exist yet (shouldn't happen, but defensive coding).
+    if (!mapContainerRef.current) return;
+
+    // ── Cancellation flag ───────────────────────────────────────────────
+    // This variable is captured by closure in both the async IIFE and the cleanup function.
+    // When cleanup runs (unmount), it sets cancelled = true. The async code checks this
+    // after every await point and aborts if the effect has been superseded.
+    let cancelled = false;
 
     // ── Async IIFE (Immediately Invoked Function Expression) ──────────────────
     // useEffect's callback can't be async directly (it would return a Promise, but React
@@ -100,9 +124,12 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         // asynchronously and we await its resolution.
         const L = await import('leaflet');
 
-        // Guard against the component unmounting while we were awaiting the import.
-        // React Strict Mode and fast navigation can cause this.
-        if (!mapContainerRef.current) return;
+        // ── Post-await cancellation check ─────────────────────────────────
+        // If React Strict Mode already called cleanup (unmount) while we were awaiting,
+        // `cancelled` will be true. We must NOT proceed — another effect invocation
+        // is now the "real" one that should initialize the map.
+        // Also guard against the container ref being nulled out during unmount.
+        if (cancelled || !mapContainerRef.current) return;
 
         // ── Initialize the Leaflet Map ─────────────────────────────────────────
         //
@@ -285,6 +312,11 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         setIsLoading(false);
 
       } catch (err) {
+        // ── Handle errors, but only for the "active" effect ────────────────────
+        // If this effect invocation was already cancelled (Strict Mode unmounted us),
+        // we don't want to set error state — the new effect invocation is in charge now.
+        if (cancelled) return;
+
         // Something went wrong — log it for debugging and show a user-friendly error.
         // In C#, this is like catching Exception and setting an error property.
         console.error('[MuralMap] Failed to initialize Leaflet map:', err);
@@ -298,31 +330,36 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
     // React calls this function when the component UNMOUNTS (navigates away, etc.)
     // or before the effect re-runs (if dependencies changed — not the case here since []).
     //
-    // This is critical: Leaflet attaches a lot of DOM listeners and creates canvas/WebGL
-    // contexts. Calling map.remove() properly tears all of that down.
-    // NOT doing this causes memory leaks — the old map instance lingers in memory.
+    // TWO responsibilities:
     //
-    // In C# terms, this is your IDisposable.Dispose() implementation.
+    // 1. SET THE CANCELLATION FLAG — if the async IIFE is still in-flight (awaiting the
+    //    Leaflet import), this tells it to bail out when the await resolves. Without this,
+    //    the first mount's async code would race with the second mount's async code, and
+    //    both would try to call L.map() on the same DOM element.
     //
-    // REACT STRICT MODE FIX:
-    // In development, React Strict Mode runs effects twice: mount → unmount → mount.
-    // Leaflet's map.remove() tears down listeners and internal state, BUT it leaves
-    // a `_leaflet_id` property stamped on the container DOM element. On the second
-    // mount, Leaflet sees this stale ID and throws "Map container is already initialized."
+    // 2. TEAR DOWN THE MAP — if Leaflet already initialized (the await resolved before
+    //    cleanup ran), we need to properly destroy the map instance and clear the
+    //    _leaflet_id from the container DOM element.
     //
-    // The fix: after calling map.remove(), also delete the _leaflet_id from the
-    // container element. This tells Leaflet the container is "fresh" on re-mount.
-    // This is a well-documented workaround in the Leaflet + React ecosystem.
-    // See: https://github.com/PaulLeCam/react-leaflet/issues/1133
+    //    Why clear _leaflet_id? Leaflet stamps this property onto the container <div>
+    //    as an ownership flag. map.remove() cleans up listeners and internal state but
+    //    does NOT remove this stamp. If a new L.map() call sees it, it throws
+    //    "Map container is already initialized."
+    //
+    // In C# terms: responsibility #1 is like CancellationTokenSource.Cancel().
+    // Responsibility #2 is IDisposable.Dispose().
     return () => {
+      // Signal any in-flight async work to abort
+      cancelled = true;
+
+      // Tear down the map if it was already created
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      // Clear Leaflet's internal marker on the DOM element so a subsequent
-      // L.map() call (from Strict Mode re-mount) won't think it's already initialized.
-      // In C# terms: think of _leaflet_id as a static field on the DOM node that
-      // Leaflet uses as a "this element is mine" flag. We're clearing that flag.
+
+      // Clear Leaflet's ownership stamp so a subsequent L.map() call
+      // (from Strict Mode re-mount) treats the container as fresh.
       if (mapContainerRef.current) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (mapContainerRef.current as any)._leaflet_id;
