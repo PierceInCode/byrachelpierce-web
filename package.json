@@ -13,7 +13,7 @@
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
     "@libsql/client": "^0.17.0",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.44.5",
     "leaflet": "^1.9.4",
     "next": "15.3.3",
     "next-auth": "5.0.0-beta.25",
@@ -27,7 +27,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^16.4.5",
-    "drizzle-kit": "^0.45.1",
+    "drizzle-kit": "^0.31.4",
     "postcss": "^8",
     "tailwindcss": "^4.0.0",
     "typescript": "^5"
