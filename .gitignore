@@ -30,3 +30,15 @@ data/
 
 # Vercel
 .vercel
+
+# Art image binaries — served from Vercel Blob (Architecture s6); source of truth
+# is the operator's local folder + external backup. NEVER commit these.
+public/art/
+
+# Local file databases (dev/CI/test) and DB backups
+*.db
+*.db-journal
+backups/
+
+# Claude Code local (per-machine) settings — the shared harness IS committed
+.claude/settings.local.json
