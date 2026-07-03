@@ -20,7 +20,7 @@
 
 **009 · 2026-07-03 · Test stack.** Vitest (+ V8 coverage, thresholds 80% on `src/lib` + `src/app/api`), Testing Library + happy-dom for components, Playwright (chromium) for e2e from R3. All DB access in tests via local libSQL `file:` databases built from `drizzle/` migrations; production Turso is unreachable from tests/CI by construction (no token present).
 
-**010 · 2026-07-03 · npm stays** (not pnpm), lockfile committed in R0, `next-auth` pinned exactly at `5.0.0-beta.25` (two prior adapter breakages = upgrades are escalations, Spec §13.3). The parent folder's pnpm workspace files belong to a different project family and are ignored.
+**010 · 2026-07-03 · npm stays** (not pnpm), lockfile committed in R0, `next-auth` pinned exactly at `5.0.0-beta.25` (two prior adapter breakages = upgrades are escalations, Spec §13.3).
 
 **011 · 2026-07-03 · Analytics = Vercel Analytics**, not GA4. Why: zero-config, no consent-banner obligation, gallery-scale insight needs. Veto if the business wants GA4's depth.
 

@@ -55,7 +55,7 @@ The release ships when every item in §14 (Definition of Done) is checked. The l
 
 ### 2.1 Development machine (verify, don't redo)
 
-Windows 11, Node 20 LTS (`node --version` ≥ 20), npm (this repo uses npm + `package-lock.json`, not pnpm — the parent folder's `pnpm-workspace.yaml` belongs to a different project family and is out of scope). Repo: `C:\Code\businessWebsites\byRachelPierce\byrachelpierce-web`. Local dev DB: `TURSO_DATABASE_URL=file:./dev.db` in `.env.local` **is the default working mode** — develop against production Turso only when a task explicitly requires it (R4 ingest, R5 smoke).
+Windows 11, Node 20 LTS (`node --version` ≥ 20), npm (this repo uses npm + `package-lock.json`; do not introduce pnpm/yarn). Repo: `C:\Code\businessWebsites\byRachelPierce\byrachelpierce-web`. Local dev DB: `TURSO_DATABASE_URL=file:./dev.db` in `.env.local` **is the default working mode** — develop against production Turso only when a task explicitly requires it (R4 ingest, R5 smoke).
 
 ### 2.2 GitHub (exists)
 
@@ -241,7 +241,7 @@ Vercel preview: complete a trail run end-to-end with a real magic link (operator
 ## 7. Milestone R2 — Images & Performance
 
 **Model: Sonnet 5.** **Branch:** `r2-images`.
-**Sanctioned new dependency:** `@vercel/blob` (dev+runtime). **Reading:** Architecture §6, §12.
+**Sanctioned new dependencies:** `@vercel/blob` (runtime), `@playwright/test` (dev — arrives here because the R2 gate's image-budget test needs it; R3 builds the full suite on it). **Reading:** Architecture §6, §12.
 
 ### 7.1 Work, in order
 
@@ -265,7 +265,7 @@ Operator: run the real sync; open the Vercel preview on a phone — collection g
 ## 8. Milestone R3 — Collection Finish
 
 **Model: Sonnet 5.** **Branch:** `r3-collection`.
-**Sanctioned new dev-dependency:** `@playwright/test`. **Reading:** Architecture §2, §5, §12 (all).
+**No new dependencies** (`@playwright/test` arrived in R2). **Reading:** Architecture §2, §5, §12 (all).
 
 ### 8.1 Work, in order
 

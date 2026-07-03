@@ -19,7 +19,7 @@ function readStdin() {
 }
 
 /** Decode defensively: the host sends UTF-8, but manual testing through
- *  PowerShell 5.1 pipes can produce BOMs or UTF-16 (FogBank precedent). */
+ *  PowerShell 5.1 pipes can produce BOMs or UTF-16. */
 function decode(buf) {
   if (buf.length >= 2 && buf[0] === 0xff && buf[1] === 0xfe) {
     return buf.toString('utf16le');
