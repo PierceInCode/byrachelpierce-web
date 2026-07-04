@@ -31,6 +31,9 @@
 - **0.2 (branch protection on `main`) is unavailable on this GitHub plan** — no paid tier / protection feature on this account. Substitute control: PR-only discipline (CLAUDE.md rule 9 — one milestone branch at a time, Conventional Commits, every commit passes `npm run check`, PRs only, never commit to `main`) plus operator review of every PR before merge. This is a process control, not a technical guardrail, so it depends on the operator and agent actually observing it every time — no CI-enforced blocker exists if it's skipped.
 Why: operator ruling, 2026-07-04 session (both raised as blocking-looking Phase 0 items that are intentionally not blocking). Record and continue; do not stall R0 on either.
 
+**014 · 2026-07-04 · R0 step 2 (reconcile with origin) surfaced further next.js CVEs beyond the merged fix; bumped past what the merge alone provided.** `origin/main`'s merge set `next` to `15.3.6` (the CVE-2025-66478 fix), but `npm install` immediately flagged many further disclosed advisories against that version, several HIGH severity (DoS via Server Components, SSRF via WebSocket upgrades, middleware/proxy bypass). Operator chose (asked live, not a smallest-reasonable-choice default): bump to `next@15.5.20` (npm's non-major fix target) now, in R0, rather than defer. `npm audit fix` (non-breaking) also cleared a transitive `ws` DoS/memory-disclosure issue. Verified: `npx tsc --noEmit` clean, `npm run build` green (552 pages, test-runner-confirmed) after the bump.
+Left untouched, deliberately out of scope for this step: `next-auth` (Iron rule 7 — stays exactly pinned, not part of this bump); `drizzle-orm`/`drizzle-kit` (moderate/high advisories remain, but bumping the ORM touches the live production DB layer — Iron Invariant 1 — and deserves its own decision, not one bundled into a Next.js reconciliation); one residual moderate `next`/`postcss` advisory has no non-major fix path available in the 15.x line and was left as-is.
+
 ---
 
-*(Build sessions append from 014 onward.)*
+*(Build sessions append from 015 onward.)*
