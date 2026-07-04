@@ -338,7 +338,7 @@ The `TrailClient` component manages these states:
 
 ```bash
 # Auth.js — picks up AUTH_RESEND_KEY automatically for the Resend provider
-AUTH_RESEND_KEY=re_cQuXwBZ1_HA12iLRs38gPKLyfZKPNY8Ym
+AUTH_RESEND_KEY=<REDACTED — key was leaked here and must be rotated; see DECISIONS.md 003>
 AUTH_SECRET=<generate with: openssl rand -base64 32>
 NEXTAUTH_URL=http://localhost:3000
 
@@ -350,7 +350,7 @@ TRAIL_REQUIRED_CHECKINS=3
 GALLERY_EMAIL=info@byrachelpierce.com
 
 # Resend API key (used directly by trail-service for custom emails)
-RESEND_API_KEY=re_cQuXwBZ1_HA12iLRs38gPKLyfZKPNY8Ym
+RESEND_API_KEY=<REDACTED — key was leaked here and must be rotated; see DECISIONS.md 003>
 ```
 
 **Note:** `AUTH_RESEND_KEY` and `RESEND_API_KEY` are the same key. Auth.js reads from `AUTH_RESEND_KEY` by convention; our custom trail emails use `RESEND_API_KEY` directly.
@@ -404,3 +404,12 @@ RESEND_API_KEY=re_cQuXwBZ1_HA12iLRs38gPKLyfZKPNY8Ym
 ---
 
 *Spec approved. Implementation in progress.*
+
+---
+
+> **ARCHIVED 2026-07-03.** Superseded by `docs/SITE-ARCHITECTURE-v2.md` (behavior) and
+> `docs/FINAL-BUILD-SPEC.md` (process). Kept for historical reference; the storage
+> architecture described above (unstorage/filesystem) was replaced by Turso + Drizzle
+> before this archive. The Resend API key that appeared in §9 was redacted at archive
+> time because this file is committed to git; the key is considered leaked and is
+> rotated as part of Operator Phase 0.

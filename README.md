@@ -1,76 +1,54 @@
-# by Rachel Pierce — Next.js Website
+# by Rachel Pierce — byrachelpierce.com
 
-Marketing and experience website for the by Rachel Pierce art gallery on Sanibel Island, Florida.
+Marketing and experience website for the **by Rachel Pierce** art gallery on Sanibel Island, Florida (1571 Periwinkle Way). Presents Rachel's 528-painting collection, her 14 island murals, and the gamified **Mural Selfie Trail**. This is a marketing site — e-commerce lives on an external Lightspeed shop.
 
-## Tech Stack
+## Governing documents
 
-- **Framework**: Next.js 16 (App Router, React 19)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS v4 (CSS-first config via `@import 'tailwindcss'` + `@theme` block)
-- **Fonts**: Playfair Display (headings), Jura (navigation), system sans-serif (body)
+| Doc | What it is |
+|---|---|
+| [`docs/SITE-ARCHITECTURE-v2.md`](docs/SITE-ARCHITECTURE-v2.md) | Behavior contract: what every feature does (incl. design language §12 and the AR tool spec §13) |
+| [`docs/FINAL-BUILD-SPEC.md`](docs/FINAL-BUILD-SPEC.md) | Process contract: milestones R0–R5, quality gates, CI, engineering rules |
+| [`OPERATOR-GUIDE.md`](OPERATOR-GUIDE.md) | The supervising human's runbook |
+| [`CLAUDE.md`](CLAUDE.md) | Standing orders for Claude Code build sessions |
+| [`PROGRESS.md`](PROGRESS.md) / [`DECISIONS.md`](DECISIONS.md) | Live state · judgment-call log |
 
-## Getting Started
+## Tech stack
 
-```bash
-npm install
-npm run dev
+- **Next.js 15** (App Router, React 19) · **TypeScript** (strict) · **Tailwind CSS v4** (CSS-first `@theme` tokens in `src/app/globals.css`)
+- **Turso** (libSQL/SQLite) via **Drizzle ORM** — auth, trail, and painting catalog. The production DB is live; see Spec §3 rule 1 before touching anything.
+- **Auth.js v5** (pinned beta) + **Resend** magic-link email · **Leaflet** mural map · **Vercel** hosting (+ Blob for art images from R2)
+
+## Quickstart (local, no cloud credentials needed)
+
+```powershell
+npm ci
+# .env.local minimum for local dev:
+#   TURSO_DATABASE_URL=file:./dev.db
+#   AUTH_SECRET=<any random string locally>
+#   NEXTAUTH_URL=http://localhost:3000
+npm run db:seed-ci        # builds + seeds a local file DB (available from R0)
+npm run dev               # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Full commands (available from R0): `npm run check` (lint+format+types+tests) · `npm run test:coverage` · `npm run e2e` (R3+) · gate details in Spec §4.1.
 
-## Brand
-
-| Token | Value | Usage |
-|---|---|---|
-| `--color-teal` | `#36B5CD` | Header, footer, accents |
-| `--color-coral` | `#FD8473` | CTA buttons |
-| `--color-hotpink` | `#FF008C` | Hover states |
-| `--color-slate` | `#577083` | Body text |
-| `--font-heading` | Playfair Display | All headings (h1–h6) |
-| `--font-nav` | Jura | Navigation items |
-| `--font-body` | Avenir / Helvetica Neue / Arial | Body copy |
-
-## Project Structure
+## Repo map
 
 ```
-src/
-├── app/                  # Next.js App Router pages
-│   ├── globals.css       # Tailwind v4 + brand tokens
-│   ├── layout.tsx        # Root layout (Header + Footer)
-│   ├── page.tsx          # Homepage
-│   ├── story/            # Artist biography
-│   ├── collection/       # Art gallery (placeholder)
-│   ├── murals/           # Mural hub + trail
-│   ├── visit/            # Events & visit info
-│   ├── contact/          # Contact form
-│   ├── press/            # Press & media
-│   ├── custom/           # Custom orders
-│   └── ar/               # AR Sizing Tool (coming soon)
-├── components/           # Shared UI components
-│   ├── Header.tsx
-│   ├── Footer.tsx
-│   ├── CrossSellModule.tsx
-│   └── MobileNav.tsx
-├── lib/
-│   ├── constants.ts      # Site-wide constants
-│   └── mural-data.ts     # 14 mural locations + coordinates
-└── types/
-    └── index.ts          # Shared TypeScript types
+src/app/            App Router pages (/collection, /murals/trail, /ar, marketing pages)
+src/app/api/        Route handlers: auth ([...nextauth]), trail (checkin, status)
+src/components/     UI (collection/, trail/, map, chrome)
+src/lib/            Services: art-service, trail-service, trail-emails, mural-data, constants
+src/db/             Drizzle schema + client (Turso / file: DBs)
+scripts/            Data pipelines (art extraction/migration; ingest + blob sync arrive R2/R4)
+docs/               Specification documents (agent-read-only; docs/intake/ = operator content drop zone)
+public/art/         Art images — gitignored; served from Vercel Blob in production (Architecture §6)
 ```
 
-## External Links
+## Brand at a glance
 
-- **Shop (Lightspeed)**: https://store33134078.company.site/
-- **Pierce's Paw Paradise**: https://www.piercespawparadise.com
-- **Home by Rachel Pierce**: https://www.homebyrachelpierce.com
+Teal `#36b5cd` ground · coral `#fd8473` CTAs · hot-pink hover accents · Playfair Display headings · Jura labels. The complete design language — tokens, type, component recipes, motion, copy voice — is Architecture §12 and is normative.
 
-## Gallery Location
+## External
 
-1571 Periwinkle Way, Sanibel Island, FL 33957
-
-## Notes
-
-- This is a **marketing/experience site** — no e-commerce, no cart
-- The Shop link opens in a new tab (external Lightspeed store)
-- AR Sizing Tool is a coming-soon feature (UI placeholder only)
-- 14 mural locations are seeded in `lib/mural-data.ts` for future map integration
+Shop: https://store33134078.company.site/ · Instagram [@by_rachelpierce](https://www.instagram.com/by_rachelpierce/) · sister businesses: [Pierce's Paw Paradise](https://www.piercespawparadise.com), [Home by Rachel Pierce](https://www.homebyrachelpierce.com)

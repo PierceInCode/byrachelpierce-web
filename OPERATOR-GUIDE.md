@@ -1,0 +1,153 @@
+# Operator's Guide — Shipping byrachelpierce.com with Claude Code
+
+**Who this is for:** you, Matthew, supervising the build. The agent's standing orders are `CLAUDE.md`; milestone content is `docs/FINAL-BUILD-SPEC.md` ("the Spec"); behavior is `docs/SITE-ARCHITECTURE-v2.md` ("the Architecture"). This document is yours. Anywhere it says **YOU**, do it yourself — do not delegate that step to the agent.
+
+**Feature-drift caveat:** Claude Code commands and config formats evolve. If anything below doesn't match what you see, trust https://docs.claude.com/en/docs/claude-code/overview and adjust the harness files (they're plain text).
+
+**Models:** Opus 4.8, Sonnet 5, Haiku 4.5 (+ occasional Fable for escalation reviews). Per-milestone assignments: Spec §1.2 / §12; repeated in the Phase 1 table below.
+
+---
+
+## Phase 0 — One-time setup (~1–2 hours). Do these IN ORDER before any milestone.
+
+**0.1 — Rotate the leaked secrets (YOU, first, before anything else).**
+1. Resend dashboard → API Keys → revoke the key beginning `re_cQuXwBZ1` (it was committed to git in the old trail spec and is public to anyone with repo access) → create a new key.
+2. Turso dashboard → byrachelpierce database → rotate/revoke the auth token that was in `Database Token.txt` → create a new one.
+3. Update `.env.local` with both new values. Confirm `npm run dev` + a magic-link send still work.
+4. Delete `C:\Code\businessWebsites\byRachelPierce\Database Token.txt`.
+5. When you later set up Vercel env vars (R5), use the NEW values.
+
+**0.2 — Branch protection (YOU).** GitHub → `PierceInCode/byrachelpierce-web` → Settings → Branches → protect `main`: require a pull request before merging, require status checks, block force pushes. Until R0's first PR creates the CI check, the status-check list is empty — come back after R0's first push and require the `checks` job.
+
+**0.3 — Merge the planning docs (YOU).** Push branch `final-product-planning`, open a PR, and read every document top-to-bottom once (this is the last time anyone reads them end-to-end). **Rule on `DECISIONS.md` entries 001–012** — merging is your approval of them. Entries flagged ⚠ VETO POINT deserve a deliberate look. Then merge and tag:
+```powershell
+git checkout main; git pull; git tag planning-docs; git push --tags
+```
+Note: the stranded collection work stays uncommitted in your working tree through this merge — that is intentional; it lands in R0 step 1, not before.
+
+**0.4 — Verify the harness loaded (YOU).** Start `claude` in the repo root. Confirm agents `test-runner`, `spec-auditor`, `vercel-analyst` are available and the hooks registered. Live test: ask the agent to edit `docs/FINAL-BUILD-SPEC.md` — it must be blocked by the guard hook and offer a DECISIONS.md entry instead. Then ask it to write `docs/intake/hook-test.md` — that must succeed (delete the file after).
+
+**0.5 — Permissions policy (YOU — your safety rail).** Default ask-before-acting. **Never** `--dangerously-skip-permissions`. "Always allow" ONLY for: `npm run lint/format:check/typecheck/test/test:coverage/check`, `npx tsc`, `npx vitest`, file edits inside the repo, `git status/diff/log/add/commit/checkout -b`. Keep one-time approval for: `git push`, `npm install`/anything touching `package.json` deps, `drizzle-kit` anything, `npx tsx scripts/*` (the scripts touch DBs and Blob), anything network-touching, anything outside the repo.
+
+**0.6 — Back up the art (YOU).** `public/art/` (205MB) is now gitignored — git does not protect it. Copy the folder to your backup location of choice (external drive / cloud). This is the master copy until R2 puts it in Vercel Blob (and even then, keep the local + backup copies — Blob is serving infrastructure, not archival).
+
+**0.7 — Vercel sanity (YOU).** Vercel dashboard → confirm the project builds from the GitHub repo and PRs get preview URLs. Don't change env vars yet (R5 owns that); just confirm previews exist.
+
+---
+
+## Phase 1 — The per-milestone ritual (repeat for R0 → R5)
+
+Run **one milestone per session family**. Don't batch milestones. Fresh context + hard gates is the reliability model.
+
+| Milestone | Model | Sub-agents expected | Special handling |
+|---|---|---|---|
+| R0 process retrofit | Sonnet 5 | test-runner | §R0 below (stranded work) |
+| **R1 trail fixes** | **Opus 4.8** | test-runner, spec-auditor | **§R1 below (live-DB migration)** |
+| R2 images | Sonnet 5 | test-runner, vercel-analyst | §R2 below (Blob sync is yours) |
+| R3 collection | Sonnet 5 | test-runner, vercel-analyst, spec-auditor | verify filters YOURSELF on the preview |
+| R4 content intake | Haiku 4.5 / Sonnet 5 | test-runner | §R4 below (CSVs + production apply) |
+| **R5 go-live** | **Opus 4.8** | all three | **§R5 below (DNS cutover runbook)** |
+
+### The ritual
+
+1. **Start clean (YOU):** `git status` must be clean (exception: pre-R0, the stranded work is expected); `git checkout main; git pull`. Start `claude`, set the milestone's model.
+2. **Plan mode:** `claude` in plan mode → prompt from the Prompt Bank below → **read the plan**. Judge it against the milestone section yourself: does it list the same work items? Does it end at the gate? Reject scope creep.
+3. **Supervised execution:** approve the plan; watch permission prompts (Phase 0.5 policy). The agent should delegate test runs to test-runner.
+4. **Gates:** agent runs the milestone gate (via test-runner, output pasted). Then **YOU independently re-run** the gate commands from the Spec's milestone section in your own terminal. Not optional — this is the step that catches "described as passing."
+5. **Auditor:** tell the agent: *"Run spec-auditor for R<n> and fix all BLOCKER/MAJOR findings, then re-run the gate."*
+6. **PR:** agent opens it; **YOU read the diff** — every file. Small enough per milestone to be readable; if it isn't, that's itself a finding.
+7. **Merge, tag, clear:** merge on green CI, `git tag r<n> && git push --tags`, verify `PROGRESS.md` was updated truthfully, `/clear` the session.
+
+### Verification-command table (what YOU re-run per milestone)
+
+| After | Commands (from repo root) | Expect |
+|---|---|---|
+| R0 | `npm run check`; `npm run test:coverage`; `npm run db:seed-ci; npm run build`; `git diff main --stat -- public/art` | all green; empty art diff |
+| R1 | `npm run check`; `npx vitest run tests/trail`; the two SQL checks in Spec §6.2 against production (Turso shell) | green; 0 sentinel rows |
+| R2 | `npm run check`; `npx tsx scripts/sync-art-blob.ts --dry-run`; phone-check the preview | green; images from Blob host |
+| R3 | `npm run check`; `npm run e2e`; then filter/search/paginate ON THE PREVIEW yourself | results actually change |
+| R4 | `npx tsx scripts/ingest-content.ts --dry-run`; spot-check 5 paintings + all 14 mural names on preview | real content |
+| R5 | `npm run e2e`; `npm run lighthouse`; smoke matrix (§R5) | budgets green; matrix all-checked |
+
+---
+
+## Special handling — the dangerous milestones
+
+### §R0 — Stranded work
+The June collection feature (10 modified + 6 untracked paths) gets committed **as-is, no fixes** (landing ≠ reviewing; R3 reviews). Before approving R0's first commits, glance at `git status` yourself: the staged set must NOT include anything under `public/art/`. If the agent proposes "improving" the collection code during R0, refuse — that's R3.
+
+Baseline migration note: R0 generates `drizzle/0000_*.sql` from the current schema. Production already has these tables. The agent will give you a one-time command to mark the baseline as applied against production (drizzle's baseline procedure) — run it yourself, and take a backup first (§R1 backup command).
+
+### §R1 — Live database migration (the release's scariest step)
+The migration creates `trail_completions`, copies legacy code rows, deletes sentinel rows. **YOU run it, not the agent:**
+1. Backup: `turso db shell byrachelpierce ".dump" > backups/pre-r1-$(Get-Date -Format yyyy-MM-dd).sql` — verify the file is non-trivially sized before proceeding.
+2. Record the expected counts (the runbook the agent prepares in the PR gives the exact queries): number of `mural_id = 0` rows = expected `trail_completions` rows.
+3. Apply: `npx drizzle-kit migrate` with `.env.local` pointed at production (the ONLY sanctioned use of `drizzle-kit` against production in this release).
+4. Run the Spec §6.2 verification SQL. Counts must match exactly. If they don't: STOP, restore is `turso db shell` + the dump file; then make the agent investigate — do not improvise SQL.
+5. Do a real trail completion on the preview (your own email) and confirm "N/3" stays correct after reload.
+
+### §R2 — Blob sync
+The real upload needs the Blob read-write token — keep it out of `.env.local` history the agent sees if you prefer; run `npx tsx scripts/sync-art-blob.ts` yourself after reviewing the `--dry-run` plan. 1,056 files, one-time, idempotent (re-running is safe).
+
+### §R4 — Content
+Start filling `docs/intake/murals.csv` and `paintings.csv` with Rachel **as soon as R4 publishes the formats** (don't wait for the code to finish — the CSVs are the long pole). Murals block go-live; painting data doesn't (unknowns render honestly). Production apply = backup first (same command as §R1 step 1), then `--dry-run`, read the report, then `--apply`.
+
+### §R5 — DNS cutover runbook
+1. Day before: at the DNS host, lower TTL on the apex + www records to 300.
+2. Verify production env vars in Vercel (Spec §10.1 item 5 checklist) and that the production deploy is green **before** touching DNS.
+3. Resend: verify byrachelpierce.com (SPF + DKIM records) — do this before cutover day; propagation is slow.
+4. Cutover: point apex + www at Vercel (dashboard gives exact records). Wait for cert issuance.
+5. Smoke matrix (print this, check boxes, initial it, paste into the PR):
+   - [ ] Every nav item loads over https://byrachelpierce.com (phone + desktop)
+   - [ ] www → apex redirect
+   - [ ] Collection: filter, search, paginate — results change
+   - [ ] A painting page renders with image (from Blob) + correct availability
+   - [ ] Trail: magic link round-trip on a phone, to an inbox that is NOT your Resend account email
+   - [ ] Complete a check-in; gallery email arrives with real mural names + timestamps
+   - [ ] Old Wix URLs redirect (spot-check 3)
+   - [ ] `curl -sI https://byrachelpierce.com` → 200, served by Vercel
+6. **Rollback if needed:** repoint DNS at the old Wix records (you lowered TTL, so ≤5 min propagation). Nothing else to undo — Wix keeps running until you cancel it. Don't cancel Wix until a week of green.
+
+---
+
+## Red flags — stop the session and investigate if the agent…
+
+- proposes `drizzle-kit push`, raw SQL, or ANY write against production Turso
+- asks for, echoes, or writes any secret value anywhere
+- wants to lower a coverage threshold, disable a lint rule, skip a gate, or "temporarily" bypass CI
+- edits under `docs/` (the hook should block it — if it got through, the hook broke)
+- proposes committing `public/art/`, `.env.local`, or a `.db` file
+- describes a gate as passing without pasted command output
+- wants a new dependency not on the milestone's sanctioned list
+- claims work is done but `PROGRESS.md` says otherwise (or vice versa)
+
+## Troubleshooting
+
+| Symptom | Likely cause | Do |
+|---|---|---|
+| Trail emails never arrive (pre-R5) | Resend test domain only delivers to YOUR account email | Expected. Test with your own address; real addresses work after R5 domain verification |
+| Magic link works locally, not on preview | `NEXTAUTH_URL`/cookie config vs. preview URL | Have vercel-analyst triage; don't let the agent restructure auth |
+| Filters/pagination do nothing on deployed site | The SSG/searchParams conflict (pre-R3) | Known defect; R3 fixes it. Don't hotfix |
+| Images 404 on previews (post-R0, pre-R2) | Art is gitignored, Blob not yet synced | Expected until R2's sync runs |
+| Vercel build fails, local passes | Env vars / prod schema drift | vercel-analyst; check dashboard env vars first |
+| `npm run build` fails locally about DB | Forgot `npm run db:seed-ci` / `.env.local` points nowhere | Seed, or set `TURSO_DATABASE_URL=file:./dev.db` |
+| Hook seems inactive | settings not loaded / `node` not on PATH | Restart `claude` in repo root; `node .claude/hooks/guard-docs.mjs` manually with a test payload (Phase 0.4) |
+| Agent context degrading mid-milestone | long session | Have it commit WIP + update PROGRESS.md, then /clear and resume |
+
+## Prompt bank (copy-paste)
+
+- **Start a milestone:** `Read CLAUDE.md, PROGRESS.md, and Spec §0–§4, then the R<n> section and its Architecture reading list. Produce a plan for R<n> only — work items in dependency order, ending at the gate. Do not start work until I approve.`
+- **Mid-milestone resume:** `Read CLAUDE.md and PROGRESS.md. Continue R<n> from the exact next step recorded there. Do not re-plan completed work.`
+- **Gate run:** `Run the R<n> gate via test-runner and paste the output. If anything is red, fix and re-run; do not summarize a red gate as "mostly passing".`
+- **Audit:** `Run spec-auditor for R<n>. Fix all BLOCKER and MAJOR findings, re-run the gate, then report findings + resolutions.`
+- **Deployed-vs-local issue:** `Delegate to vercel-analyst: symptom is <X> on <preview URL>, works locally. Report its diagnosis before changing anything.`
+- **Session end:** `Update PROGRESS.md truthfully (done / exact next step / open questions), commit it, and stop.`
+- **Escalation received:** `You flagged an escalation. Write the full write-up into DECISIONS.md as an OPEN entry with options and your recommendation, update PROGRESS.md, and stop.`
+
+## Standing queries (until A.6 ships) — trail stats from your terminal
+
+```powershell
+turso db shell byrachelpierce "SELECT COUNT(*) FROM trail_completions;"                          # completions
+turso db shell byrachelpierce "SELECT mural_id, COUNT(*) FROM trail_progress GROUP BY mural_id ORDER BY 2 DESC;"  # popularity
+turso db shell byrachelpierce "SELECT u.email, c.redemption_code, c.completed_at FROM trail_completions c JOIN users u ON u.id = c.user_id ORDER BY c.completed_at DESC LIMIT 20;"
+```
