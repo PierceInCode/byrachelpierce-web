@@ -28,7 +28,7 @@ export default function PressPage() {
     },
     {
       publication: 'SWFL Living',
-      headline: 'Murals, Mermaids & More: Inside Rachel Pierce\'s World',
+      headline: "Murals, Mermaids & More: Inside Rachel Pierce's World",
       date: 'Coming Soon',
     },
   ];
@@ -76,8 +76,7 @@ export default function PressPage() {
               lineHeight: 1.65,
             }}
           >
-            Coverage, features, and interviews about Rachel Pierce and her work
-            on Sanibel Island.
+            Coverage, features, and interviews about Rachel Pierce and her work on Sanibel Island.
           </p>
         </div>
       </section>
@@ -104,7 +103,9 @@ export default function PressPage() {
               gap: '0.875rem',
             }}
           >
-            <span style={{ fontSize: '1.25rem' }} aria-hidden="true">📰</span>
+            <span style={{ fontSize: '1.25rem' }} aria-hidden="true">
+              📰
+            </span>
             <p
               style={{
                 fontFamily: 'var(--font-nav)',
@@ -117,7 +118,11 @@ export default function PressPage() {
               inquiries, please use the{' '}
               <Link
                 href="/contact"
-                style={{ color: 'var(--color-teal-dark)', fontWeight: 600, textDecoration: 'underline' }}
+                style={{
+                  color: 'var(--color-teal-dark)',
+                  fontWeight: 600,
+                  textDecoration: 'underline',
+                }}
               >
                 Contact page
               </Link>
@@ -245,9 +250,8 @@ export default function PressPage() {
                 marginBottom: '1.25rem',
               }}
             >
-              For press inquiries, interview requests, high-resolution images, or
-              artist bios, please reach out via the Contact page or connect on
-              social media.
+              For press inquiries, interview requests, high-resolution images, or artist bios,
+              please reach out via the Contact page or connect on social media.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
               <Link

@@ -49,7 +49,7 @@ const GALLERY_EMAIL = process.env.GALLERY_EMAIL || 'matthew@pierceincode.com';
  */
 export async function sendRedemptionEmail(
   email: string,
-  redemptionCode: string
+  redemptionCode: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { error } = await resend.emails.send({
@@ -80,7 +80,7 @@ export async function sendRedemptionEmail(
  * @param progress - The user's full trail progress (includes email, code, check-ins)
  */
 export async function sendGalleryNotification(
-  progress: TrailProgress
+  progress: TrailProgress,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { error } = await resend.emails.send({

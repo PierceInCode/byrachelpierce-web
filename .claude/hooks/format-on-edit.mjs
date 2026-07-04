@@ -34,8 +34,7 @@ try {
   if (!raw) process.exit(0);
 
   const norm = String(raw).replaceAll('\\', '/');
-  const inScope =
-    /(^|\/)(src|tests|scripts)\//.test(norm) && /\.(ts|tsx|css|mjs)$/.test(norm);
+  const inScope = /(^|\/)(src|tests|scripts)\//.test(norm) && /\.(ts|tsx|css|mjs)$/.test(norm);
   if (!inScope) process.exit(0);
 
   execFileSync('npx', ['--no-install', 'prettier', '--write', raw], {

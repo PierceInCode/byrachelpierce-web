@@ -165,7 +165,8 @@ function CollectionDropdown() {
           gap: '0.125rem',
           opacity: open ? 1 : 0,
           pointerEvents: open ? 'auto' : 'none',
-          transition: 'opacity 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
+          transition:
+            'opacity 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
           zIndex: 100,
           border: '1px solid var(--color-border)',
         }}
@@ -186,10 +187,12 @@ function CollectionDropdown() {
                 padding: '0.5rem 0.75rem',
                 borderRadius: 'var(--radius-sm)',
                 letterSpacing: '0.04em',
-                transition: 'background 180ms cubic-bezier(0.16,1,0.3,1), color 180ms cubic-bezier(0.16,1,0.3,1)',
+                transition:
+                  'background 180ms cubic-bezier(0.16,1,0.3,1), color 180ms cubic-bezier(0.16,1,0.3,1)',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-teal-light)';
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'var(--color-teal-light)';
                 (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-teal-dark)';
               }}
               onMouseLeave={(e) => {
@@ -218,10 +221,12 @@ function CollectionDropdown() {
                 padding: '0.5rem 0.75rem',
                 borderRadius: 'var(--radius-sm)',
                 letterSpacing: '0.04em',
-                transition: 'background 180ms cubic-bezier(0.16,1,0.3,1), color 180ms cubic-bezier(0.16,1,0.3,1)',
+                transition:
+                  'background 180ms cubic-bezier(0.16,1,0.3,1), color 180ms cubic-bezier(0.16,1,0.3,1)',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'var(--color-teal-light)';
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'var(--color-teal-light)';
                 (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-teal-dark)';
               }}
               onMouseLeave={(e) => {
@@ -315,8 +320,7 @@ export default function Header() {
               flexShrink: 0,
             }}
           >
-            <span style={{ fontWeight: 300, opacity: 0.85 }}>by</span>{' '}
-            <span>Rachel Pierce</span>
+            <span style={{ fontWeight: 300, opacity: 0.85 }}>by</span> <span>Rachel Pierce</span>
           </Link>
 
           {/* ── Desktop Navigation ── */}
@@ -330,9 +334,18 @@ export default function Header() {
             className="desktop-nav"
           >
             {/* Home */}
-            <Link href="/" style={navLinkStyle}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-white)'; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'rgba(255,255,255,0.15)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.92)'; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = ''; }}
+            <Link
+              href="/"
+              style={navLinkStyle}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-white)';
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'rgba(255,255,255,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.92)';
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '';
+              }}
             >
               Home
             </Link>
@@ -343,8 +356,15 @@ export default function Header() {
               target="_blank"
               rel="noopener noreferrer"
               style={navLinkStyle}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-white)'; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'rgba(255,255,255,0.15)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.92)'; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = ''; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-white)';
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  'rgba(255,255,255,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.92)';
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '';
+              }}
             >
               Shop <ExternalLinkIcon />
             </a>
@@ -358,8 +378,15 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 style={navLinkStyle}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-white)'; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'rgba(255,255,255,0.15)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.92)'; (e.currentTarget as HTMLAnchorElement).style.backgroundColor = ''; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color = 'var(--color-white)';
+                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                    'rgba(255,255,255,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.92)';
+                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '';
+                }}
               >
                 {item.label}
               </Link>

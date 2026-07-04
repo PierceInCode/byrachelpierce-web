@@ -84,9 +84,8 @@ export default function CustomPage() {
               lineHeight: 1.65,
             }}
           >
-            Have a specific subject, size, or occasion in mind? Rachel accepts
-            commissions for custom original paintings — a meaningful, lasting
-            piece created just for you.
+            Have a specific subject, size, or occasion in mind? Rachel accepts commissions for
+            custom original paintings — a meaningful, lasting piece created just for you.
           </p>
         </div>
       </section>
@@ -230,9 +229,8 @@ export default function CustomPage() {
                   marginInline: 'auto',
                 }}
               >
-                An online commission form is on the way. For now, get in touch
-                directly through the Contact page — Rachel will be happy to discuss
-                your ideas.
+                An online commission form is on the way. For now, get in touch directly through the
+                Contact page — Rachel will be happy to discuss your ideas.
               </p>
               <Link
                 href="/contact"

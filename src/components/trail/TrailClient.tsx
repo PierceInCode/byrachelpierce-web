@@ -171,9 +171,7 @@ export default function TrailClient() {
       // Update local state with the server's response
       setTotalCheckIns(data.newTotal);
       // Add the mural ID to our local checked-in list (if not already there)
-      setCheckedInMuralIds((prev) =>
-        prev.includes(muralId) ? prev : [...prev, muralId]
-      );
+      setCheckedInMuralIds((prev) => (prev.includes(muralId) ? prev : [...prev, muralId]));
 
       if (data.questComplete) {
         setRedemptionCode(data.redemptionCode);
@@ -302,8 +300,8 @@ export default function TrailClient() {
               marginInline: 'auto',
             }}
           >
-            We sent you a magic link. Click it to sign in and start tracking your
-            mural visits. The link expires in 24 hours.
+            We sent you a magic link. Click it to sign in and start tracking your mural visits. The
+            link expires in 24 hours.
           </p>
           <button
             onClick={() => setTrailState('SIGNED_OUT')}

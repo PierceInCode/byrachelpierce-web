@@ -92,9 +92,8 @@ export default function MuralTrailPage() {
               marginBottom: '2rem',
             }}
           >
-            Rachel Pierce has painted {MURAL_LOCATIONS.length} large-scale murals
-            across Sanibel Island. Visit any 3, check in below, and earn a special
-            reward at the gallery.
+            Rachel Pierce has painted {MURAL_LOCATIONS.length} large-scale murals across Sanibel
+            Island. Visit any 3, check in below, and earn a special reward at the gallery.
           </p>
 
           {/* Trail stats */}

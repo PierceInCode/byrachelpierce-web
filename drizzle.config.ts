@@ -23,8 +23,8 @@
  * are injected by the platform.
  */
 
-import { config } from "dotenv";
-import { defineConfig } from "drizzle-kit";
+import { config } from 'dotenv';
+import { defineConfig } from 'drizzle-kit';
 
 /**
  * Load .env.local so drizzle-kit can read TURSO_DATABASE_URL and
@@ -35,17 +35,17 @@ import { defineConfig } from "drizzle-kit";
  * The { path: ".env.local" } argument tells dotenv to look at that
  * specific file instead of the default ".env".
  */
-config({ path: ".env.local" });
+config({ path: '.env.local' });
 
 export default defineConfig({
   // "turso" dialect = remote libSQL database (Turso cloud)
-  dialect: "turso",
+  dialect: 'turso',
 
   // Path to the file where all our table definitions live
-  schema: "./src/db/schema.ts",
+  schema: './src/db/schema.ts',
 
   // Folder where drizzle-kit stores migration SQL files (if needed)
-  out: "./drizzle",
+  out: './drizzle',
 
   // Connection credentials — read from .env.local (local dev)
   // or from Vercel environment variables (production)

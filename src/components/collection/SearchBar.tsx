@@ -1,31 +1,31 @@
-"use client";
+'use client';
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useRef, useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRef, useCallback, useEffect, useState } from 'react';
 
 export function SearchBar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("q") ?? "");
+  const [value, setValue] = useState(searchParams.get('q') ?? '');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setValue(searchParams.get("q") ?? "");
+    setValue(searchParams.get('q') ?? '');
   }, [searchParams]);
 
   const updateSearch = useCallback(
     (query: string) => {
       const params = new URLSearchParams(searchParams.toString());
       if (query) {
-        params.set("q", query);
+        params.set('q', query);
       } else {
-        params.delete("q");
+        params.delete('q');
       }
-      params.delete("page");
+      params.delete('page');
       router.push(`${pathname}?${params.toString()}`);
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams],
   );
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -36,23 +36,23 @@ export function SearchBar() {
   }
 
   return (
-    <div style={{ position: "relative", maxWidth: "400px", width: "100%" }}>
+    <div style={{ position: 'relative', maxWidth: '400px', width: '100%' }}>
       <input
         type="search"
         placeholder="Search paintings..."
         value={value}
         onChange={handleChange}
         style={{
-          width: "100%",
-          padding: "0.625rem 1rem 0.625rem 2.5rem",
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
-          color: "var(--color-slate-dark)",
-          backgroundColor: "var(--color-offwhite)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "var(--radius-full)",
-          outline: "none",
-          minHeight: "44px",
+          width: '100%',
+          padding: '0.625rem 1rem 0.625rem 2.5rem',
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--text-sm)',
+          color: 'var(--color-slate-dark)',
+          backgroundColor: 'var(--color-offwhite)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-full)',
+          outline: 'none',
+          minHeight: '44px',
         }}
       />
       <svg
@@ -60,14 +60,14 @@ export function SearchBar() {
         viewBox="0 0 20 20"
         fill="currentColor"
         style={{
-          position: "absolute",
-          left: "0.75rem",
-          top: "50%",
-          transform: "translateY(-50%)",
-          width: "1.125rem",
-          height: "1.125rem",
-          color: "var(--color-slate-light)",
-          pointerEvents: "none",
+          position: 'absolute',
+          left: '0.75rem',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '1.125rem',
+          height: '1.125rem',
+          color: 'var(--color-slate-light)',
+          pointerEvents: 'none',
         }}
       >
         <path

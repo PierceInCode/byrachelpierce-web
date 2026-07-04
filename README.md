@@ -4,13 +4,13 @@ Marketing and experience website for the **by Rachel Pierce** art gallery on San
 
 ## Governing documents
 
-| Doc | What it is |
-|---|---|
+| Doc                                                            | What it is                                                                                      |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | [`docs/SITE-ARCHITECTURE-v2.md`](docs/SITE-ARCHITECTURE-v2.md) | Behavior contract: what every feature does (incl. design language §12 and the AR tool spec §13) |
-| [`docs/FINAL-BUILD-SPEC.md`](docs/FINAL-BUILD-SPEC.md) | Process contract: milestones R0–R5, quality gates, CI, engineering rules |
-| [`OPERATOR-GUIDE.md`](OPERATOR-GUIDE.md) | The supervising human's runbook |
-| [`CLAUDE.md`](CLAUDE.md) | Standing orders for Claude Code build sessions |
-| [`PROGRESS.md`](PROGRESS.md) / [`DECISIONS.md`](DECISIONS.md) | Live state · judgment-call log |
+| [`docs/FINAL-BUILD-SPEC.md`](docs/FINAL-BUILD-SPEC.md)         | Process contract: milestones R0–R5, quality gates, CI, engineering rules                        |
+| [`OPERATOR-GUIDE.md`](OPERATOR-GUIDE.md)                       | The supervising human's runbook                                                                 |
+| [`CLAUDE.md`](CLAUDE.md)                                       | Standing orders for Claude Code build sessions                                                  |
+| [`PROGRESS.md`](PROGRESS.md) / [`DECISIONS.md`](DECISIONS.md)  | Live state · judgment-call log                                                                  |
 
 ## Tech stack
 

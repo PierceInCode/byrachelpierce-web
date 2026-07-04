@@ -64,12 +64,14 @@ export default function RootLayout({
       lang="en"
       // Attach font CSS variables to <html> so they cascade everywhere
       className={`${playfairDisplay.variable} ${jura.variable}`}
-      style={{
-        // Override the @theme font values with the loaded Google Font variables
-        // so the actual font files are used instead of fallback stack names.
-        // This ensures next/font optimization is respected.
-        // (Tailwind v4 @theme values serve as fallbacks when fonts aren't loaded.)
-      }}
+      style={
+        {
+          // Override the @theme font values with the loaded Google Font variables
+          // so the actual font files are used instead of fallback stack names.
+          // This ensures next/font optimization is respected.
+          // (Tailwind v4 @theme values serve as fallbacks when fonts aren't loaded.)
+        }
+      }
     >
       <head>
         {/*
@@ -97,11 +99,7 @@ export default function RootLayout({
           <Header />
 
           {/* Page content — pushed below the fixed 68px header */}
-          <main
-            id="main-content"
-            style={{ flex: 1, paddingTop: '68px' }}
-            tabIndex={-1}
-          >
+          <main id="main-content" style={{ flex: 1, paddingTop: '68px' }} tabIndex={-1}>
             {children}
           </main>
 

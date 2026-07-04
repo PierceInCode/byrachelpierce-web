@@ -65,9 +65,6 @@ export async function GET() {
     return NextResponse.json(response);
   } catch (err) {
     console.error('[trail/status] Error fetching progress:', err);
-    return NextResponse.json(
-      { authenticated: true, progress: null },
-      { status: 500 }
-    );
+    return NextResponse.json({ authenticated: true, progress: null }, { status: 500 });
   }
 }

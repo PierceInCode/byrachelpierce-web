@@ -11,7 +11,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'AR Sizing Tool — Coming Soon',
   description:
-    'See how Rachel Pierce\'s artwork looks on your wall before you buy — our AR Sizing Tool is coming soon to byrachelpierce.com.',
+    "See how Rachel Pierce's artwork looks on your wall before you buy — our AR Sizing Tool is coming soon to byrachelpierce.com.",
 };
 
 export default function ARPage() {
@@ -123,9 +123,9 @@ export default function ARPage() {
                 marginBottom: '1rem',
               }}
             >
-              We&apos;re building an augmented reality tool that lets you preview
-              Rachel Pierce&apos;s artwork at true scale in your own space —
-              before you commit to a purchase.
+              We&apos;re building an augmented reality tool that lets you preview Rachel
+              Pierce&apos;s artwork at true scale in your own space — before you commit to a
+              purchase.
             </p>
             <p
               style={{
@@ -136,9 +136,8 @@ export default function ARPage() {
                 marginBottom: '2.5rem',
               }}
             >
-              Point your phone at a wall, choose a painting, and see exactly how
-              it will look — complete with true-to-life sizing. Perfect for
-              finding the right piece for your home.
+              Point your phone at a wall, choose a painting, and see exactly how it will look —
+              complete with true-to-life sizing. Perfect for finding the right piece for your home.
             </p>
 
             {/* Feature highlights */}

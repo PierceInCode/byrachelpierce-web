@@ -14,19 +14,16 @@
  * encapsulating all the SQL logic.
  */
 
-import { db } from "@/db";
-import { trailProgress, users } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { db } from '@/db';
+import { trailProgress, users } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 
 // ----------------------------------------------------------------
 // Configuration
 // ----------------------------------------------------------------
 
 /** Number of unique murals a user must visit to complete the quest */
-const REQUIRED_CHECKINS = parseInt(
-  process.env.TRAIL_REQUIRED_CHECKINS ?? "3",
-  10
-);
+const REQUIRED_CHECKINS = parseInt(process.env.TRAIL_REQUIRED_CHECKINS ?? '3', 10);
 
 // ----------------------------------------------------------------
 // Types
@@ -63,10 +60,7 @@ export interface TrailStatus {
 export async function getTrailStatus(userId: string): Promise<TrailStatus> {
   // Fetch all check-in rows for this user
   // For C# devs: similar to  dbContext.TrailProgress.Where(tp => tp.UserId == userId).ToList()
-  const rows = await db
-    .select()
-    .from(trailProgress)
-    .where(eq(trailProgress.userId, userId));
+  const rows = await db.select().from(trailProgress).where(eq(trailProgress.userId, userId));
 
   // Extract unique mural IDs (a user could theoretically check in
   // at the same mural twice — we only count unique ones)
@@ -101,20 +95,12 @@ export async function getTrailStatus(userId: string): Promise<TrailStatus> {
  * @param muralId - Which mural (1–14) the user is checking into
  * @returns Updated TrailStatus after the check-in
  */
-export async function recordCheckIn(
-  userId: string,
-  muralId: number
-): Promise<TrailStatus> {
+export async function recordCheckIn(userId: string, muralId: number): Promise<TrailStatus> {
   // --- Guard: already checked in at this mural? ---
   const existing = await db
     .select()
     .from(trailProgress)
-    .where(
-      and(
-        eq(trailProgress.userId, userId),
-        eq(trailProgress.muralId, muralId)
-      )
-    );
+    .where(and(eq(trailProgress.userId, userId), eq(trailProgress.muralId, muralId)));
 
   if (existing.length > 0) {
     // Already visited this mural — just return current status
@@ -138,14 +124,12 @@ export async function recordCheckIn(
 
     // Store the code on the row we just inserted
     // (We find the latest row for this user+mural and update it)
-    await db
-      .insert(trailProgress)
-      .values({
-        userId,
-        muralId: 0, // Sentinel: this row is just for the code
-        checkedInAt: new Date().toISOString(),
-        redemptionCode: code,
-      });
+    await db.insert(trailProgress).values({
+      userId,
+      muralId: 0, // Sentinel: this row is just for the code
+      checkedInAt: new Date().toISOString(),
+      redemptionCode: code,
+    });
 
     // Return updated status with the new code
     return {
@@ -166,13 +150,8 @@ export async function recordCheckIn(
  * @param userId - Auth.js user ID
  * @returns The user's email, or null if not found
  */
-export async function getUserEmail(
-  userId: string
-): Promise<string | null> {
-  const rows = await db
-    .select({ email: users.email })
-    .from(users)
-    .where(eq(users.id, userId));
+export async function getUserEmail(userId: string): Promise<string | null> {
+  const rows = await db.select({ email: users.email }).from(users).where(eq(users.id, userId));
 
   return rows[0]?.email ?? null;
 }
@@ -192,8 +171,8 @@ export async function getUserEmail(
  * to verify they completed the trail.
  */
 function generateRedemptionCode(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let suffix = "";
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let suffix = '';
   for (let i = 0; i < 6; i++) {
     suffix += chars.charAt(Math.floor(Math.random() * chars.length));
   }

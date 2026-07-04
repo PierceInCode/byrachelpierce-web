@@ -23,13 +23,7 @@
  * schema to your Turso database.
  */
 
-import {
-  sqliteTable,
-  text,
-  integer,
-  real,
-  primaryKey,
-} from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, primaryKey } from 'drizzle-orm/sqlite-core';
 
 /* ------------------------------------------------------------------ */
 /*  AUTH.JS TABLES                                                     */
@@ -41,23 +35,23 @@ import {
  * users — one row per person who enters an email on the trail page.
  * Auth.js creates this automatically the first time someone signs in.
  */
-export const users = sqliteTable("users", {
+export const users = sqliteTable('users', {
   /**
    * Primary key — text, auto-generated UUID.
    * The .$defaultFn() tells Drizzle to generate a random UUID when
    * inserting a new row, so the adapter doesn't have to supply one.
    */
-  id: text("id")
+  id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: text("name"),
-  email: text("email").unique(),
+  name: text('name'),
+  email: text('email').unique(),
   /**
    * timestamp_ms mode stores milliseconds as an integer and converts
    * to/from JS Date objects. The adapter expects this exact mode.
    */
-  emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
-  image: text("image"),
+  emailVerified: integer('emailVerified', { mode: 'timestamp_ms' }),
+  image: text('image'),
 });
 
 /**
@@ -68,21 +62,21 @@ export const users = sqliteTable("users", {
  * expects for SQLite.
  */
 export const accounts = sqliteTable(
-  "accounts",
+  'accounts',
   {
-    userId: text("userId")
+    userId: text('userId')
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    type: text("type").notNull(), // "email" for magic links
-    provider: text("provider").notNull(), // "resend"
-    providerAccountId: text("providerAccountId").notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
-    scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(), // "email" for magic links
+    provider: text('provider').notNull(), // "resend"
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
   },
   (account) => [
     /**
@@ -90,7 +84,7 @@ export const accounts = sqliteTable(
      * the combination of provider + providerAccountId, not a UUID.
      */
     primaryKey({ columns: [account.provider, account.providerAccountId] }),
-  ]
+  ],
 );
 
 /**
@@ -101,16 +95,16 @@ export const accounts = sqliteTable(
  * DefaultSQLiteSessionsTable requires sessionToken.isPrimaryKey = true.
  * Having a separate "id" as PK causes a type error at build time.
  */
-export const sessions = sqliteTable("sessions", {
+export const sessions = sqliteTable('sessions', {
   /**
    * The session token IS the primary key. Auth.js generates this
    * value itself — we don't need a $defaultFn here.
    */
-  sessionToken: text("sessionToken").primaryKey(),
-  userId: text("userId")
+  sessionToken: text('sessionToken').primaryKey(),
+  userId: text('userId')
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+    .references(() => users.id, { onDelete: 'cascade' }),
+  expires: integer('expires', { mode: 'timestamp_ms' }).notNull(),
 });
 
 /**
@@ -122,15 +116,13 @@ export const sessions = sqliteTable("sessions", {
  * id column, matching the adapter's expected shape.
  */
 export const verificationTokens = sqliteTable(
-  "verificationTokens",
+  'verificationTokens',
   {
-    identifier: text("identifier").notNull(),
-    token: text("token").notNull(),
-    expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: integer('expires', { mode: 'timestamp_ms' }).notNull(),
   },
-  (vt) => [
-    primaryKey({ columns: [vt.identifier, vt.token] }),
-  ]
+  (vt) => [primaryKey({ columns: [vt.identifier, vt.token] })],
 );
 
 /* ------------------------------------------------------------------ */
@@ -149,22 +141,22 @@ export const verificationTokens = sqliteTable(
  * triggers quest completion (i.e. when they hit the required number
  * of check-ins).  We reuse that code if they complete again later.
  */
-export const trailProgress = sqliteTable("trail_progress", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const trailProgress = sqliteTable('trail_progress', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
   /** Foreign key to users.id — the person checking in */
-  userId: text("user_id")
+  userId: text('user_id')
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: 'cascade' }),
   /** Which mural (1–14) was visited */
-  muralId: integer("mural_id").notNull(),
+  muralId: integer('mural_id').notNull(),
   /** ISO-8601 timestamp of when the check-in happened */
-  checkedInAt: text("checked_in_at").notNull(),
+  checkedInAt: text('checked_in_at').notNull(),
   /**
    * Unique redemption code, only populated on the check-in row
    * that completes the quest (e.g. "BRP-A1B2C3").
    * All other rows leave this null.
    */
-  redemptionCode: text("redemption_code"),
+  redemptionCode: text('redemption_code'),
 });
 
 /**
@@ -172,66 +164,64 @@ export const trailProgress = sqliteTable("trail_progress", {
  * Future feature: collect names + emails from visitors who want
  * updates about new murals, events, etc.
  */
-export const emailList = sqliteTable("email_list", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name"),
-  email: text("email").notNull().unique(),
+export const emailList = sqliteTable('email_list', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name'),
+  email: text('email').notNull().unique(),
   /** ISO-8601 timestamp of when they signed up */
-  signedUpAt: text("signed_up_at").notNull(),
+  signedUpAt: text('signed_up_at').notNull(),
 });
 
 /* ------------------------------------------------------------------ */
 /*  ART COLLECTION TABLES                                              */
 /* ------------------------------------------------------------------ */
 
-export const paintings = sqliteTable("paintings", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  title: text("title").notNull(),
-  slug: text("slug").notNull().unique(),
-  medium: text("medium"),
-  formatType: text("format_type"),
-  location: text("location"),
-  physicalSize: text("physical_size"),
-  availability: text("availability"),
-  series: text("series"),
-  notes: text("notes"),
-  widthPx: integer("width_px"),
-  heightPx: integer("height_px"),
-  orientation: text("orientation"),
-  webImagePath: text("web_image_path"),
-  thumbPath: text("thumb_path"),
-  createdAt: text("created_at"),
-  updatedAt: text("updated_at"),
+export const paintings = sqliteTable('paintings', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(),
+  medium: text('medium'),
+  formatType: text('format_type'),
+  location: text('location'),
+  physicalSize: text('physical_size'),
+  availability: text('availability'),
+  series: text('series'),
+  notes: text('notes'),
+  widthPx: integer('width_px'),
+  heightPx: integer('height_px'),
+  orientation: text('orientation'),
+  webImagePath: text('web_image_path'),
+  thumbPath: text('thumb_path'),
+  createdAt: text('created_at'),
+  updatedAt: text('updated_at'),
 });
 
-export const tagCategories = sqliteTable("tag_categories", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  sortOrder: integer("sort_order").notNull().default(0),
+export const tagCategories = sqliteTable('tag_categories', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
 });
 
-export const tags = sqliteTable("tags", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  categoryId: integer("category_id")
+export const tags = sqliteTable('tags', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  categoryId: integer('category_id')
     .notNull()
     .references(() => tagCategories.id),
-  name: text("name").notNull(),
-  sortOrder: integer("sort_order").notNull().default(0),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
 });
 
 export const paintingTags = sqliteTable(
-  "painting_tags",
+  'painting_tags',
   {
-    paintingId: integer("painting_id")
+    paintingId: integer('painting_id')
       .notNull()
-      .references(() => paintings.id, { onDelete: "cascade" }),
-    tagId: integer("tag_id")
+      .references(() => paintings.id, { onDelete: 'cascade' }),
+    tagId: integer('tag_id')
       .notNull()
-      .references(() => tags.id, { onDelete: "cascade" }),
-    source: text("source"),
-    confidence: real("confidence"),
+      .references(() => tags.id, { onDelete: 'cascade' }),
+    source: text('source'),
+    confidence: real('confidence'),
   },
-  (pt) => [
-    primaryKey({ columns: [pt.paintingId, pt.tagId] }),
-  ]
+  (pt) => [primaryKey({ columns: [pt.paintingId, pt.tagId] })],
 );

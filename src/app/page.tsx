@@ -42,7 +42,8 @@ const btnPrimary: React.CSSProperties = {
   borderRadius: 'var(--radius-full)',
   textDecoration: 'none',
   minHeight: '48px',
-  transition: 'background-color 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
+  transition:
+    'background-color 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
   border: 'none',
   cursor: 'pointer',
 };
@@ -63,7 +64,8 @@ const btnSecondary: React.CSSProperties = {
   textDecoration: 'none',
   minHeight: '48px',
   border: '2px solid rgba(255,255,255,0.6)',
-  transition: 'border-color 180ms cubic-bezier(0.16,1,0.3,1), background-color 180ms cubic-bezier(0.16,1,0.3,1)',
+  transition:
+    'border-color 180ms cubic-bezier(0.16,1,0.3,1), background-color 180ms cubic-bezier(0.16,1,0.3,1)',
 };
 
 // ── External link icon ────────────────────────────────────────────────
@@ -92,8 +94,14 @@ function ExternalLinkIcon() {
 
 // Featured categories shown on homepage — first 8 to form two rows of 4
 const FEATURED_SLUGS = [
-  'beach-coastal', 'sea-life', 'birds-wildlife', 'florals',
-  'abstracts', 'palm-trees', 'mermaids-whimsy', 'watercolors',
+  'beach-coastal',
+  'sea-life',
+  'birds-wildlife',
+  'florals',
+  'abstracts',
+  'palm-trees',
+  'mermaids-whimsy',
+  'watercolors',
 ];
 
 // ── Homepage ──────────────────────────────────────────────────────────
@@ -186,26 +194,17 @@ export default async function HomePage() {
                 maxWidth: '54ch',
               }}
             >
-              Rachel Pierce paints the soul of Sanibel — sea turtles, herons, florals,
-              and the light that makes this island unforgettable. Original works,
-              open-edition prints, and hand-painted murals.
+              Rachel Pierce paints the soul of Sanibel — sea turtles, herons, florals, and the light
+              that makes this island unforgettable. Original works, open-edition prints, and
+              hand-painted murals.
             </p>
 
             {/* CTAs */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-              <Link
-                href="/collection"
-                className="btn-primary"
-                style={btnPrimary}
-              >
+              <Link href="/collection" className="btn-primary" style={btnPrimary}>
                 Explore the Collection
               </Link>
-              <a
-                href={SHOP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={btnSecondary}
-              >
+              <a href={SHOP_URL} target="_blank" rel="noopener noreferrer" style={btnSecondary}>
                 Visit Our Store <ExternalLinkIcon />
               </a>
             </div>
@@ -298,7 +297,8 @@ export default async function HomePage() {
                   textDecoration: 'none',
                   boxShadow: 'var(--shadow-sm)',
                   border: '1px solid var(--color-border)',
-                  transition: 'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
+                  transition:
+                    'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
                 }}
               >
                 {/* Thumbnail image */}
@@ -443,10 +443,10 @@ export default async function HomePage() {
                   marginBottom: '1rem',
                 }}
               >
-                Rachel Pierce traded the camera for a paintbrush — and Sanibel Island
-                became her muse. A former television on-air personality, Rachel now
-                channels her expressive energy into vivid, joyful paintings that
-                capture the light, color, and life of Southwest Florida.
+                Rachel Pierce traded the camera for a paintbrush — and Sanibel Island became her
+                muse. A former television on-air personality, Rachel now channels her expressive
+                energy into vivid, joyful paintings that capture the light, color, and life of
+                Southwest Florida.
               </p>
               <p
                 style={{
@@ -457,8 +457,8 @@ export default async function HomePage() {
                   marginBottom: '2rem',
                 }}
               >
-                Her gallery at 1571 Periwinkle Way is a destination — filled with
-                original works, prints, and the stories behind every piece.
+                Her gallery at 1571 Periwinkle Way is a destination — filled with original works,
+                prints, and the stories behind every piece.
               </p>
               <Link
                 href="/story"
@@ -559,16 +559,12 @@ export default async function HomePage() {
                   maxWidth: '52ch',
                 }}
               >
-                Rachel has painted 14 large-scale murals across Sanibel Island.
-                Follow the trail, snap your selfie, and discover each piece of
-                outdoor art that has become part of the island&apos;s identity.
+                Rachel has painted 14 large-scale murals across Sanibel Island. Follow the trail,
+                snap your selfie, and discover each piece of outdoor art that has become part of the
+                island&apos;s identity.
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                <Link
-                  href="/murals/trail"
-                  className="btn-primary"
-                  style={btnPrimary}
-                >
+                <Link href="/murals/trail" className="btn-primary" style={btnPrimary}>
                   Explore the Trail
                 </Link>
                 <Link href="/murals" style={btnSecondary}>
@@ -680,9 +676,8 @@ export default async function HomePage() {
               marginInline: 'auto',
             }}
           >
-            Original paintings, open-edition prints, and gift-ready works —
-            available through our Lightspeed store with secure checkout and
-            shipping to your door.
+            Original paintings, open-edition prints, and gift-ready works — available through our
+            Lightspeed store with secure checkout and shipping to your door.
           </p>
           <div
             style={{

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return NextResponse.json(
       { success: false, message: 'Please sign in to check in at murals.' },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -45,10 +45,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { success: false, message: 'Invalid request body.' },
-      { status: 400 }
-    );
+    return NextResponse.json({ success: false, message: 'Invalid request body.' }, { status: 400 });
   }
 
   const muralId = body.muralId;
@@ -57,7 +54,7 @@ export async function POST(request: Request) {
   if (typeof muralId !== 'number' || !Number.isInteger(muralId) || muralId < 1 || muralId > 14) {
     return NextResponse.json(
       { success: false, message: `Invalid mural ID. Must be an integer between 1 and 14.` },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -130,7 +127,7 @@ export async function POST(request: Request) {
     console.error('[trail/checkin] Error recording check-in:', err);
     return NextResponse.json(
       { success: false, message: 'Something went wrong. Please try again.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

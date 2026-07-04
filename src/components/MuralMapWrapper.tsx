@@ -53,11 +53,7 @@ const MuralMapDynamic = dynamic(
     // Note: we can't use the CSS class animations here easily, so we use a simple
     // styled div that matches the .mural-map-loading appearance.
     loading: () => (
-      <div
-        className="mural-map-loading"
-        aria-busy="true"
-        aria-label="Map loading"
-      >
+      <div className="mural-map-loading" aria-busy="true" aria-label="Map loading">
         {/* The pulsing map emoji gives a visual cue that something is loading. */}
         <div className="mural-map-loading-icon" aria-hidden="true">
           🗺️
@@ -65,7 +61,7 @@ const MuralMapDynamic = dynamic(
         <p className="mural-map-loading-text">LOADING MAP</p>
       </div>
     ),
-  }
+  },
 );
 
 // ── Props re-export ────────────────────────────────────────────────────────────

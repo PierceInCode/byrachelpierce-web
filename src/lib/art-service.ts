@@ -5,11 +5,11 @@
  * Called by server components and API routes.
  */
 
-import { db } from "@/db";
-import { paintings, tags, tagCategories, paintingTags } from "@/db/schema";
-import { eq, like, inArray, or, sql, and, desc, asc } from "drizzle-orm";
-import { CATEGORY_TAG_MAP, COLLECTION_CATEGORIES, PAGE_SIZE } from "./constants";
-import type { Painting, PaintingWithTags, CategoryCardData } from "@/types";
+import { db } from '@/db';
+import { paintings, tags, tagCategories, paintingTags } from '@/db/schema';
+import { eq, like, inArray, or, sql, and, desc, asc } from 'drizzle-orm';
+import { CATEGORY_TAG_MAP, COLLECTION_CATEGORIES, PAGE_SIZE } from './constants';
+import type { Painting, PaintingWithTags, CategoryCardData } from '@/types';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -21,10 +21,7 @@ function buildCategoryConditions(slug: string) {
 
 async function getTagIdsByNames(tagNames: string[]): Promise<number[]> {
   if (tagNames.length === 0) return [];
-  const rows = await db
-    .select({ id: tags.id })
-    .from(tags)
-    .where(inArray(tags.name, tagNames));
+  const rows = await db.select({ id: tags.id }).from(tags).where(inArray(tags.name, tagNames));
   return rows.map((r) => r.id);
 }
 
@@ -41,7 +38,7 @@ async function getPaintingIdsByTagIds(tagIds: number[]): Promise<number[]> {
 
 export async function getPaintingsByCategory(
   slug: string,
-  options: { page?: number; limit?: number } = {}
+  options: { page?: number; limit?: number } = {},
 ): Promise<{ paintings: Painting[]; total: number }> {
   const page = options.page ?? 1;
   const limit = options.limit ?? PAGE_SIZE;
@@ -71,11 +68,12 @@ export async function getPaintingsByCategory(
     conditions.push(eq(paintings.formatType, mapping.formatType));
   }
 
-  const where = conditions.length === 1
-    ? conditions[0]
-    : conditions.length > 1
-      ? and(...conditions)
-      : undefined;
+  const where =
+    conditions.length === 1
+      ? conditions[0]
+      : conditions.length > 1
+        ? and(...conditions)
+        : undefined;
 
   const [rows, countResult] = await Promise.all([
     db
@@ -94,14 +92,8 @@ export async function getPaintingsByCategory(
   return { paintings: rows, total: Number(countResult[0].count) };
 }
 
-export async function getPaintingBySlug(
-  slug: string
-): Promise<PaintingWithTags | null> {
-  const rows = await db
-    .select()
-    .from(paintings)
-    .where(eq(paintings.slug, slug))
-    .limit(1);
+export async function getPaintingBySlug(slug: string): Promise<PaintingWithTags | null> {
+  const rows = await db.select().from(paintings).where(eq(paintings.slug, slug)).limit(1);
 
   if (rows.length === 0) return null;
   const painting = rows[0];
@@ -130,7 +122,7 @@ export async function getPaintingBySlug(
 export async function searchPaintings(
   query: string,
   filters: { medium?: string; tagIds?: number[] } = {},
-  options: { page?: number; limit?: number } = {}
+  options: { page?: number; limit?: number } = {},
 ): Promise<{ paintings: Painting[]; total: number }> {
   const page = options.page ?? 1;
   const limit = options.limit ?? PAGE_SIZE;
@@ -139,12 +131,7 @@ export async function searchPaintings(
   const conditions = [];
 
   if (query) {
-    conditions.push(
-      or(
-        like(paintings.title, `%${query}%`),
-        like(paintings.notes, `%${query}%`)
-      )
-    );
+    conditions.push(or(like(paintings.title, `%${query}%`), like(paintings.notes, `%${query}%`)));
   }
 
   if (filters.medium) {
@@ -157,11 +144,12 @@ export async function searchPaintings(
     conditions.push(inArray(paintings.id, paintingIds));
   }
 
-  const where = conditions.length === 1
-    ? conditions[0]
-    : conditions.length > 1
-      ? and(...conditions)
-      : undefined;
+  const where =
+    conditions.length === 1
+      ? conditions[0]
+      : conditions.length > 1
+        ? and(...conditions)
+        : undefined;
 
   const [rows, countResult] = await Promise.all([
     db
@@ -181,22 +169,15 @@ export async function searchPaintings(
 }
 
 export async function getAllPaintings(
-  options: { page?: number; limit?: number } = {}
+  options: { page?: number; limit?: number } = {},
 ): Promise<{ paintings: Painting[]; total: number }> {
   const page = options.page ?? 1;
   const limit = options.limit ?? PAGE_SIZE;
   const offset = (page - 1) * limit;
 
   const [rows, countResult] = await Promise.all([
-    db
-      .select()
-      .from(paintings)
-      .orderBy(asc(paintings.title))
-      .limit(limit)
-      .offset(offset),
-    db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(paintings),
+    db.select().from(paintings).orderBy(asc(paintings.title)).limit(limit).offset(offset),
+    db.select({ count: sql<number>`COUNT(*)` }).from(paintings),
   ]);
 
   return { paintings: rows, total: Number(countResult[0].count) };
@@ -206,10 +187,10 @@ export async function getCategoryCards(): Promise<CategoryCardData[]> {
   const results: CategoryCardData[] = [];
 
   for (const cat of COLLECTION_CATEGORIES) {
-    const { total, paintings: catPaintings } = await getPaintingsByCategory(
-      cat.slug,
-      { page: 1, limit: 1 }
-    );
+    const { total, paintings: catPaintings } = await getPaintingsByCategory(cat.slug, {
+      page: 1,
+      limit: 1,
+    });
 
     results.push({
       label: cat.label,
@@ -224,7 +205,7 @@ export async function getCategoryCards(): Promise<CategoryCardData[]> {
 
 export async function getRelatedPaintings(
   paintingId: number,
-  limit: number = 6
+  limit: number = 6,
 ): Promise<Painting[]> {
   // Get this painting's tag IDs
   const myTags = await db
@@ -244,10 +225,7 @@ export async function getRelatedPaintings(
     })
     .from(paintingTags)
     .where(
-      and(
-        inArray(paintingTags.tagId, tagIds),
-        sql`${paintingTags.paintingId} != ${paintingId}`
-      )
+      and(inArray(paintingTags.tagId, tagIds), sql`${paintingTags.paintingId} != ${paintingId}`),
     )
     .groupBy(paintingTags.paintingId)
     .orderBy(desc(sql`COUNT(*)`))
@@ -256,10 +234,7 @@ export async function getRelatedPaintings(
   if (related.length === 0) return [];
 
   const relatedIds = related.map((r) => r.paintingId);
-  return db
-    .select()
-    .from(paintings)
-    .where(inArray(paintings.id, relatedIds));
+  return db.select().from(paintings).where(inArray(paintings.id, relatedIds));
 }
 
 export async function getFilterOptions() {
