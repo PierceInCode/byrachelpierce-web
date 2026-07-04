@@ -7,3 +7,4 @@ package-lock.json
 CLAUDE.md
 OPERATOR-GUIDE.md
 scripts/art-data.json
+coverage/

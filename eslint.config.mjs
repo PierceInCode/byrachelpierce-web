@@ -7,7 +7,14 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
-    ignores: ['drizzle/**', 'public/**', '.next/**', 'node_modules/**', 'next-env.d.ts'],
+    ignores: [
+      'drizzle/**',
+      'public/**',
+      '.next/**',
+      'node_modules/**',
+      'next-env.d.ts',
+      'coverage/**',
+    ],
   },
   {
     // R2 (Spec §7) migrates all artwork <img> usages to next/image via artUrl().
