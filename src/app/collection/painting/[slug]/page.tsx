@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { db } from '@/db';
 import { paintings } from '@/db/schema';
 import { getPaintingBySlug, getRelatedPaintings } from '@/lib/art-service';
+import { artUrl } from '@/lib/art-url';
 import { ArtworkGrid } from '@/components/collection/ArtworkGrid';
 
 // ── Static params for SSG ─────────────────────────────────────────
@@ -27,7 +29,7 @@ export async function generateMetadata({
   return {
     title: painting.title,
     description: `"${painting.title}" — ${painting.medium ?? 'original artwork'} by Rachel Pierce. ${painting.availability ?? 'Available at the Sanibel Island gallery.'}`,
-    openGraph: painting.webImagePath ? { images: [`/art/${painting.webImagePath}`] } : undefined,
+    openGraph: painting.webImagePath ? { images: [artUrl(painting.webImagePath)] } : undefined,
   };
 }
 
@@ -144,18 +146,29 @@ export default async function PaintingDetailPage({
                 width: '100%',
               }}
             >
-              {painting.webImagePath ? (
-                // R2 (Spec §7) migrates this to next/image via artUrl(). DECISIONS.md 015.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={`/art/${painting.webImagePath}`}
+              {painting.webImagePath && painting.widthPx && painting.heightPx ? (
+                <Image
+                  src={artUrl(painting.webImagePath)}
                   alt={painting.title}
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    display: 'block',
-                  }}
+                  width={painting.widthPx}
+                  height={painting.heightPx}
+                  sizes="(max-width: 800px) 100vw, 800px"
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                  priority
                 />
+              ) : painting.webImagePath ? (
+                // Dimensions missing for this row — crop into a fixed-aspect
+                // box rather than pass a guessed width/height to next/image.
+                <div style={{ position: 'relative', aspectRatio: '4/3', width: '100%' }}>
+                  <Image
+                    src={artUrl(painting.webImagePath)}
+                    alt={painting.title}
+                    fill
+                    sizes="(max-width: 800px) 100vw, 800px"
+                    style={{ objectFit: 'contain' }}
+                    priority
+                  />
+                </div>
               ) : (
                 <div className="img-placeholder" style={{ aspectRatio: '4/3', width: '100%' }}>
                   {painting.title}

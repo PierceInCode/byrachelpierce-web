@@ -1,9 +1,16 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Image optimization — add trusted domains here as they become known
+  // Image optimization — artwork serves from Vercel Blob in deployed
+  // environments (Architecture §6); the store subdomain is assigned per
+  // project, so the pattern wildcards it.
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.public.blob.vercel-storage.com',
+      },
+    ],
   },
   // Strict mode for catching React issues early
   reactStrictMode: true,

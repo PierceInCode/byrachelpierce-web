@@ -43,5 +43,9 @@ backups/
 # Vitest coverage output
 coverage/
 
+# Playwright output
+playwright-report/
+test-results/
+
 # Claude Code local (per-machine) settings — the shared harness IS committed
 .claude/settings.local.json
