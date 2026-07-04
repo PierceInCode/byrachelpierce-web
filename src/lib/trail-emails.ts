@@ -86,7 +86,7 @@ function muralLabel(muralId: number): string | null {
  * It includes the code prominently, plus instructions on how to redeem.
  *
  * @param email - The user's email address
- * @param redemptionCode - The generated RP-XXXXXX code
+ * @param redemptionCode - The generated BRP-XXXXXX code
  * @returns The Resend API response (contains the email ID)
  */
 export async function sendRedemptionEmail(
@@ -148,6 +148,10 @@ export async function sendGalleryNotification(
 // These produce simple, inline-styled HTML emails.
 // Email clients strip <style> blocks and external CSS, so everything
 // must be inline. We keep it simple — no images, no complex layouts.
+// NOTE: the brand hex values below are hardcoded rather than pulled from
+// the §12 design tokens — email is the ONE sanctioned exception to the
+// tokens-only rule, because email clients can't resolve CSS variables
+// (Architecture §8, §12).
 
 /**
  * Build the HTML body for the redemption code email.

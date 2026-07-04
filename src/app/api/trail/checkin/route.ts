@@ -8,7 +8,7 @@
  * AUTHENTICATION: Requires an active Auth.js session (magic link sign-in).
  * Unauthenticated requests get a 401.
  *
- * REQUEST BODY: { "muralId": 7 }  (integer 1-14)
+ * REQUEST BODY: { "muralId": 7 }  (integer 1..MURAL_LOCATIONS.length)
  * RESPONSE: TrailCheckInResponse (see types/index.ts)
  *
  * IDEMPOTENT: Checking in at the same mural twice returns success without

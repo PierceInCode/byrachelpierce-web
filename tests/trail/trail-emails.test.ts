@@ -40,6 +40,26 @@ describe('sendRedemptionEmail', () => {
     expect(result.success).toBe(false);
     expect(result.error).toBe('nope');
   });
+
+  it('the count truly comes from TRAIL_REQUIRED_CHECKINS (renders 5 when set to 5)', async () => {
+    // Guards against a regression to a hardcoded "3": re-import the module with
+    // a non-default env value and assert the email reflects it (Architecture
+    // §4.2 hole 4 — every count renders from TRAIL_REQUIRED_CHECKINS).
+    const original = process.env.TRAIL_REQUIRED_CHECKINS;
+    process.env.TRAIL_REQUIRED_CHECKINS = '5';
+    vi.resetModules();
+    try {
+      const fresh = await import('@/lib/trail-emails');
+      await fresh.sendRedemptionEmail('visitor@example.test', 'BRP-A2C4KM');
+      const html: string = sendMock.mock.calls[0][0].html;
+      expect(html).toContain('You visited 5 of');
+      expect(html).not.toContain('You visited 3 of');
+    } finally {
+      if (original === undefined) delete process.env.TRAIL_REQUIRED_CHECKINS;
+      else process.env.TRAIL_REQUIRED_CHECKINS = original;
+      vi.resetModules();
+    }
+  });
 });
 
 describe('sendGalleryNotification (Architecture §4.2 hole 4 + §4.4 honesty)', () => {
