@@ -4,7 +4,13 @@
 
 ## Milestone status (plan: `docs/FINAL-BUILD-SPEC.md`)
 
-- [ ] **Phase 0** (operator): secrets rotated (Resend + Turso), `Database Token.txt` deleted, branch protection, planning PR merged + `planning-docs` tag, harness verified, art folder backed up, Vercel previews confirmed
+- [ ] **Phase 0** (operator) — not fully closed, but unblocked for R0 per DECISIONS 013 (0.1 and 0.2 are deferred/substituted, not gating). Status as of 2026-07-04:
+  - [x] planning PR merged + `planning-docs` tag (confirmed: `origin/main` has the merge commit, tag exists)
+  - [x] harness verified (`test-runner`, `spec-auditor`, `vercel-analyst` agents + hooks present in `.claude/`)
+  - [ ] **0.1 secrets rotated (Resend + Turso) — DEFERRED, not blocking, must be re-flagged before R5** (`Database Token.txt` still present on disk; rotation not yet confirmed by operator — DECISIONS 013)
+  - [ ] **0.2 branch protection — UNAVAILABLE on this GitHub plan; substituted by PR-only discipline** (CLAUDE.md rule 9 — DECISIONS 013)
+  - [ ] 0.6 art folder backed up (operator-owned, not independently verifiable by the agent — confirm when done)
+  - [ ] 0.7 Vercel previews confirmed (operator-owned, not independently verifiable by the agent — confirm when done)
 - [ ] R0 process retrofit — branch `r0-process` — gate: Spec §5.2
 - [ ] R1 trail correctness — `r1-trail` — gate: Spec §6.2 (incl. operator-run production migration)
 - [ ] R2 images & performance — `r2-images` — gate: Spec §7.2
@@ -18,14 +24,14 @@
 - **Stranded, deliberately uncommitted work** (lands in R0 step 1, NOT before): the June art-collection feature — modified: `package.json`, `tsconfig.json`, `next-env.d.ts`, `src/app/page.tsx`, `src/app/globals.css`, `src/app/collection/page.tsx`, `src/app/collection/[category]/page.tsx`, `src/db/schema.ts`, `src/lib/constants.ts`, `src/types/index.ts`; untracked: `package-lock.json`, `scripts/`, `src/app/collection/painting/`, `src/components/collection/`, `src/lib/art-service.ts` (+ `public/art/` — now gitignored, never to be committed).
 - Local `main` is 1 commit behind `origin/main` (`525b611`, the Next.js 15.3.6 CVE fix) — reconciled in R0 step 2.
 - Known live defects (fixed in R1, documented in Architecture §4.2): sentinel-row status inflation after trail completion; `Math.random` codes with ambiguous characters; completion race; wrong timestamps in gallery email. Mural names/descriptions/years on public pages are fabricated placeholders (Architecture §4.4; real content in R4).
-- Data reality: 0/528 paintings have physical size, 1/528 has availability. Leaked secrets: Resend key (in git history) + Turso token (plaintext file) — rotation is Phase 0.1 and is NOT yet done as of this writing.
+- Data reality: 0/528 paintings have physical size, 1/528 has availability. Leaked secrets: Resend key (in git history) + Turso token (plaintext file) — rotation (Phase 0.1) is operator-deferred as of 2026-07-04 (DECISIONS 013); NOT a block on R0, but must be re-flagged before R5.
 - Planning docs written on branch `final-product-planning`: Architecture v2, FINAL-BUILD-SPEC, CLAUDE.md, agent harness (hooks piped-payload tested), OPERATOR-GUIDE, this file, DECISIONS.md 001–012, README rewrite. Old trail spec archived to `docs/old/` (leaked key redacted).
 
 ## Exact next step
 
-1. Operator: OPERATOR-GUIDE **Phase 0.1 (rotate secrets) — before anything else**, then 0.2–0.7, ruling on DECISIONS 001–012 in the planning PR.
-2. Then start **R0** in a fresh Sonnet 5 session: prompt bank "Start a milestone" with n=0.
+1. R0 plan drafted this session (2026-07-04), pending operator approval before any work starts. See DECISIONS 013 for the Phase 0.1/0.2 rulings this plan proceeds under.
+2. Once approved: execute Spec §5.1 steps in order on branch `r0-process`, ending at the §5.2 gate.
 
 ## Open questions for operator
 
-- None blocking beyond the DECISIONS veto points (007 — suppressing fabricated mural content pre-R4 — is the one that changes visible behavior; read it deliberately).
+- None blocking beyond the DECISIONS veto points (007 — suppressing fabricated mural content pre-R4 — is the one that changes visible behavior; read it deliberately). 013 (this session) is informational, not a veto point — no action needed unless you disagree with either ruling.

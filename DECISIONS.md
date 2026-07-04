@@ -26,6 +26,11 @@
 
 **012 · 2026-07-03 · Baseline migration approach.** R0 snapshots the current schema as `drizzle/0000_*.sql` and the operator marks it applied on production (drizzle baseline procedure) rather than hand-writing SQL to match. Why: file DBs for tests/CI need buildable-from-migrations; production must never be re-created.
 
+**013 · 2026-07-04 · Phase 0 exceptions ruled by operator: secret rotation deferred, branch protection substituted.**
+- **0.1 (rotate Resend key + Turso token) is deferred** — back-burnered by the operator, not blocking R0 start. `Database Token.txt` still exists on disk and the old Resend key has not been confirmed revoked as of this entry. This does NOT relax Iron Invariant 2 (no secrets in repo/logs/output) — it means the leaked-credential risk stays open a while longer. **Must be re-flagged before R5 go-live** (production env vars, DNS cutover, and real Resend sending all depend on rotated credentials — Spec §2.4, §10). The agent confirms-not-performs this step (Spec §5.0); until the operator asserts rotation done, R0–R4 proceed on file-DB/mocked-email environments where the distinction is moot (Spec §4.5).
+- **0.2 (branch protection on `main`) is unavailable on this GitHub plan** — no paid tier / protection feature on this account. Substitute control: PR-only discipline (CLAUDE.md rule 9 — one milestone branch at a time, Conventional Commits, every commit passes `npm run check`, PRs only, never commit to `main`) plus operator review of every PR before merge. This is a process control, not a technical guardrail, so it depends on the operator and agent actually observing it every time — no CI-enforced blocker exists if it's skipped.
+Why: operator ruling, 2026-07-04 session (both raised as blocking-looking Phase 0 items that are intentionally not blocking). Record and continue; do not stall R0 on either.
+
 ---
 
-*(Build sessions append from 013 onward.)*
+*(Build sessions append from 014 onward.)*
