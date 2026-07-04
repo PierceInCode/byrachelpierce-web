@@ -27,6 +27,7 @@ import {
   sqliteTable,
   text,
   integer,
+  real,
   primaryKey,
 } from "drizzle-orm/sqlite-core";
 
@@ -178,3 +179,59 @@ export const emailList = sqliteTable("email_list", {
   /** ISO-8601 timestamp of when they signed up */
   signedUpAt: text("signed_up_at").notNull(),
 });
+
+/* ------------------------------------------------------------------ */
+/*  ART COLLECTION TABLES                                              */
+/* ------------------------------------------------------------------ */
+
+export const paintings = sqliteTable("paintings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  medium: text("medium"),
+  formatType: text("format_type"),
+  location: text("location"),
+  physicalSize: text("physical_size"),
+  availability: text("availability"),
+  series: text("series"),
+  notes: text("notes"),
+  widthPx: integer("width_px"),
+  heightPx: integer("height_px"),
+  orientation: text("orientation"),
+  webImagePath: text("web_image_path"),
+  thumbPath: text("thumb_path"),
+  createdAt: text("created_at"),
+  updatedAt: text("updated_at"),
+});
+
+export const tagCategories = sqliteTable("tag_categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const tags = sqliteTable("tags", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  categoryId: integer("category_id")
+    .notNull()
+    .references(() => tagCategories.id),
+  name: text("name").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const paintingTags = sqliteTable(
+  "painting_tags",
+  {
+    paintingId: integer("painting_id")
+      .notNull()
+      .references(() => paintings.id, { onDelete: "cascade" }),
+    tagId: integer("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+    source: text("source"),
+    confidence: real("confidence"),
+  },
+  (pt) => [
+    primaryKey({ columns: [pt.paintingId, pt.tagId] }),
+  ]
+);

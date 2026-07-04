@@ -8,11 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:migrate-art": "tsx scripts/migrate-art-data.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
     "@libsql/client": "^0.17.0",
+    "@tailwindcss/postcss": "^4.2.1",
     "drizzle-orm": "^0.44.5",
     "leaflet": "^1.9.4",
     "next": "15.3.3",

@@ -231,6 +231,39 @@ nav a {
   transform: translateY(-3px) !important;
 }
 
+/* ── Home Category Grid (4 cols → 2 → 1) ────────────────────────── */
+@media (max-width: 900px) {
+  .home-category-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 520px) {
+  .home-category-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Collection Filter Layout ────────────────────────────────────── */
+.filter-toggle-mobile {
+  display: none !important;
+}
+
+.filter-drawer-mobile {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .filter-sidebar {
+    display: none !important;
+  }
+  .filter-toggle-mobile {
+    display: inline-flex !important;
+  }
+  .filter-drawer-mobile {
+    display: block !important;
+  }
+}
+
 /* ── Leaflet Map Styles ──────────────────────────────────────────── */
 /* Leaflet's own CSS (leaflet.css) is imported via JavaScript in MuralMap.tsx.
    We can't use @import in this file because Tailwind v4's @import 'tailwindcss'
