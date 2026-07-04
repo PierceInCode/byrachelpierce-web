@@ -1,0 +1,9 @@
+docs/
+drizzle/
+public/
+.next/
+node_modules/
+package-lock.json
+CLAUDE.md
+OPERATOR-GUIDE.md
+scripts/art-data.json
