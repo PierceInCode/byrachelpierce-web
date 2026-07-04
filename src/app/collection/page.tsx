@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { getCategoryCards } from '@/lib/art-service';
+import { artUrl } from '@/lib/art-url';
 
 export const metadata: Metadata = {
   title: 'Collection',
@@ -136,23 +138,20 @@ export default async function CollectionPage() {
               >
                 <div
                   style={{
+                    position: 'relative',
                     height: '160px',
                     overflow: 'hidden',
                     backgroundColor: 'var(--color-teal-light)',
                   }}
                 >
                   {cat.thumbPath ? (
-                    // R2 (Spec §7) migrates this to next/image via artUrl(). DECISIONS.md 015.
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={`/art/${cat.thumbPath}`}
+                    <Image
+                      src={artUrl(cat.thumbPath)}
                       alt=""
+                      fill
                       loading="lazy"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
+                      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"
+                      style={{ objectFit: 'cover' }}
                     />
                   ) : (
                     <div

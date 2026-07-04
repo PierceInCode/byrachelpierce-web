@@ -1,8 +1,10 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { Painting } from '@/types';
+import { artUrl } from '@/lib/art-url';
 
 export function ArtworkCard({ painting }: { painting: Painting }) {
-  const thumbSrc = painting.thumbPath ? `/art/${painting.thumbPath}` : null;
+  const thumbSrc = painting.thumbPath ? artUrl(painting.thumbPath) : null;
 
   return (
     <Link
@@ -22,23 +24,20 @@ export function ArtworkCard({ painting }: { painting: Painting }) {
     >
       <div
         style={{
+          position: 'relative',
           aspectRatio: '3/4',
           overflow: 'hidden',
           backgroundColor: 'var(--color-teal-light)',
         }}
       >
         {thumbSrc ? (
-          // R2 (Spec §7) migrates this to next/image via artUrl(). DECISIONS.md 015.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={thumbSrc}
             alt={painting.title}
+            fill
             loading="lazy"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"
+            style={{ objectFit: 'cover' }}
           />
         ) : (
           <div

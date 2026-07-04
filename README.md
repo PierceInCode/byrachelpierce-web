@@ -16,8 +16,8 @@ Marketing and experience website for the **by Rachel Pierce** art gallery on San
 
 - **Next.js 15.5.20** (App Router, React 19) · **TypeScript 5** (strict) · **Tailwind CSS v4** (CSS-first `@theme` tokens in `src/app/globals.css`)
 - **Turso** (libSQL/SQLite) via **Drizzle ORM** — auth, trail, and painting catalog. The production DB is live; see Spec §3 rule 1 before touching anything.
-- **Auth.js v5** (pinned beta) + **Resend** magic-link email · **Leaflet** mural map · **Vercel** hosting (+ Blob for art images from R2)
-- **Vitest** (+ V8 coverage) for unit/integration tests, **ESLint** + **Prettier** for lint/format, **Playwright** for e2e (arrives R3)
+- **Auth.js v5** (pinned beta) + **Resend** magic-link email · **Leaflet** mural map · **Vercel** hosting + **Vercel Blob** for art images (R2)
+- **Vitest** (+ V8 coverage) for unit/integration tests, **ESLint** + **Prettier** for lint/format, **Playwright** for e2e (minimal scaffold from R2 — image budgets only; full suite lands R3)
 
 ## Quickstart (local, no cloud credentials needed)
 
@@ -27,24 +27,28 @@ npm ci
 #   TURSO_DATABASE_URL=file:./dev.db
 #   AUTH_SECRET=<any random string locally>
 #   NEXTAUTH_URL=http://localhost:3000
+#   NEXT_PUBLIC_ART_BASE_URL — leave unset locally; defaults to /art (serves
+#     straight from the gitignored public/art/ folder). Set to the Vercel
+#     Blob public URL only in deployed environments.
 npm run db:seed-ci        # builds a local file DB from drizzle/ + tests/fixtures
 npm run dev                # http://localhost:3000
 ```
 
 ## Commands
 
-| Command                           | What it does                                                               |
-| --------------------------------- | -------------------------------------------------------------------------- |
-| `npm run dev`                     | Start the dev server against `.env.local` (`file:./dev.db` by default)     |
-| `npm run build`                   | Production build (`next build`)                                            |
-| `npm run lint`                    | ESLint, zero warnings allowed                                              |
-| `npm run format` / `format:check` | Prettier write / check                                                     |
-| `npm run typecheck`               | `tsc --noEmit`                                                             |
-| `npm run test`                    | Vitest (unit + integration, per-test-file file DBs)                        |
-| `npm run test:coverage`           | Vitest with V8 coverage; thresholds enforced in `vitest.config.ts`         |
-| `npm run check`                   | lint + format:check + typecheck + test — the standard local gate           |
-| `npm run db:seed-ci`              | Rebuild `ci.db` from `drizzle/` migrations + `tests/fixtures/catalog.json` |
-| `npm run e2e`                     | Playwright against a built + seeded site (R3+)                             |
+| Command                                      | What it does                                                               |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `npm run dev`                                | Start the dev server against `.env.local` (`file:./dev.db` by default)     |
+| `npm run build`                              | Production build (`next build`)                                            |
+| `npm run lint`                               | ESLint, zero warnings allowed                                              |
+| `npm run format` / `format:check`            | Prettier write / check                                                     |
+| `npm run typecheck`                          | `tsc --noEmit`                                                             |
+| `npm run test`                               | Vitest (unit + integration, per-test-file file DBs)                        |
+| `npm run test:coverage`                      | Vitest with V8 coverage; thresholds enforced in `vitest.config.ts`         |
+| `npm run check`                              | lint + format:check + typecheck + test — the standard local gate           |
+| `npm run db:seed-ci`                         | Rebuild `ci.db` from `drizzle/` migrations + `tests/fixtures/catalog.json` |
+| `npm run e2e`                                | Playwright against a built + seeded site (image-budget test only until R3) |
+| `npx tsx scripts/sync-art-blob.ts --dry-run` | Print the `public/art/` → Blob upload plan; no token needed                |
 
 Full gate definitions: Spec §4.1. CI (`.github/workflows/ci.yml`) runs the same commands on every push to `main` and every PR.
 
@@ -57,10 +61,11 @@ src/components/     UI (collection/, trail/, map, chrome)
 src/lib/            Services: art-service, trail-service, trail-emails, mural-data, constants
 src/db/             Drizzle schema + client (Turso / file: DBs)
 drizzle/            Migration SQL, generated by drizzle-kit — never hand-edited
-scripts/            Data pipelines (art extraction/migration, CI seeding; blob sync arrives R2/R4)
+scripts/            Data pipelines (art extraction/migration, CI seeding, sync-art-blob.ts)
 tests/              Vitest suite — helpers/ (file-DB factory, fixture seeding), fixtures/, lib/
 docs/               Specification documents (agent-read-only; docs/intake/ = operator content drop zone)
-public/art/         Art images — gitignored; served from Vercel Blob in production (Architecture §6)
+public/art/         Art images — gitignored; source of truth for sync-art-blob.ts; served from Vercel
+                    Blob in deployed environments via artUrl() (src/lib/art-url.ts, Architecture §6)
 ```
 
 ## Brand at a glance

@@ -15,9 +15,11 @@
  */
 
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { SHOP_URL, GALLERY_ADDRESS } from '@/lib/constants';
 import { getCategoryCards } from '@/lib/art-service';
+import { artUrl } from '@/lib/art-url';
 
 export const metadata: Metadata = {
   title: 'by Rachel Pierce | Original Art on Sanibel Island',
@@ -304,23 +306,20 @@ export default async function HomePage() {
                 {/* Thumbnail image */}
                 <div
                   style={{
+                    position: 'relative',
                     height: '200px',
                     overflow: 'hidden',
                     backgroundColor: 'var(--color-teal-light)',
                   }}
                 >
                   {cat.thumbPath ? (
-                    // R2 (Spec §7) migrates this to next/image via artUrl(). DECISIONS.md 015.
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={`/art/${cat.thumbPath}`}
+                    <Image
+                      src={artUrl(cat.thumbPath)}
                       alt=""
+                      fill
                       loading="lazy"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
+                      sizes="(max-width: 520px) 100vw, (max-width: 768px) 50vw, 300px"
+                      style={{ objectFit: 'cover' }}
                     />
                   ) : (
                     <div
