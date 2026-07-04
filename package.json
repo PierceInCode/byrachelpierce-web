@@ -15,7 +15,8 @@
     "check": "npm run lint && npm run format:check && npm run typecheck && npm run test",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:migrate-art": "tsx scripts/migrate-art-data.ts"
+    "db:migrate-art": "tsx scripts/migrate-art-data.ts",
+    "db:seed-ci": "tsx scripts/seed-ci.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
