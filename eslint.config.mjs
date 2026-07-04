@@ -16,13 +16,6 @@ const eslintConfig = [
       'coverage/**',
     ],
   },
-  {
-    // R2 (Spec §7) migrates all artwork <img> usages to next/image via artUrl().
-    // Off until then so R0 doesn't half-implement R2's work. DECISIONS.md 015.
-    rules: {
-      '@next/next/no-img-element': 'off',
-    },
-  },
 ];
 
 export default eslintConfig;

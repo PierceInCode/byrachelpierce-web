@@ -28,6 +28,8 @@ export function ArtworkCard({ painting }: { painting: Painting }) {
         }}
       >
         {thumbSrc ? (
+          // R2 (Spec §7) migrates this to next/image via artUrl(). DECISIONS.md 015.
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbSrc}
             alt={painting.title}
