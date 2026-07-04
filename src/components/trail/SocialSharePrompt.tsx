@@ -45,9 +45,9 @@ export default function SocialSharePrompt() {
           marginInline: 'auto',
         }}
       >
-        Take a photo with each mural and share it on social media.
-        Tag <strong style={{ color: 'var(--color-teal)' }}>@byrachelpierce</strong> on
-        Instagram or Facebook — we love seeing your trail adventures!
+        Take a photo with each mural and share it on social media. Tag{' '}
+        <strong style={{ color: 'var(--color-teal)' }}>@byrachelpierce</strong> on Instagram or
+        Facebook — we love seeing your trail adventures!
       </p>
       <div
         style={{

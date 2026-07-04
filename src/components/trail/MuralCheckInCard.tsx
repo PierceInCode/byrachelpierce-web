@@ -58,9 +58,7 @@ export default function MuralCheckInCard({
         padding: '0.875rem 1rem',
         backgroundColor: isCheckedIn ? 'var(--color-teal-light)' : 'var(--color-white)',
         borderRadius: 'var(--radius-lg)',
-        border: isCheckedIn
-          ? '1px solid var(--color-teal)'
-          : '1px solid var(--color-border)',
+        border: isCheckedIn ? '1px solid var(--color-teal)' : '1px solid var(--color-border)',
         transition: 'all 200ms cubic-bezier(0.16,1,0.3,1)',
       }}
     >

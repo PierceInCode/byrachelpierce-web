@@ -36,7 +36,7 @@ export const SISTER_BUSINESSES: SisterBusiness[] = [
   {
     name: "Pierce's Paw Paradise",
     description:
-      'A beloved pet boutique on Sanibel featuring curated toys, treats, accessories, and Rachel\'s pet-inspired artwork.',
+      "A beloved pet boutique on Sanibel featuring curated toys, treats, accessories, and Rachel's pet-inspired artwork.",
     address: "Jerry's Plaza, Sanibel Island",
     url: 'https://www.piercespawparadise.com',
   },
@@ -62,6 +62,108 @@ export const COLLECTION_CATEGORIES = [
   { label: 'Watercolors', slug: 'watercolors' },
   { label: 'Line Art', slug: 'line-art' },
 ] as const;
+
+// ── Art Collection ──────────────────────────────────────────────────────────
+
+export const PAGE_SIZE = 24;
+
+/**
+ * Maps each marketing category slug to the database filters that define it.
+ * - `tags`: array of tag names from the tags table
+ * - `medium`: filter by paintings.medium column
+ * - `formatType`: filter by paintings.format_type column
+ */
+export const CATEGORY_TAG_MAP: Record<
+  string,
+  { tags?: string[]; medium?: string; formatType?: string }
+> = {
+  'beach-coastal': {
+    tags: ['Beach / shore', 'Ocean / open water', 'Sunset / sunrise', 'Dock / harbor'],
+  },
+  'sea-life': {
+    tags: [
+      // Sea Life - Animals
+      'Sea turtles',
+      'Dolphins',
+      'Manatees',
+      'Octopus',
+      'Seahorses',
+      'Jellyfish',
+      'Stingrays',
+      'Sharks',
+      // Sea Life - Fish
+      'Tropical / reef fish',
+      'Mahi-mahi',
+      'Tarpon',
+      'Snook',
+      'Black Drum',
+      'Barracuda',
+      'Amber Jack',
+      'Flounder',
+      'Mackerel',
+      'Permit',
+      'Pompano',
+      'Red Fish',
+      'Sea trout',
+      'Sheephead',
+      'Mullet',
+      'Other game fish',
+      'Lionfish',
+      // Sea Life - Elements
+      'Coral / reef',
+      'Shells',
+      'Starfish',
+      'Sea grass',
+    ],
+  },
+  'birds-wildlife': {
+    tags: [
+      // Birds
+      'Flamingos',
+      'Roseate spoonbills',
+      'Pelicans',
+      'Herons',
+      'Egrets',
+      'Parrots',
+      'Shorebirds',
+      'Owls',
+      'Birds of prey',
+      'Other birds',
+      // Wildlife / Other (non-whimsy ones)
+      'Dogs',
+      'Cats',
+      'Longhorn cattle',
+      'Other mammals',
+    ],
+  },
+  florals: {
+    tags: [
+      'Tropical flowers',
+      'Hibiscus',
+      'Plumeria',
+      'Mangroves',
+      'Sea oats / dune grass',
+      'Bougainvillea',
+      'Bird of Paradise',
+      'LillyOther plants',
+    ],
+  },
+  abstracts: {
+    formatType: 'Abstract',
+  },
+  'palm-trees': {
+    tags: ['Palm trees'],
+  },
+  'mermaids-whimsy': {
+    tags: ['Mermaids', 'Beach umbrellas / chairs', 'Lighthouses'],
+  },
+  watercolors: {
+    medium: 'Watercolor',
+  },
+  'line-art': {
+    formatType: 'Line art',
+  },
+};
 
 // ── Navigation ────────────────────────────────────────────────────────────
 

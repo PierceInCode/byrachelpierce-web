@@ -43,17 +43,42 @@ export type ArtworkCategory =
   | 'watercolors'
   | 'line-art';
 
-export interface Artwork {
-  id: string;
+export interface Painting {
+  id: number;
   title: string;
-  category: ArtworkCategory;
-  medium: string;
-  dimensions?: string;
-  /** Path relative to /public/images */
-  imagePath?: string;
-  available: boolean;
-  /** Link to Lightspeed product page */
-  shopUrl?: string;
+  slug: string;
+  medium: string | null;
+  formatType: string | null;
+  location: string | null;
+  physicalSize: string | null;
+  availability: string | null;
+  series: string | null;
+  notes: string | null;
+  widthPx: number | null;
+  heightPx: number | null;
+  orientation: string | null;
+  webImagePath: string | null;
+  thumbPath: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface PaintingWithTags extends Painting {
+  tags: { categoryName: string; tagName: string }[];
+}
+
+export interface CategoryCardData {
+  label: string;
+  slug: string;
+  count: number;
+  thumbPath: string | null;
+}
+
+export interface PaintingSearchParams {
+  q?: string;
+  medium?: string;
+  tags?: string;
+  page?: string;
 }
 
 // ── Sister Business ──────────────────────────────────────────────────

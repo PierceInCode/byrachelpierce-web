@@ -18,16 +18,11 @@
  *   - signIn / signOut: server-side sign-in/out helpers
  */
 
-import NextAuth from "next-auth";
-import Resend from "next-auth/providers/resend";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "@/db";
-import {
-  users,
-  accounts,
-  sessions,
-  verificationTokens,
-} from "@/db/schema";
+import NextAuth from 'next-auth';
+import Resend from 'next-auth/providers/resend';
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import { db } from '@/db';
+import { users, accounts, sessions, verificationTokens } from '@/db/schema';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   /**
@@ -55,7 +50,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      */
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY,
-      from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
+      from: process.env.EMAIL_FROM ?? 'onboarding@resend.dev',
       maxAge: 24 * 60 * 60, // 24 hours in seconds
     }),
   ],
@@ -66,7 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
    * providers — JWT-only sessions won't work with email sign-in.
    */
   session: {
-    strategy: "database",
+    strategy: 'database',
   },
 
   /**
@@ -97,6 +92,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      * trail page instead of the default Auth.js sign-in page.
      * The trail page has its own email form (EmailSignInForm).
      */
-    signIn: "/murals/trail",
+    signIn: '/murals/trail',
   },
 });

@@ -6,16 +6,25 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:migrate-art": "tsx scripts/migrate-art-data.ts",
+    "db:seed-ci": "tsx scripts/seed-ci.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
     "@libsql/client": "^0.17.0",
+    "@tailwindcss/postcss": "^4.2.1",
     "drizzle-orm": "^0.44.5",
     "leaflet": "^1.9.4",
-    "next": "15.3.6",
+    "next": "15.5.20",
     "next-auth": "5.0.0-beta.25",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -23,14 +32,22 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
+    "@testing-library/react": "^16.3.2",
     "@types/leaflet": "^1.9.8",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.9",
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.31.4",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^15.5.20",
+    "happy-dom": "^20.10.6",
     "postcss": "^8",
+    "prettier": "^3.9.4",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5"
+    "tsx": "^4.23.0",
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   }
 }

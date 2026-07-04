@@ -173,9 +173,13 @@ video {
 button,
 a,
 [role='button'] {
-  transition: color var(--transition-base), background-color var(--transition-base),
-    border-color var(--transition-base), box-shadow var(--transition-base),
-    opacity var(--transition-base), transform var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    opacity var(--transition-base),
+    transform var(--transition-base);
 }
 
 /* ── Minimum Touch Targets (WCAG 2.5.8) ─────────────────────────── */
@@ -231,6 +235,39 @@ nav a {
   transform: translateY(-3px) !important;
 }
 
+/* ── Home Category Grid (4 cols → 2 → 1) ────────────────────────── */
+@media (max-width: 900px) {
+  .home-category-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 520px) {
+  .home-category-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Collection Filter Layout ────────────────────────────────────── */
+.filter-toggle-mobile {
+  display: none !important;
+}
+
+.filter-drawer-mobile {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .filter-sidebar {
+    display: none !important;
+  }
+  .filter-toggle-mobile {
+    display: inline-flex !important;
+  }
+  .filter-drawer-mobile {
+    display: block !important;
+  }
+}
+
 /* ── Leaflet Map Styles ──────────────────────────────────────────── */
 /* Leaflet's own CSS (leaflet.css) is imported via JavaScript in MuralMap.tsx.
    We can't use @import in this file because Tailwind v4's @import 'tailwindcss'
@@ -269,8 +306,9 @@ nav a {
   border: 2.5px solid var(--color-white);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   cursor: pointer;
-  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
@@ -411,8 +449,13 @@ nav a {
 
 /* Pulse animation for loading state */
 @keyframes map-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .mural-map-loading-icon {

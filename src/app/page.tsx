@@ -16,7 +16,8 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { SHOP_URL, COLLECTION_CATEGORIES, GALLERY_ADDRESS } from '@/lib/constants';
+import { SHOP_URL, GALLERY_ADDRESS } from '@/lib/constants';
+import { getCategoryCards } from '@/lib/art-service';
 
 export const metadata: Metadata = {
   title: 'by Rachel Pierce | Original Art on Sanibel Island',
@@ -41,7 +42,8 @@ const btnPrimary: React.CSSProperties = {
   borderRadius: 'var(--radius-full)',
   textDecoration: 'none',
   minHeight: '48px',
-  transition: 'background-color 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
+  transition:
+    'background-color 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
   border: 'none',
   cursor: 'pointer',
 };
@@ -62,7 +64,8 @@ const btnSecondary: React.CSSProperties = {
   textDecoration: 'none',
   minHeight: '48px',
   border: '2px solid rgba(255,255,255,0.6)',
-  transition: 'border-color 180ms cubic-bezier(0.16,1,0.3,1), background-color 180ms cubic-bezier(0.16,1,0.3,1)',
+  transition:
+    'border-color 180ms cubic-bezier(0.16,1,0.3,1), background-color 180ms cubic-bezier(0.16,1,0.3,1)',
 };
 
 // ── External link icon ────────────────────────────────────────────────
@@ -89,26 +92,24 @@ function ExternalLinkIcon() {
   );
 }
 
-// ── Category visual data (teal gradient tones per category) ───────────
-
-const CATEGORY_GRADIENTS: Record<string, string> = {
-  'beach-coastal':    'linear-gradient(135deg, #e0f5fb 0%, #b3e6f2 100%)',
-  'sea-life':         'linear-gradient(135deg, #cce9f5 0%, #7ecde8 100%)',
-  'birds-wildlife':   'linear-gradient(135deg, #d4f0e8 0%, #88d5c2 100%)',
-  'florals':          'linear-gradient(135deg, #fde8e4 0%, #f7b8b0 100%)',
-  'abstracts':        'linear-gradient(135deg, #e8e4fd 0%, #c4b0f7 100%)',
-  'palm-trees':       'linear-gradient(135deg, #e4f8e0 0%, #a6dfa0 100%)',
-  'mermaids-whimsy':  'linear-gradient(135deg, #fde4f5 0%, #f0a8da 100%)',
-  'watercolors':      'linear-gradient(135deg, #e4f0fd 0%, #a8c8f0 100%)',
-  'line-art':         'linear-gradient(135deg, #f5f0e4 0%, #ddd0a8 100%)',
-};
-
-// Featured categories shown on homepage (subset)
-const FEATURED_CATEGORIES = COLLECTION_CATEGORIES.slice(0, 6);
+// Featured categories shown on homepage — first 8 to form two rows of 4
+const FEATURED_SLUGS = [
+  'beach-coastal',
+  'sea-life',
+  'birds-wildlife',
+  'florals',
+  'abstracts',
+  'palm-trees',
+  'mermaids-whimsy',
+  'watercolors',
+];
 
 // ── Homepage ──────────────────────────────────────────────────────────
 
-export default function HomePage() {
+export default async function HomePage() {
+  const allCategories = await getCategoryCards();
+  const featuredCategories = allCategories.filter((c) => FEATURED_SLUGS.includes(c.slug));
+
   return (
     <>
       {/* ════════════════════════════════════════════════════════════
@@ -193,26 +194,17 @@ export default function HomePage() {
                 maxWidth: '54ch',
               }}
             >
-              Rachel Pierce paints the soul of Sanibel — sea turtles, herons, florals,
-              and the light that makes this island unforgettable. Original works,
-              open-edition prints, and hand-painted murals.
+              Rachel Pierce paints the soul of Sanibel — sea turtles, herons, florals, and the light
+              that makes this island unforgettable. Original works, open-edition prints, and
+              hand-painted murals.
             </p>
 
             {/* CTAs */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-              <Link
-                href="/collection"
-                className="btn-primary"
-                style={btnPrimary}
-              >
+              <Link href="/collection" className="btn-primary" style={btnPrimary}>
                 Explore the Collection
               </Link>
-              <a
-                href={SHOP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={btnSecondary}
-              >
+              <a href={SHOP_URL} target="_blank" rel="noopener noreferrer" style={btnSecondary}>
                 Visit Our Store <ExternalLinkIcon />
               </a>
             </div>
@@ -283,15 +275,16 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Category grid */}
+          {/* Category grid — 4 columns on desktop, 2 on tablet, 1 on mobile */}
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+              gridTemplateColumns: 'repeat(4, 1fr)',
               gap: '1.25rem',
             }}
+            className="home-category-grid"
           >
-            {FEATURED_CATEGORIES.map((cat) => (
+            {featuredCategories.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/collection/${cat.slug}`}
@@ -304,37 +297,50 @@ export default function HomePage() {
                   textDecoration: 'none',
                   boxShadow: 'var(--shadow-sm)',
                   border: '1px solid var(--color-border)',
-                  transition: 'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
+                  transition:
+                    'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
                 }}
               >
-                {/* Placeholder image area */}
+                {/* Thumbnail image */}
                 <div
                   style={{
                     height: '200px',
-                    background: CATEGORY_GRADIENTS[cat.slug] ?? 'var(--color-teal-light)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--color-teal-light)',
                   }}
-                  aria-hidden="true"
                 >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-heading)',
-                      fontSize: 'var(--text-sm)',
-                      color: 'rgba(80,110,130,0.5)',
-                      fontStyle: 'italic',
-                    }}
-                  >
-                    {cat.label}
-                  </span>
+                  {cat.thumbPath ? (
+                    // R2 (Spec §7) migrates this to next/image via artUrl(). DECISIONS.md 015.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={`/art/${cat.thumbPath}`}
+                      alt=""
+                      loading="lazy"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="img-placeholder"
+                      style={{ width: '100%', height: '100%' }}
+                      aria-hidden="true"
+                    >
+                      {cat.label}
+                    </div>
+                  )}
                 </div>
 
-                {/* Card label */}
+                {/* Card label + count */}
                 <div
                   style={{
                     padding: '1rem 1.25rem',
                     backgroundColor: 'var(--color-white)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
                 >
                   <h3
@@ -348,6 +354,19 @@ export default function HomePage() {
                   >
                     {cat.label}
                   </h3>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-nav)',
+                      fontSize: '11px',
+                      color: 'var(--color-teal)',
+                      backgroundColor: 'var(--color-teal-light)',
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: 'var(--radius-full)',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {cat.count}
+                  </span>
                 </div>
               </Link>
             ))}
@@ -426,10 +445,10 @@ export default function HomePage() {
                   marginBottom: '1rem',
                 }}
               >
-                Rachel Pierce traded the camera for a paintbrush — and Sanibel Island
-                became her muse. A former television on-air personality, Rachel now
-                channels her expressive energy into vivid, joyful paintings that
-                capture the light, color, and life of Southwest Florida.
+                Rachel Pierce traded the camera for a paintbrush — and Sanibel Island became her
+                muse. A former television on-air personality, Rachel now channels her expressive
+                energy into vivid, joyful paintings that capture the light, color, and life of
+                Southwest Florida.
               </p>
               <p
                 style={{
@@ -440,8 +459,8 @@ export default function HomePage() {
                   marginBottom: '2rem',
                 }}
               >
-                Her gallery at 1571 Periwinkle Way is a destination — filled with
-                original works, prints, and the stories behind every piece.
+                Her gallery at 1571 Periwinkle Way is a destination — filled with original works,
+                prints, and the stories behind every piece.
               </p>
               <Link
                 href="/story"
@@ -542,16 +561,12 @@ export default function HomePage() {
                   maxWidth: '52ch',
                 }}
               >
-                Rachel has painted 14 large-scale murals across Sanibel Island.
-                Follow the trail, snap your selfie, and discover each piece of
-                outdoor art that has become part of the island&apos;s identity.
+                Rachel has painted 14 large-scale murals across Sanibel Island. Follow the trail,
+                snap your selfie, and discover each piece of outdoor art that has become part of the
+                island&apos;s identity.
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                <Link
-                  href="/murals/trail"
-                  className="btn-primary"
-                  style={btnPrimary}
-                >
+                <Link href="/murals/trail" className="btn-primary" style={btnPrimary}>
                   Explore the Trail
                 </Link>
                 <Link href="/murals" style={btnSecondary}>
@@ -663,9 +678,8 @@ export default function HomePage() {
               marginInline: 'auto',
             }}
           >
-            Original paintings, open-edition prints, and gift-ready works —
-            available through our Lightspeed store with secure checkout and
-            shipping to your door.
+            Original paintings, open-edition prints, and gift-ready works — available through our
+            Lightspeed store with secure checkout and shipping to your door.
           </p>
           <div
             style={{

@@ -24,10 +24,20 @@ import { MURAL_LOCATIONS } from '@/lib/mural-data';
 import type { TrailProgress } from '@/types';
 
 // ── Resend Client ────────────────────────────────────────────────────
-// Instantiate once at module level (like a singleton DI registration).
-// The API key is read from env — Resend's constructor handles this.
+// Lazily instantiated on first send, not at module load — CI and build
+// (Next.js "Collecting page data") import this module with no
+// RESEND_API_KEY set (Invariant 4), and the Resend constructor throws
+// immediately if the key is missing. Constructing only when a send
+// function actually runs keeps the module import itself side-effect-free.
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
 /** The "from" address for all trail emails */
 const FROM_ADDRESS = process.env.EMAIL_FROM || 'onboarding@resend.dev';
@@ -49,10 +59,10 @@ const GALLERY_EMAIL = process.env.GALLERY_EMAIL || 'matthew@pierceincode.com';
  */
 export async function sendRedemptionEmail(
   email: string,
-  redemptionCode: string
+  redemptionCode: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResendClient().emails.send({
       from: `Rachel Pierce Art Gallery <${FROM_ADDRESS}>`,
       to: [email],
       subject: '🎉 You completed the Sanibel Mural Trail!',
@@ -80,10 +90,10 @@ export async function sendRedemptionEmail(
  * @param progress - The user's full trail progress (includes email, code, check-ins)
  */
 export async function sendGalleryNotification(
-  progress: TrailProgress
+  progress: TrailProgress,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResendClient().emails.send({
       from: `Mural Trail System <${FROM_ADDRESS}>`,
       to: [GALLERY_EMAIL],
       subject: `Mural Trail completed — ${progress.redemptionCode}`,

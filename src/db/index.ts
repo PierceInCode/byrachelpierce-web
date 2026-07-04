@@ -13,9 +13,9 @@
  *   const rows = await db.select().from(users);
  */
 
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
-import * as schema from "./schema";
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
+import * as schema from './schema';
 
 /**
  * createClient() opens a persistent HTTP connection to your Turso

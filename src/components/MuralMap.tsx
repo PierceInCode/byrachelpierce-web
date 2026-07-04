@@ -49,7 +49,7 @@ interface MuralMapProps {
 
 // ─── Component ─────────────────────────────────────────────────────────────────────
 
-export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps) {
+export default function MuralMap({ onMuralClick }: MuralMapProps) {
   // useRef holds a reference to a DOM element across renders without triggering re-renders.
   // In C# terms, think of it as storing a pointer to the <div> that Leaflet will take over.
   // The generic type parameter <HTMLDivElement | null> means it starts as null and
@@ -97,7 +97,8 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
   // and check token.IsCancellationRequested after each await. Same concept, different syntax.
   useEffect(() => {
     // Guard: if the container div doesn't exist yet (shouldn't happen, but defensive coding).
-    if (!mapContainerRef.current) return;
+    const container = mapContainerRef.current;
+    if (!container) return;
 
     // ── Cancellation flag ───────────────────────────────────────────────────
     // This variable is captured by closure in both the async IIFE and the cleanup function.
@@ -168,22 +169,19 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
         // CartoDB Voyager is a free, no-API-key-required tile set that looks clean and
         // modern. The URL template uses {s} (subdomain), {z} (zoom), {x}/{y} (tile coords).
         // Leaflet fills these in automatically as the user pans and zooms.
-        L.tileLayer(
-          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-          {
-            // Attribution is legally required by OpenStreetMap's license (ODbL).
-            // Leaflet displays this text in the bottom-right corner of the map.
-            attribution:
-              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            // The tile provider supports 4 subdomains (a, b, c, d) for load balancing.
-            // Browsers limit concurrent requests per domain, so using multiple subdomains
-            // lets the browser fetch tiles in parallel — faster map loading.
-            subdomains: 'abcd',
-            // Maximum native zoom the tile set supports. Beyond this, Leaflet upscales.
-            maxNativeZoom: 19,
-            maxZoom: 22,
-          }
-        ).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          // Attribution is legally required by OpenStreetMap's license (ODbL).
+          // Leaflet displays this text in the bottom-right corner of the map.
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          // The tile provider supports 4 subdomains (a, b, c, d) for load balancing.
+          // Browsers limit concurrent requests per domain, so using multiple subdomains
+          // lets the browser fetch tiles in parallel — faster map loading.
+          subdomains: 'abcd',
+          // Maximum native zoom the tile set supports. Beyond this, Leaflet upscales.
+          maxNativeZoom: 19,
+          maxZoom: 22,
+        }).addTo(map);
 
         // ── Add Markers for Each Mural ─────────────────────────────────────
         //
@@ -234,9 +232,7 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
 
           // Build the year badge HTML — only if the mural has a year recorded.
           // The conditional expression (ternary) works just like C#'s ternary operator.
-          const yearBadge = mural.year
-            ? `<span class="mural-popup-year">${mural.year}</span>`
-            : '';
+          const yearBadge = mural.year ? `<span class="mural-popup-year">${mural.year}</span>` : '';
 
           // Build the description paragraph — only if a description exists.
           const descriptionHtml = mural.description
@@ -330,11 +326,10 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
           if (bounds.isValid()) {
             map.fitBounds(bounds, {
               padding: [40, 40], // [top/bottom pixels, left/right pixels]
-              maxZoom: 13,       // Don't zoom in too close — murals span ~11km across Sanibel
+              maxZoom: 13, // Don't zoom in too close — murals span ~11km across Sanibel
             });
           }
         });
-
       } catch (err) {
         // ── Handle errors, but only for the "active" effect ──────────────────
         // If this effect invocation was already cancelled (Strict Mode unmounted us),
@@ -384,18 +379,16 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
 
       // Clear Leaflet's ownership stamp so a subsequent L.map() call
       // (from Strict Mode re-mount) treats the container as fresh.
-      if (mapContainerRef.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        delete (mapContainerRef.current as any)._leaflet_id;
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (container as any)._leaflet_id;
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     // We intentionally omit onMuralClick from the dependency array.
     // It's captured at mount time. Re-initializing the map every time a callback
     // reference changes would cause the map to flash/rebuild unnecessarily.
     // If this were a production app with frequent callback changes, we'd use
     // a ref-wrapped callback instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // ← empty array = "run once on mount"
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -490,7 +483,9 @@ export default function MuralMap({ activeMuralId, onMuralClick }: MuralMapProps)
             borderRadius: 'var(--radius-xl)',
           }}
         >
-          <div className="mural-map-loading-icon" aria-hidden="true">🗺️</div>
+          <div className="mural-map-loading-icon" aria-hidden="true">
+            🗺️
+          </div>
           <p className="mural-map-loading-text">LOADING MAP</p>
         </div>
       )}

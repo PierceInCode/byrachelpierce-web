@@ -81,8 +81,8 @@ export default function CrossSellModule({ backgroundColor }: CrossSellModuleProp
               marginInline: 'auto',
             }}
           >
-            Rachel&apos;s creative spirit extends beyond the canvas — discover her
-            other beloved Sanibel ventures.
+            Rachel&apos;s creative spirit extends beyond the canvas — discover her other beloved
+            Sanibel ventures.
           </p>
         </div>
 
@@ -111,7 +111,8 @@ export default function CrossSellModule({ backgroundColor }: CrossSellModuleProp
                 boxShadow: 'var(--shadow-sm)',
                 border: '1px solid rgba(54,181,205,0.15)',
                 textDecoration: 'none',
-                transition: 'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
+                transition:
+                  'box-shadow 180ms cubic-bezier(0.16,1,0.3,1), transform 180ms cubic-bezier(0.16,1,0.3,1)',
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLAnchorElement;

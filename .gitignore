@@ -40,5 +40,8 @@ public/art/
 *.db-journal
 backups/
 
+# Vitest coverage output
+coverage/
+
 # Claude Code local (per-machine) settings — the shared harness IS committed
 .claude/settings.local.json

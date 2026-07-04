@@ -56,8 +56,8 @@ export default function ContactPage() {
               lineHeight: 1.65,
             }}
           >
-            Questions about a piece, custom commission inquiries, press requests, or
-            just want to say hello — we&apos;d love to hear from you.
+            Questions about a piece, custom commission inquiries, press requests, or just want to
+            say hello — we&apos;d love to hear from you.
           </p>
         </div>
       </section>
@@ -118,9 +118,8 @@ export default function ContactPage() {
                   marginBottom: '2rem',
                 }}
               >
-                A contact form with email integration is under construction. In the
-                meantime, reach Rachel directly through social media or visit the
-                gallery on Periwinkle Way.
+                A contact form with email integration is under construction. In the meantime, reach
+                Rachel directly through social media or visit the gallery on Periwinkle Way.
               </p>
 
               {/* Form mockup (visual placeholder) */}

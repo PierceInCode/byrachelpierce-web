@@ -116,11 +116,14 @@ export default function EmailSignInForm({ onEmailSent }: EmailSignInFormProps) {
           margin: '0 0 1.25rem',
         }}
       >
-        Enter your email to start tracking your mural visits. We&apos;ll send you a magic link —
-        no password needed.
+        Enter your email to start tracking your mural visits. We&apos;ll send you a magic link — no
+        password needed.
       </p>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
+      >
         <label
           htmlFor="trail-email"
           style={{
@@ -208,8 +211,8 @@ export default function EmailSignInForm({ onEmailSent }: EmailSignInFormProps) {
           lineHeight: 1.5,
         }}
       >
-        We only use your email for the trail — no spam, no marketing. Your progress
-        is saved so you can come back anytime.
+        We only use your email for the trail — no spam, no marketing. Your progress is saved so you
+        can come back anytime.
       </p>
     </div>
   );

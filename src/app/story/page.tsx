@@ -150,35 +150,34 @@ export default function StoryPage() {
               </h2>
 
               <p style={bodyParagraph}>
-                Before she was known across Sanibel for her vivid paintings of sea turtles,
-                roseate spoonbills, and tropical florals, Rachel Pierce was a familiar face
-                on television. As an on-air talent, she spent years in front of the camera —
-                learning how to tell stories, connect with audiences, and convey emotion
-                in an instant.
+                Before she was known across Sanibel for her vivid paintings of sea turtles, roseate
+                spoonbills, and tropical florals, Rachel Pierce was a familiar face on television.
+                As an on-air talent, she spent years in front of the camera — learning how to tell
+                stories, connect with audiences, and convey emotion in an instant.
               </p>
               <p style={bodyParagraph}>
-                That same instinct for storytelling found a new home when Rachel made
-                the leap to full-time artist. She settled on Sanibel Island — a place
-                of extraordinary natural beauty, famous for its shelling beaches,
-                wildlife refuges, and unhurried pace — and never looked back.
+                That same instinct for storytelling found a new home when Rachel made the leap to
+                full-time artist. She settled on Sanibel Island — a place of extraordinary natural
+                beauty, famous for its shelling beaches, wildlife refuges, and unhurried pace — and
+                never looked back.
               </p>
               <p style={bodyParagraph}>
                 &ldquo;Sanibel gave me permission to slow down and really look,&rdquo; Rachel says.
-                &ldquo;Every sea turtle, every heron, every late-afternoon light on the Gulf — 
-                it all demands to be painted.&rdquo;
+                &ldquo;Every sea turtle, every heron, every late-afternoon light on the Gulf — it
+                all demands to be painted.&rdquo;
               </p>
               <p style={bodyParagraph}>
-                Her work is unmistakably hers: bold color, confident line, and a joyful
-                energy that makes even a quiet beach scene feel alive. Rachel paints in
-                a range of media — acrylic, watercolor, mixed media — and her subjects
-                span the full breadth of island life: sea life, birds, florals,
-                mermaids, palm trees, and the abstract play of light on water.
+                Her work is unmistakably hers: bold color, confident line, and a joyful energy that
+                makes even a quiet beach scene feel alive. Rachel paints in a range of media —
+                acrylic, watercolor, mixed media — and her subjects span the full breadth of island
+                life: sea life, birds, florals, mermaids, palm trees, and the abstract play of light
+                on water.
               </p>
               <p style={{ ...bodyParagraph, marginBottom: 0 }}>
                 She is also the creative force behind two sister businesses on Periwinkle Way:
-                Pierce&apos;s Paw Paradise, a beloved pet boutique, and Home by Rachel Pierce,
-                a coastal home goods and décor shop — each reflecting her signature aesthetic
-                and love for the Sanibel lifestyle.
+                Pierce&apos;s Paw Paradise, a beloved pet boutique, and Home by Rachel Pierce, a
+                coastal home goods and décor shop — each reflecting her signature aesthetic and love
+                for the Sanibel lifestyle.
               </p>
             </div>
           </div>
@@ -222,13 +221,13 @@ export default function StoryPage() {
                 1571 Periwinkle Way
               </h2>
               <p style={bodyParagraph}>
-                The by Rachel Pierce gallery sits at the heart of Sanibel&apos;s arts
-                corridor on Periwinkle Way. It&apos;s more than a shop — it&apos;s an
-                immersive environment where every wall tells a story.
+                The by Rachel Pierce gallery sits at the heart of Sanibel&apos;s arts corridor on
+                Periwinkle Way. It&apos;s more than a shop — it&apos;s an immersive environment
+                where every wall tells a story.
               </p>
               <p style={{ ...bodyParagraph, marginBottom: '2rem' }}>
-                Walk in to see original works, browse open-edition prints, find gifts
-                that capture the island spirit, and meet the artist herself on many days.
+                Walk in to see original works, browse open-edition prints, find gifts that capture
+                the island spirit, and meet the artist herself on many days.
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.875rem' }}>
                 <Link
@@ -271,7 +270,8 @@ export default function StoryPage() {
                     border: '2px solid var(--color-teal)',
                     textDecoration: 'none',
                     minHeight: '44px',
-                    transition: 'background-color 180ms cubic-bezier(0.16,1,0.3,1), color 180ms cubic-bezier(0.16,1,0.3,1)',
+                    transition:
+                      'background-color 180ms cubic-bezier(0.16,1,0.3,1), color 180ms cubic-bezier(0.16,1,0.3,1)',
                   }}
                 >
                   Shop Online ↗
@@ -375,10 +375,9 @@ export default function StoryPage() {
                 marginBottom: '1.25rem',
               }}
             >
-              Rachel has left her mark on Sanibel in the most literal way possible —
-              with 14 large-scale murals scattered across the island. From the seafront
-              at the Lighthouse to the storefronts of Periwinkle Way, her outdoor works
-              have become beloved landmarks.
+              Rachel has left her mark on Sanibel in the most literal way possible — with 14
+              large-scale murals scattered across the island. From the seafront at the Lighthouse to
+              the storefronts of Periwinkle Way, her outdoor works have become beloved landmarks.
             </p>
             <p
               style={{
@@ -389,8 +388,8 @@ export default function StoryPage() {
                 marginBottom: '2rem',
               }}
             >
-              Follow the Sanibel Mural Selfie Trail to visit every location, learn
-              the story behind each piece, and collect your mural selfies.
+              Follow the Sanibel Mural Selfie Trail to visit every location, learn the story behind
+              each piece, and collect your mural selfies.
             </p>
             <div
               style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem' }}
@@ -478,9 +477,8 @@ export default function StoryPage() {
                 marginBottom: '2rem',
               }}
             >
-              Rachel&apos;s work and story have been featured in local and regional media
-              across Southwest Florida. Visit the Press page for coverage, interviews,
-              and media resources.
+              Rachel&apos;s work and story have been featured in local and regional media across
+              Southwest Florida. Visit the Press page for coverage, interviews, and media resources.
             </p>
             <Link
               href="/press"

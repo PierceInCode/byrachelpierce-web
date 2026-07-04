@@ -22,8 +22,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.4468597,
     lng: -82.0409293,
     radius: 150,
-    description:
-      'A vibrant sea turtle mural celebrating the nesting turtles of Sanibel\'s shores.',
+    description: "A vibrant sea turtle mural celebrating the nesting turtles of Sanibel's shores.",
     year: 2019,
   },
   {
@@ -57,7 +56,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.4315721,
     lng: -82.0517195,
     radius: 150,
-    description: 'Lush tropical blooms in Rachel\'s signature vivid palette.',
+    description: "Lush tropical blooms in Rachel's signature vivid palette.",
     year: 2021,
   },
   {
@@ -68,8 +67,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.4441864,
     lng: -82.0467407,
     radius: 150,
-    description:
-      'A whimsical mermaid encircled by sea glass, shells, and island magic.',
+    description: 'A whimsical mermaid encircled by sea glass, shells, and island magic.',
     year: 2021,
   },
   {
@@ -80,8 +78,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.4422593,
     lng: -82.0582572,
     radius: 150,
-    description:
-      'A stately great blue heron standing in the stillness of a tidal flat.',
+    description: 'A stately great blue heron standing in the stillness of a tidal flat.',
     year: 2019,
   },
   {
@@ -92,8 +89,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.4418806,
     lng: -82.0557876,
     radius: 150,
-    description:
-      'The historic Sanibel Lighthouse bathed in watercolor sunrise hues.',
+    description: 'The historic Sanibel Lighthouse bathed in watercolor sunrise hues.',
     year: 2022,
   },
   {
@@ -104,8 +100,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.438531,
     lng: -82.066615,
     radius: 150,
-    description:
-      'Swaying palms and a turquoise sky \u2014 pure Sanibel in every brushstroke.',
+    description: 'Swaying palms and a turquoise sky \u2014 pure Sanibel in every brushstroke.',
     year: 2022,
   },
   {
@@ -133,7 +128,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
   {
     id: 11,
     // TODO: Replace with actual mural name
-    name: 'Osprey\'s Catch',
+    name: "Osprey's Catch",
     address: 'Shalimar Beach Resort, 2823 W. Gulf Dr, Sanibel, FL 33957',
     lat: 26.4230609,
     lng: -82.0884098,
@@ -149,8 +144,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.4259448,
     lng: -82.0892634,
     radius: 150,
-    description:
-      'The intricate root systems of Sanibel\'s mangroves in jewel-toned color.',
+    description: "The intricate root systems of Sanibel's mangroves in jewel-toned color.",
     year: 2024,
   },
   {
@@ -161,8 +155,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.450358,
     lng: -82.129249,
     radius: 150,
-    description:
-      'The beloved "Sanibel stoop" \u2014 collectors bending for shells at golden hour.',
+    description: 'The beloved "Sanibel stoop" \u2014 collectors bending for shells at golden hour.',
     year: 2024,
   },
   {
@@ -173,8 +166,7 @@ export const MURAL_LOCATIONS: MuralLocation[] = [
     lat: 26.4653901,
     lng: -82.1522022,
     radius: 150,
-    description:
-      'A flock of flamingos in Rachel\'s most colorful, celebratory style.',
+    description: "A flock of flamingos in Rachel's most colorful, celebratory style.",
     year: 2024,
   },
 ];

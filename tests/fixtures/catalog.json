@@ -1,0 +1,1342 @@
+{
+  "paintings": [
+    {
+      "sourceId": 203,
+      "title": "Matthew's Turtle",
+      "slug": "matthews-turtle",
+      "medium": "Acrylic on canvas",
+      "formatType": "Abstract",
+      "location": "Sanibel Island",
+      "physicalSize": null,
+      "availability": "Sold - prints available",
+      "series": null,
+      "notes": null,
+      "widthPx": 5323,
+      "heightPx": 2639,
+      "orientation": "Landscape",
+      "webImagePath": "web/matthews-turtle-7bb2b9a6.jpg",
+      "thumbPath": "thumbs/matthews-turtle-7bb2b9a6.jpg",
+      "createdAt": "2026-03-17 02:29:22",
+      "updatedAt": "2026-03-17 04:25:25"
+    },
+    {
+      "sourceId": 1,
+      "title": "ABirder'sDream",
+      "slug": "abirdersdream",
+      "medium": "Watercolor",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 7273,
+      "heightPx": 3118,
+      "orientation": "Landscape",
+      "webImagePath": "web/abirdersdream-88fc976a.jpg",
+      "thumbPath": "thumbs/abirdersdream-88fc976a.jpg",
+      "createdAt": "2026-03-17 02:25:22",
+      "updatedAt": "2026-03-17 02:25:22"
+    },
+    {
+      "sourceId": 2,
+      "title": "A Colorful Crowd Product",
+      "slug": "a-colorful-crowd_product",
+      "medium": "Acrylic on canvas",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 5362,
+      "heightPx": 5340,
+      "orientation": "Square",
+      "webImagePath": "web/a-colorful-crowd_product-b593edaa.jpg",
+      "thumbPath": "thumbs/a-colorful-crowd_product-b593edaa.jpg",
+      "createdAt": "2026-03-17 02:25:23",
+      "updatedAt": "2026-03-17 02:25:23"
+    },
+    {
+      "sourceId": 12,
+      "title": "All These Cats",
+      "slug": "all-these-cats",
+      "medium": "Mixed media",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 6250,
+      "heightPx": 4993,
+      "orientation": "Landscape",
+      "webImagePath": "web/all-these-cats-92013000.jpg",
+      "thumbPath": "thumbs/all-these-cats-92013000.jpg",
+      "createdAt": "2026-03-17 02:25:42",
+      "updatedAt": "2026-03-17 02:25:42"
+    },
+    {
+      "sourceId": 281,
+      "title": "SEA WATER 2",
+      "slug": "sea-water-2",
+      "medium": "Oil on canvas",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 6217,
+      "heightPx": 3872,
+      "orientation": "Landscape",
+      "webImagePath": "web/sea-water-2-fdd484a8.jpg",
+      "thumbPath": "thumbs/sea-water-2-fdd484a8.jpg",
+      "createdAt": "2026-03-17 02:30:58",
+      "updatedAt": "2026-03-17 02:30:58"
+    },
+    {
+      "sourceId": 17,
+      "title": "Baily Truck",
+      "slug": "baily-truck",
+      "medium": "Watercolor",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 2270,
+      "heightPx": 2281,
+      "orientation": "Square",
+      "webImagePath": "web/baily-truck-44b67ec7.jpg",
+      "thumbPath": "thumbs/baily-truck-44b67ec7.jpg",
+      "createdAt": "2026-03-17 02:25:47",
+      "updatedAt": "2026-03-17 02:25:47"
+    },
+    {
+      "sourceId": 3,
+      "title": "A Pair of Roseates",
+      "slug": "a-pair-of-roseates",
+      "medium": "Acrylic on canvas",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 2337,
+      "heightPx": 2336,
+      "orientation": "Square",
+      "webImagePath": "web/a-pair-of-roseates-62e4783d.jpg",
+      "thumbPath": "thumbs/a-pair-of-roseates-62e4783d.jpg",
+      "createdAt": "2026-03-17 02:25:23",
+      "updatedAt": "2026-03-17 02:25:23"
+    },
+    {
+      "sourceId": 30,
+      "title": "Black and Yellow Underwater",
+      "slug": "black-and-yellow-underwater",
+      "medium": "Mixed media",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 7780,
+      "heightPx": 3813,
+      "orientation": "Landscape",
+      "webImagePath": "web/black-and-yellow-underwater-8d211bc1.jpg",
+      "thumbPath": "thumbs/black-and-yellow-underwater-8d211bc1.jpg",
+      "createdAt": "2026-03-17 02:26:07",
+      "updatedAt": "2026-03-17 02:26:07"
+    },
+    {
+      "sourceId": 4,
+      "title": "A Surprise Guest",
+      "slug": "a-surprise-guest",
+      "medium": "Acrylic on canvas",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 7377,
+      "heightPx": 4918,
+      "orientation": "Landscape",
+      "webImagePath": "web/a-surprise-guest-dc392d75.jpg",
+      "thumbPath": "thumbs/a-surprise-guest-dc392d75.jpg",
+      "createdAt": "2026-03-17 02:25:25",
+      "updatedAt": "2026-03-17 02:25:25"
+    },
+    {
+      "sourceId": 41,
+      "title": "Blue Stars",
+      "slug": "blue-stars",
+      "medium": "Mixed media",
+      "formatType": "Abstract",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 2584,
+      "heightPx": 1618,
+      "orientation": "Landscape",
+      "webImagePath": "web/blue-stars-4e58eb10.jpg",
+      "thumbPath": "thumbs/blue-stars-4e58eb10.jpg",
+      "createdAt": "2026-03-17 02:26:15",
+      "updatedAt": "2026-03-17 02:26:15"
+    },
+    {
+      "sourceId": 21,
+      "title": "Beach Palms 2",
+      "slug": "beach-palms-2",
+      "medium": "Watercolor",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 6299,
+      "heightPx": 4195,
+      "orientation": "Landscape",
+      "webImagePath": "web/beach-palms-2-e36f5af2.jpg",
+      "thumbPath": "thumbs/beach-palms-2-e36f5af2.jpg",
+      "createdAt": "2026-03-17 02:25:57",
+      "updatedAt": "2026-03-17 02:25:57"
+    },
+    {
+      "sourceId": 5,
+      "title": "A Vision of Paradise",
+      "slug": "a-vision-of-paradise_300dpi",
+      "medium": "Acrylic on canvas",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 1982,
+      "heightPx": 2992,
+      "orientation": "Portrait",
+      "webImagePath": "web/a-vision-of-paradise_300dpi-6a77a69a.jpg",
+      "thumbPath": "thumbs/a-vision-of-paradise_300dpi-6a77a69a.jpg",
+      "createdAt": "2026-03-17 02:25:26",
+      "updatedAt": "2026-03-17 12:41:06"
+    },
+    {
+      "sourceId": 46,
+      "title": "Dogs and Cards",
+      "slug": "dogs_and_cards",
+      "medium": "Mixed media",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 6083,
+      "heightPx": 4594,
+      "orientation": "Landscape",
+      "webImagePath": "web/dogs_and_cards-19e24347.jpg",
+      "thumbPath": "thumbs/dogs_and_cards-19e24347.jpg",
+      "createdAt": "2026-03-17 02:26:22",
+      "updatedAt": "2026-03-17 02:26:22"
+    },
+    {
+      "sourceId": 25,
+      "title": "BeyondTheWalls 01",
+      "slug": "beyondthewalls_01",
+      "medium": "Watercolor",
+      "formatType": "Line art",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 4250,
+      "heightPx": 2428,
+      "orientation": "Landscape",
+      "webImagePath": "web/beyondthewalls_01-4fc0228b.jpg",
+      "thumbPath": "thumbs/beyondthewalls_01-4fc0228b.jpg",
+      "createdAt": "2026-03-17 02:25:59",
+      "updatedAt": "2026-03-17 02:25:59"
+    },
+    {
+      "sourceId": 6,
+      "title": "A Window To The Reef 1",
+      "slug": "a-window-to-the-reef_1",
+      "medium": "Acrylic on canvas",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 3697,
+      "heightPx": 7481,
+      "orientation": "Portrait",
+      "webImagePath": "web/a-window-to-the-reef_1-e35b0960.jpg",
+      "thumbPath": "thumbs/a-window-to-the-reef_1-e35b0960.jpg",
+      "createdAt": "2026-03-17 02:25:29",
+      "updatedAt": "2026-03-17 02:25:29"
+    },
+    {
+      "sourceId": 74,
+      "title": "Courageous Turtle",
+      "slug": "courageous-turtle",
+      "medium": "Mixed media",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 6669,
+      "heightPx": 4381,
+      "orientation": "Landscape",
+      "webImagePath": "web/courageous-turtle-5d92190f.jpg",
+      "thumbPath": "thumbs/courageous-turtle-5d92190f.jpg",
+      "createdAt": "2026-03-17 02:26:54",
+      "updatedAt": "2026-03-17 02:26:54"
+    },
+    {
+      "sourceId": 26,
+      "title": "Birds Heading to NYC",
+      "slug": "birds-heading-to-nyc",
+      "medium": "Watercolor",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 3846,
+      "heightPx": 2546,
+      "orientation": "Landscape",
+      "webImagePath": "web/birds-heading-to-nyc-0715f328.jpg",
+      "thumbPath": "thumbs/birds-heading-to-nyc-0715f328.jpg",
+      "createdAt": "2026-03-17 02:25:59",
+      "updatedAt": "2026-03-17 02:25:59"
+    },
+    {
+      "sourceId": 7,
+      "title": "A Window To The Reef 2",
+      "slug": "a-window-to-the-reef_2",
+      "medium": "Acrylic on canvas",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 3660,
+      "heightPx": 7435,
+      "orientation": "Portrait",
+      "webImagePath": "web/a-window-to-the-reef_2-c63db3c0.jpg",
+      "thumbPath": "thumbs/a-window-to-the-reef_2-c63db3c0.jpg",
+      "createdAt": "2026-03-17 02:25:32",
+      "updatedAt": "2026-03-17 02:25:32"
+    },
+    {
+      "sourceId": 85,
+      "title": "Deep Water Sea Turtle",
+      "slug": "deep-water-sea-turtle",
+      "medium": "Mixed media",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 7766,
+      "heightPx": 5159,
+      "orientation": "Landscape",
+      "webImagePath": "web/deep-water-sea-turtle-c4f9c9f7.jpg",
+      "thumbPath": "thumbs/deep-water-sea-turtle-c4f9c9f7.jpg",
+      "createdAt": "2026-03-17 02:27:08",
+      "updatedAt": "2026-03-17 02:27:08"
+    },
+    {
+      "sourceId": 28,
+      "title": "Birds of Paradise",
+      "slug": "birds-of-paradise",
+      "medium": "Watercolor",
+      "formatType": "Original painting",
+      "location": null,
+      "physicalSize": null,
+      "availability": null,
+      "series": null,
+      "notes": null,
+      "widthPx": 8700,
+      "heightPx": 5400,
+      "orientation": "Landscape",
+      "webImagePath": "web/birds-of-paradise-1d8c43e7.jpg",
+      "thumbPath": "thumbs/birds-of-paradise-1d8c43e7.jpg",
+      "createdAt": "2026-03-17 02:26:05",
+      "updatedAt": "2026-03-17 02:26:05"
+    }
+  ],
+  "tagCategories": [
+    {
+      "id": 1,
+      "name": "Scene / Setting",
+      "sort_order": 0
+    },
+    {
+      "id": 2,
+      "name": "Birds",
+      "sort_order": 1
+    },
+    {
+      "id": 3,
+      "name": "Sea Life - Animals",
+      "sort_order": 2
+    },
+    {
+      "id": 4,
+      "name": "Sea Life - Fish",
+      "sort_order": 3
+    },
+    {
+      "id": 5,
+      "name": "Sea Life - Elements",
+      "sort_order": 4
+    },
+    {
+      "id": 6,
+      "name": "Flora",
+      "sort_order": 5
+    },
+    {
+      "id": 7,
+      "name": "Wildlife / Other",
+      "sort_order": 6
+    },
+    {
+      "id": 8,
+      "name": "Color Palette",
+      "sort_order": 7
+    }
+  ],
+  "tags": [
+    {
+      "id": 1,
+      "category_id": 1,
+      "name": "Beach / shore",
+      "sort_order": 0
+    },
+    {
+      "id": 2,
+      "category_id": 1,
+      "name": "Ocean / open water",
+      "sort_order": 1
+    },
+    {
+      "id": 3,
+      "category_id": 1,
+      "name": "Underwater",
+      "sort_order": 2
+    },
+    {
+      "id": 4,
+      "category_id": 1,
+      "name": "Sunset / sunrise",
+      "sort_order": 3
+    },
+    {
+      "id": 7,
+      "category_id": 1,
+      "name": "Sky / clouds",
+      "sort_order": 6
+    },
+    {
+      "id": 8,
+      "category_id": 1,
+      "name": "Tropical garden",
+      "sort_order": 7
+    },
+    {
+      "id": 10,
+      "category_id": 1,
+      "name": "Isolated subject",
+      "sort_order": 9
+    },
+    {
+      "id": 11,
+      "category_id": 2,
+      "name": "Flamingos",
+      "sort_order": 0
+    },
+    {
+      "id": 12,
+      "category_id": 2,
+      "name": "Roseate spoonbills",
+      "sort_order": 1
+    },
+    {
+      "id": 13,
+      "category_id": 2,
+      "name": "Pelicans",
+      "sort_order": 2
+    },
+    {
+      "id": 14,
+      "category_id": 2,
+      "name": "Herons",
+      "sort_order": 3
+    },
+    {
+      "id": 17,
+      "category_id": 2,
+      "name": "Shorebirds",
+      "sort_order": 6
+    },
+    {
+      "id": 21,
+      "category_id": 3,
+      "name": "Sea turtles",
+      "sort_order": 0
+    },
+    {
+      "id": 24,
+      "category_id": 3,
+      "name": "Octopus",
+      "sort_order": 3
+    },
+    {
+      "id": 25,
+      "category_id": 3,
+      "name": "Seahorses",
+      "sort_order": 4
+    },
+    {
+      "id": 26,
+      "category_id": 3,
+      "name": "Jellyfish",
+      "sort_order": 5
+    },
+    {
+      "id": 27,
+      "category_id": 3,
+      "name": "Stingrays",
+      "sort_order": 6
+    },
+    {
+      "id": 28,
+      "category_id": 4,
+      "name": "Tropical / reef fish",
+      "sort_order": 0
+    },
+    {
+      "id": 44,
+      "category_id": 5,
+      "name": "Coral / reef",
+      "sort_order": 0
+    },
+    {
+      "id": 45,
+      "category_id": 5,
+      "name": "Shells",
+      "sort_order": 1
+    },
+    {
+      "id": 46,
+      "category_id": 5,
+      "name": "Starfish",
+      "sort_order": 2
+    },
+    {
+      "id": 47,
+      "category_id": 5,
+      "name": "Sea grass",
+      "sort_order": 3
+    },
+    {
+      "id": 48,
+      "category_id": 6,
+      "name": "Palm trees",
+      "sort_order": 0
+    },
+    {
+      "id": 49,
+      "category_id": 6,
+      "name": "Tropical flowers",
+      "sort_order": 1
+    },
+    {
+      "id": 55,
+      "category_id": 6,
+      "name": "Bird of Paradise",
+      "sort_order": 7
+    },
+    {
+      "id": 58,
+      "category_id": 7,
+      "name": "Cats",
+      "sort_order": 1
+    },
+    {
+      "id": 60,
+      "category_id": 7,
+      "name": "Other mammals",
+      "sort_order": 3
+    },
+    {
+      "id": 66,
+      "category_id": 8,
+      "name": "Vibrant / technicolor",
+      "sort_order": 0
+    },
+    {
+      "id": 67,
+      "category_id": 8,
+      "name": "Tropical brights",
+      "sort_order": 1
+    },
+    {
+      "id": 68,
+      "category_id": 8,
+      "name": "Warm tones",
+      "sort_order": 2
+    },
+    {
+      "id": 69,
+      "category_id": 8,
+      "name": "Cool tones",
+      "sort_order": 3
+    },
+    {
+      "id": 70,
+      "category_id": 8,
+      "name": "Neutral / earth tones",
+      "sort_order": 4
+    },
+    {
+      "id": 71,
+      "category_id": 8,
+      "name": "Pastels / soft",
+      "sort_order": 5
+    },
+    {
+      "id": 72,
+      "category_id": 8,
+      "name": "Monochromatic",
+      "sort_order": 6
+    }
+  ],
+  "paintingTags": [
+    {
+      "paintingId": 1,
+      "tagId": 1,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 1,
+      "tagId": 7,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 1,
+      "tagId": 13,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 1,
+      "tagId": 14,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 1,
+      "tagId": 12,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 1,
+      "tagId": 17,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 1,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 1,
+      "tagId": 68,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 1,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 2,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 2,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 2,
+      "tagId": 21,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 2,
+      "tagId": 24,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 2,
+      "tagId": 26,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 2,
+      "tagId": 28,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 2,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 2,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 2,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 3,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 3,
+      "tagId": 11,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 3,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 3,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 4,
+      "tagId": 8,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 4,
+      "tagId": 7,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 4,
+      "tagId": 48,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 4,
+      "tagId": 49,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 4,
+      "tagId": 60,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 4,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 4,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 5,
+      "tagId": 8,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 5,
+      "tagId": 7,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 5,
+      "tagId": 48,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 5,
+      "tagId": 49,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 5,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 5,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 6,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 6,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 6,
+      "tagId": 26,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 6,
+      "tagId": 27,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 6,
+      "tagId": 28,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 6,
+      "tagId": 44,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 6,
+      "tagId": 47,
+      "source": "ai",
+      "confidence": 0.5
+    },
+    {
+      "paintingId": 6,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 6,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 6,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 7,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 7,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 7,
+      "tagId": 21,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 7,
+      "tagId": 44,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 7,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 7,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 12,
+      "tagId": 10,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 12,
+      "tagId": 58,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 12,
+      "tagId": 68,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 12,
+      "tagId": 71,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 17,
+      "tagId": 7,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 17,
+      "tagId": 10,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 17,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 17,
+      "tagId": 70,
+      "source": "ai",
+      "confidence": 0.5
+    },
+    {
+      "paintingId": 21,
+      "tagId": 1,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 21,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 21,
+      "tagId": 7,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 21,
+      "tagId": 48,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 21,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 21,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 25,
+      "tagId": 10,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 25,
+      "tagId": 68,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 25,
+      "tagId": 70,
+      "source": "ai",
+      "confidence": 0.5
+    },
+    {
+      "paintingId": 26,
+      "tagId": 1,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 26,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 26,
+      "tagId": 7,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 26,
+      "tagId": 13,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 26,
+      "tagId": 14,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 26,
+      "tagId": 17,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 26,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 26,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 28,
+      "tagId": 4,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 28,
+      "tagId": 7,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 28,
+      "tagId": 8,
+      "source": "ai",
+      "confidence": 0.5
+    },
+    {
+      "paintingId": 28,
+      "tagId": 49,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 28,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 28,
+      "tagId": 68,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 28,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 30,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 30,
+      "tagId": 25,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 30,
+      "tagId": 44,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 30,
+      "tagId": 47,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 30,
+      "tagId": 45,
+      "source": "ai",
+      "confidence": 0.5
+    },
+    {
+      "paintingId": 30,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 30,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 0.5
+    },
+    {
+      "paintingId": 41,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 41,
+      "tagId": 44,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 41,
+      "tagId": 46,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 41,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 41,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 46,
+      "tagId": 10,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 46,
+      "tagId": 68,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 46,
+      "tagId": 70,
+      "source": "ai",
+      "confidence": 0.5
+    },
+    {
+      "paintingId": 74,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 74,
+      "tagId": 21,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 74,
+      "tagId": 44,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 74,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 74,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 85,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 85,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 85,
+      "tagId": 21,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 85,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 85,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 203,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 203,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 203,
+      "tagId": 21,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 203,
+      "tagId": 66,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 203,
+      "tagId": 67,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 281,
+      "tagId": 3,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 281,
+      "tagId": 2,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 281,
+      "tagId": 69,
+      "source": "ai",
+      "confidence": 1
+    },
+    {
+      "paintingId": 281,
+      "tagId": 72,
+      "source": "ai",
+      "confidence": 0.8
+    },
+    {
+      "paintingId": 28,
+      "tagId": 55,
+      "source": "human",
+      "confidence": 1
+    }
+  ]
+}

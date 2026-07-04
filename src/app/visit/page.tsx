@@ -57,8 +57,8 @@ export default function VisitPage() {
               lineHeight: 1.65,
             }}
           >
-            Gallery hours, upcoming events, artist meet-and-greets, and everything
-            you need to plan a visit to the gallery on Periwinkle Way.
+            Gallery hours, upcoming events, artist meet-and-greets, and everything you need to plan
+            a visit to the gallery on Periwinkle Way.
           </p>
         </div>
       </section>
@@ -117,9 +117,8 @@ export default function VisitPage() {
                 marginBottom: '1rem',
               }}
             >
-              This page will include gallery hours, upcoming exhibitions, artist
-              meet-and-greet events, and local tourism information for visitors
-              to Sanibel Island.
+              This page will include gallery hours, upcoming exhibitions, artist meet-and-greet
+              events, and local tourism information for visitors to Sanibel Island.
             </p>
             <p
               style={{
@@ -133,7 +132,9 @@ export default function VisitPage() {
               In the meantime, find us at{' '}
               <strong style={{ color: 'var(--color-slate-dark)' }}>{GALLERY_ADDRESS}</strong>.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div
+              style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem' }}
+            >
               <Link
                 href="/contact"
                 style={{

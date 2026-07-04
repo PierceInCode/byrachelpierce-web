@@ -139,7 +139,9 @@ export default function CompletionCelebration({
               paddingLeft: '1.25rem',
             }}
           >
-            <li>Visit <strong>Rachel Pierce Art Gallery</strong></li>
+            <li>
+              Visit <strong>Rachel Pierce Art Gallery</strong>
+            </li>
             <li>Show this page or the email to the cashier</li>
             <li>Receive your special gift!</li>
           </ol>
@@ -203,8 +205,8 @@ export default function CompletionCelebration({
             lineHeight: 1.5,
           }}
         >
-          This code was also emailed to <strong>{email}</strong>. You can show
-          either this screen or the email at the gallery.
+          This code was also emailed to <strong>{email}</strong>. You can show either this screen or
+          the email at the gallery.
         </p>
 
         {/* Sign out */}

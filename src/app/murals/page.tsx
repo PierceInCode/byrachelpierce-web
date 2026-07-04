@@ -61,8 +61,8 @@ export default function MuralsPage() {
               marginBottom: '2rem',
             }}
           >
-            Rachel Pierce has painted {MURAL_LOCATIONS.length} large-scale murals across Sanibel Island —
-            transforming storefronts, walls, and public spaces into vibrant works of art.
+            Rachel Pierce has painted {MURAL_LOCATIONS.length} large-scale murals across Sanibel
+            Island — transforming storefronts, walls, and public spaces into vibrant works of art.
           </p>
           <Link
             href="/murals/trail"
@@ -155,11 +155,7 @@ export default function MuralsPage() {
                 }}
               >
                 {/* Placeholder image */}
-                <div
-                  className="img-placeholder"
-                  style={{ height: '180px' }}
-                  aria-hidden="true"
-                >
+                <div className="img-placeholder" style={{ height: '180px' }} aria-hidden="true">
                   Mural #{mural.id}
                 </div>
                 <div style={{ padding: '1.25rem' }}>
