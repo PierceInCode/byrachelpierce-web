@@ -104,30 +104,23 @@ export interface PressItem {
 // ── Mural Selfie Trail ───────────────────────────────────────────────
 
 /**
- * A single check-in event at a mural location.
- * Recorded when a user self-reports visiting a mural.
- * (C# analogy: this is like a simple DTO / record type.)
+ * Payload for the trail-completion emails (redemption code to the user,
+ * notification to the gallery). Built by the check-in route from the
+ * user's real, stored data — every timestamp is the mural's actual
+ * `checked_in_at`, not "now" (Architecture §4.2 hole 4).
+ *
+ * Replaces the legacy `TrailProgress` JSON-file shape, which no longer
+ * exists — trail state lives in the database (Architecture §4.2).
  */
-export interface TrailCheckIn {
-  /** References MuralLocation.id (1–14) */
-  muralId: number;
-  /** ISO 8601 datetime string — when the check-in was recorded */
-  timestamp: string;
-}
-
-/**
- * Full trail progress for one user, persisted as a JSON file.
- * Each user gets one file: data/trail-progress/{hashed-email}.json
- * (C# analogy: this is the "entity" that gets serialized to storage.)
- */
-export interface TrailProgress {
+export interface TrailCompletionEmail {
+  /** The completing user's email address */
   email: string;
-  checkIns: TrailCheckIn[];
-  questComplete: boolean;
-  /** Null until the quest is complete — then holds the RP-XXXXXX code */
-  redemptionCode: string | null;
-  /** ISO 8601 datetime, null until quest is complete */
-  completedAt: string | null;
+  /** Their redemption code (BRP-XXXXXX) */
+  code: string;
+  /** ISO-8601 datetime the quest was completed */
+  completedAt: string;
+  /** Each visited mural with its stored check-in time (ISO-8601) */
+  checkIns: { muralId: number; checkedInAt: string }[];
 }
 
 /**

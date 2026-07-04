@@ -8,7 +8,7 @@
  * AUTHENTICATION: Requires an active Auth.js session (magic link sign-in).
  * Unauthenticated requests get a 401.
  *
- * REQUEST BODY: { "muralId": 7 }  (integer 1-14)
+ * REQUEST BODY: { "muralId": 7 }  (integer 1..MURAL_LOCATIONS.length)
  * RESPONSE: TrailCheckInResponse (see types/index.ts)
  *
  * IDEMPOTENT: Checking in at the same mural twice returns success without
@@ -24,14 +24,18 @@
 
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { getTrailStatus, recordCheckIn, getUserEmail } from '@/lib/trail-service';
+import { recordCheckIn, getUserEmail, getCheckIns, getCompletion } from '@/lib/trail-service';
 import { sendRedemptionEmail, sendGalleryNotification } from '@/lib/trail-emails';
+import { MURAL_LOCATIONS } from '@/lib/mural-data';
 import type { TrailCheckInResponse } from '@/types';
+
+/** Highest valid mural id — sourced from the data so adding murals "just works". */
+const MURAL_COUNT = MURAL_LOCATIONS.length;
 
 export async function POST(request: Request) {
   // ── 1. Check authentication ──────────────────────────────────────
   // auth() reads the session cookie. Returns null if not signed in.
-  // With our session callback in auth.ts, session.user.id is available.
+  // With our session callback in auth.ts, userId is available.
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json(
@@ -39,6 +43,7 @@ export async function POST(request: Request) {
       { status: 401 },
     );
   }
+  const userId = session.user.id;
 
   // ── 2. Parse and validate the request body ───────────────────────
   let body: { muralId?: unknown };
@@ -50,62 +55,78 @@ export async function POST(request: Request) {
 
   const muralId = body.muralId;
 
-  // Validate muralId is a number in the valid range (1-14)
-  if (typeof muralId !== 'number' || !Number.isInteger(muralId) || muralId < 1 || muralId > 14) {
+  // Validate muralId is a number in the valid range (1..MURAL_COUNT)
+  if (
+    typeof muralId !== 'number' ||
+    !Number.isInteger(muralId) ||
+    muralId < 1 ||
+    muralId > MURAL_COUNT
+  ) {
     return NextResponse.json(
-      { success: false, message: `Invalid mural ID. Must be an integer between 1 and 14.` },
+      {
+        success: false,
+        message: `Invalid mural ID. Must be an integer between 1 and ${MURAL_COUNT}.`,
+      },
       { status: 400 },
     );
   }
 
   // ── 3. Record the check-in ───────────────────────────────────────
   try {
-    // Snapshot the status BEFORE recording so we can detect if THIS
-    // specific check-in is what completed the quest.
-    const previousStatus = await getTrailStatus(session.user.id);
-    const wasAlreadyComplete = previousStatus.isComplete;
+    // recordCheckIn is race-safe: `completionInserted` is true for
+    // exactly the ONE request whose insert created the completion row,
+    // so a completion race never sends two email pairs.
+    const { status, completionInserted } = await recordCheckIn(userId, muralId);
 
-    // recordCheckIn takes the user's database ID (not email) and the mural ID.
-    // It returns the updated TrailStatus after recording the check-in.
-    const status = await recordCheckIn(session.user.id, muralId);
-
-    // Did THIS check-in complete the quest?
-    const justCompleted = status.isComplete && !wasAlreadyComplete;
-
-    // ── 4. If quest just completed, send emails ──────────────────
-    // We send both emails in parallel — fire-and-forget style.
-    // If an email fails, we still return success to the user because
-    // the check-in WAS recorded. Email failures are logged server-side.
-    if (justCompleted && status.redemptionCode) {
-      // Look up the user's email for the notification emails.
-      // (We store userId in trail_progress, but emails need the address.)
-      const userEmail = await getUserEmail(session.user.id);
+    // ── 4. If THIS request completed the quest, send emails ──────
+    // Fire-and-forget: the user shouldn't wait on email, and a check-in
+    // that was recorded stays successful even if email later fails.
+    if (completionInserted && status.redemptionCode) {
+      const userEmail = await getUserEmail(userId);
 
       if (userEmail) {
-        // Don't await these — the user shouldn't wait for emails to send.
+        // Build the payload from the user's REAL stored data: each
+        // mural's own check-in time and the actual completion time
+        // (Architecture §4.2 hole 4 — no more "now" on every row).
+        const [checkIns, completion] = await Promise.all([
+          getCheckIns(userId),
+          getCompletion(userId),
+        ]);
+
+        const payload = {
+          email: userEmail,
+          code: status.redemptionCode,
+          completedAt: completion?.completedAt ?? new Date().toISOString(),
+          checkIns,
+        };
+
         // Promise.allSettled won't throw even if one email fails.
         Promise.allSettled([
           sendRedemptionEmail(userEmail, status.redemptionCode),
-          sendGalleryNotification({
-            // Build a TrailProgress-compatible object for the email helper.
-            // The email function expects the old TrailProgress shape.
-            email: userEmail,
-            checkIns: status.checkedInMurals.map((id) => ({
-              muralId: id,
-              timestamp: new Date().toISOString(),
-            })),
-            questComplete: true,
-            redemptionCode: status.redemptionCode,
-            completedAt: new Date().toISOString(),
-          }),
+          sendGalleryNotification(payload),
         ]).then((results) => {
-          // Log any email failures for debugging (these show in server console)
+          // One log line per email failure, with the ids involved (Rule 11).
+          const kinds = ['redemption', 'gallery'] as const;
           results.forEach((result, i) => {
             if (result.status === 'rejected') {
-              console.error(`[trail/checkin] Email ${i} failed:`, result.reason);
+              console.error(
+                JSON.stringify({
+                  event: 'trail_email_failed',
+                  kind: kinds[i],
+                  userId: userId,
+                  reason: String(result.reason),
+                }),
+              );
             }
           });
         });
+      } else {
+        console.error(
+          JSON.stringify({
+            event: 'trail_email_skipped_no_address',
+            userId: userId,
+          }),
+        );
       }
     }
 
@@ -114,7 +135,7 @@ export async function POST(request: Request) {
     // that the frontend expects.
     const response: TrailCheckInResponse = {
       success: true,
-      message: justCompleted
+      message: completionInserted
         ? 'Quest complete! Check your email for your redemption code.'
         : `Checked in! ${status.totalCheckIns}/${status.requiredCheckIns} murals visited.`,
       newTotal: status.totalCheckIns,
