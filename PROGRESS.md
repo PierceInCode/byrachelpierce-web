@@ -13,14 +13,14 @@
   - [ ] 0.7 Vercel previews confirmed (operator-owned — confirm when done)
 - [x] R0 process retrofit — `r0-process` — gate Spec §5.2 — **MERGED to `main`** (PRs #3, #4; tagged per operator)
 - [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); **production migration run and verified by the operator** (counts matched runbook, Vercel redeployed)
-- [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **local gate GREEN, spec-auditor READY (0 BLOCKER/MAJOR)**; not yet committed/PR'd
+- [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PR #6); real images uploaded to Vercel Blob, verified working on a Vercel preview by the operator
 - [ ] R3 collection finish — `r3-collection` — gate Spec §8.2
 - [ ] R4 content intake — `r4-content` — gate Spec §9.2 (murals content gates R5)
 - [ ] R5 go-live — `r5-golive` — gate Spec §10.2 + smoke matrix → tag `v1.0.0`
 
 ## True current state (2026-07-04, end of R2 session)
 
-**R1 is merged to `main` (PR #5, tag `R1`), production migration verified by the operator. R2 (images & performance, Spec §7) is code-complete on branch `r2-images`, local gate GREEN, `spec-auditor`-reviewed (READY, 0 BLOCKER/MAJOR, 5 MINOR — see below). Nothing committed yet; PR not yet opened.**
+**R1 and R2 are both merged to `main`. R2 (images & performance, Spec §7) is fully shipped: the operator ran the real `sync-art-blob.ts --apply` (1056/1056 uploaded, 0 errors), added the Blob store's env vars in Vercel, confirmed images load correctly on a Vercel preview deploy, and merged PR #6. `main` currently HEAD is the R2 merge commit (`5085a22`); one small follow-up PR is in flight (branch `chore/r2-followup`) to land a fix that the R2 PR itself missed — see "R2 follow-up" below. ⚠ Per operator instruction this session: do NOT start R3 without explicit go-ahead.**
 
 ### R1 recap (kept for reference)
 
@@ -81,14 +81,27 @@ npx playwright test tests/e2e/image-budget → 2 passed (grid < 1.5MB, hero < 60
 2. Grid budget test wouldn't have caught a regression to raw `<img>` — **fixed**, added an assertion that at least one image response goes through `/_next/image`.
 3. §7.1 item 5 (`/ar`/murals verification) done but unrecorded — **fixed**, recorded above.
 4. `.env.local` pointing at production Turso — informational, already flagged (DECISIONS 026), out of R2 scope.
-5. Nothing committed yet at audit time — addressed by this session's commit (below).
+5. Nothing committed yet at audit time — addressed before merge (PR #6).
+
+## R2 follow-up (branch `chore/r2-followup`, PR pending)
+
+**Real Blob upload, done by the operator this session:**
+
+- Vercel Blob store created (`byrachelpierce-art`, public access, base URL `https://xouqrauzj4chugca.public.blob.vercel-storage.com`), connected to the project. `NEXT_PUBLIC_ART_BASE_URL` set to that base URL in Vercel's Production + Preview env vars.
+- The store was initially connected via **OIDC only**, scoped to Production/Preview — **not Development**. Running `sync-art-blob.ts --apply` locally therefore failed (`BlobOidcEnvironmentNotAllowedError`) until the operator went back into the store's "Update Project Connection" dialog, checked "Development," and also checked "Add a read-write token env var to this connection" (the simpler, more portable fix — a static `BLOB_READ_WRITE_TOKEN` rather than depending on per-environment OIDC trust). Worth remembering for any future local Blob work (e.g. a future re-sync in R4): **local/CLI usage needs either a static token, or Development explicitly added to the store's OIDC-trusted environments.**
+- `npx vercel link` + `npx vercel env pull` (scoped `--environment=production` to reach vars that live only on Production/Preview) were used to get `BLOB_STORE_ID` locally; ultimately the static token made this moot, but the pull did leave duplicate var lines in `.env.local` (harmless — later duplicates win — but worth the operator tidying up next time they're in that file).
+- Real upload run: **1056/1056 uploaded, 0 errors, ~202MB.** Verified on a redeployed Vercel preview (images served from the Blob host, confirmed via DevTools/Network) before merging PR #6.
+
+**The gap this follow-up branch fixes:** PR #6 was merged (`5085a22`, 2026-07-04 16:28:48) _before_ a same-session fix commit (`74bd44e`, 16:49:38) was pushed — timing crossed over, so that commit was never part of the merge and `main`'s `scripts/sync-art-blob.ts` is currently the version that does **not** load `.env.local` and **only** accepts a static `BLOB_READ_WRITE_TOKEN` (it would reject the OIDC-pair path). This is the exact fix that made the real upload above work in the working tree at the time — it just needs its own small PR now to land in `main`. Also carries a `.gitignore` addition (`.env*`) that `vercel link` made locally, and this final PROGRESS.md update.
 
 ## Exact next step
 
-1. Commit the working tree on `r2-images` (already gate-green and spec-audited) and open the PR to `main`; let CI run.
-2. Operator: run the real `sync-art-blob.ts --apply` (needs the Blob token, held by the operator) and confirm on a Vercel preview from a phone — collection grid and a painting page render from Blob URLs (DevTools/Network host check), feel acceptable on cellular, and the repo contains zero image binaries.
-3. Also worth operator attention (not R2-blocking): `.env.local`'s `TURSO_DATABASE_URL` currently points at production Turso rather than `file:./dev.db` as Spec §2.1 describes as the default dev mode (DECISIONS 026) — R2's own tooling is safe regardless, but plain `npm run dev`/`build` without an override would hit production.
-4. Once merged/tagged: start **R3** (collection finish, Spec §8, Architecture §2/§5/§12).
+**Do not start R3 — explicit operator instruction this session.**
+
+1. Get the `chore/r2-followup` PR (sync-art-blob.ts fix + `.gitignore` + this PROGRESS.md update) reviewed and merged — small, no new gate needed beyond confirming `npm run check` still passes (it does; verified before this branch was pushed).
+2. Optional cleanup, not blocking: dedupe the repeated variable lines in `.env.local` from the `vercel env pull` runs this session.
+3. Still open from before: `.env.local`'s `TURSO_DATABASE_URL` points at production Turso rather than `file:./dev.db` (Spec §2.1's default dev mode, DECISIONS 026) — R2's own tooling is unaffected, but plain `npm run dev`/`build` without an override would hit production.
+4. **R3 (collection finish, Spec §8, Architecture §2/§5/§12) starts only when the operator explicitly says so** — do not begin it automatically just because R2 is closed out.
 
 ## Open questions for operator
 
