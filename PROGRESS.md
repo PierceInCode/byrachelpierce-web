@@ -4,52 +4,67 @@
 
 ## Milestone status (plan: `docs/FINAL-BUILD-SPEC.md`)
 
-- [ ] **Phase 0** (operator) — not fully closed, but unblocked for R0 per DECISIONS 013 (0.1 and 0.2 are deferred/substituted, not gating). Status as of 2026-07-04:
-  - [x] planning PR merged + `planning-docs` tag (confirmed: `origin/main` has the merge commit, tag exists)
-  - [x] harness verified (`test-runner`, `spec-auditor`, `vercel-analyst` agents + hooks present in `.claude/`)
-  - [ ] **0.1 secrets rotated (Resend + Turso) — DEFERRED, not blocking, must be re-flagged before R5** (`Database Token.txt` still present on disk; rotation not yet confirmed by operator — DECISIONS 013)
-  - [ ] **0.2 branch protection — UNAVAILABLE on this GitHub plan; substituted by PR-only discipline** (CLAUDE.md rule 9 — DECISIONS 013)
-  - [ ] 0.6 art folder backed up (operator-owned, not independently verifiable by the agent — confirm when done)
-  - [ ] 0.7 Vercel previews confirmed (operator-owned, not independently verifiable by the agent — confirm when done)
-- [x] R0 process retrofit — branch `r0-process` — gate: Spec §5.2 — **GREEN**, PR not yet opened (see below)
-- [ ] R1 trail correctness — `r1-trail` — gate: Spec §6.2 (incl. operator-run production migration)
-- [ ] R2 images & performance — `r2-images` — gate: Spec §7.2
-- [ ] R3 collection finish — `r3-collection` — gate: Spec §8.2
-- [ ] R4 content intake — `r4-content` — gate: Spec §9.2 (murals content gates R5)
-- [ ] R5 go-live — `r5-golive` — gate: Spec §10.2 + smoke matrix → tag `v1.0.0`
+- [ ] **Phase 0** (operator) — unblocked per DECISIONS 013 (0.1 and 0.2 deferred/substituted, not gating).
+  - [x] planning PR merged + `planning-docs` tag
+  - [x] harness verified (`test-runner`, `spec-auditor`, `vercel-analyst` agents + hooks present)
+  - [ ] **0.1 secrets rotated (Resend + Turso) — DEFERRED, not blocking, must be re-flagged before R5** (DECISIONS 013)
+  - [ ] **0.2 branch protection — UNAVAILABLE on this GitHub plan; substituted by PR-only discipline** (DECISIONS 013)
+  - [ ] 0.6 art folder backed up (operator-owned — confirm when done)
+  - [ ] 0.7 Vercel previews confirmed (operator-owned — confirm when done)
+- [x] R0 process retrofit — `r0-process` — gate Spec §5.2 — **MERGED to `main`** (PRs #3, #4; tagged per operator)
+- [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **local gate GREEN**; PR pending; **production migration is operator-run (below), not yet done**
+- [ ] R2 images & performance — `r2-images` — gate Spec §7.2
+- [ ] R3 collection finish — `r3-collection` — gate Spec §8.2
+- [ ] R4 content intake — `r4-content` — gate Spec §9.2 (murals content gates R5)
+- [ ] R5 go-live — `r5-golive` — gate Spec §10.2 + smoke matrix → tag `v1.0.0`
 
-## True current state (2026-07-04, end of R0 session)
+## True current state (2026-07-04, end of R1 session)
 
-**R0 is done on branch `r0-process`, gate green, PR not yet opened.**
+**R1 is code-complete on branch `r1-trail`, local gate GREEN. PR not yet opened. The production migration is the operator's to run (runbook below) — the agent never touches production (Iron Invariant 1).**
 
-Gate result (Spec §5.2, this session, `test-runner`-verified):
+Local gate result (Spec §6.2, this session, `test-runner`-verified):
 
 ```
-git diff main --stat -- public/art     → empty (no image binaries)
-npm run check                          → lint 0/0, format clean, tsc clean, 24 passed | 1 expected-fail
-npm run test:coverage                  → 94.73% stmts / 85.71% branch / 100% funcs / 96.93% lines
-                                          (scoped to trail-service.ts + art-service.ts — DECISIONS 016)
-npm run db:seed-ci; npm run build      → SSG build succeeds (552 pages against dev.db; also verified
-                                          separately against ci.db directly — 44 pages, 20 seeded paintings)
+npm run check                 → lint 0/0, format clean, tsc clean, 50 passed (8 files)
+npm run test:coverage         → exit 0, thresholds met. Included files (lines/funcs %):
+                                 checkin route 85.71/100 · status route 80.00/100 ·
+                                 trail-service 89.83/90 · trail-emails 82.85/100 · art-service 96/100
+npx vitest run tests/trail    → 33 passed (7 files)
+npm run db:seed-ci; npm build → SSG build succeeds (552 pages) against the file DB
 ```
 
-Both locally green this session; CI (`.github/workflows/ci.yml`) has not run yet — it runs on the PR once opened.
+### What R1 changed (Architecture §4.2 four holes + §4.4 honesty)
 
-- **Stranded collection work landed**: two commits (`chore: commit package-lock.json`, `feat: art collection browsing (June work, landed as-is)`), unmodified, `public/art/` never touched. `npx tsc --noEmit` was green before and after.
-- **Reconciled with `origin/main`**: merged (CVE-2025-66478 fix, `next` → 15.3.6), then bumped further to `next@15.5.20` — the CVE-fix version itself had accumulated more disclosed HIGH-severity advisories since; operator approved the extra bump live (DECISIONS 014). `next-auth`/`drizzle-orm`/`drizzle-kit` deliberately left untouched (pinned / production-DB-adjacent, out of scope).
-- **Tooling added**: ESLint flat config + Prettier (singleQuote, 100 cols — confirmed as the codebase's actual dominant pre-existing style by an aggregate quote-count check, not just the Spec's assertion), `vitest.config.ts` (coverage gate scoped to `trail-service.ts` + `art-service.ts`, DECISIONS 016), `tests/helpers/db.ts` (per-test-file file-DB factory) + `seed-catalog.ts`, `tests/fixtures/catalog.json` (20-painting subset) + `murals.json`, first real tests for `trail-service` (incl. an `it.fails` test documenting the sentinel-row bug — **R1 must flip this to a plain `it` once `trail_completions` replaces the sentinel mechanism**) and `art-service`, `drizzle/0000_baseline_schema.sql` (R0 baseline snapshot — **operator still needs to mark this applied on production** per the OPERATOR-GUIDE R0 baseline procedure, DECISIONS 012), `scripts/seed-ci.ts`, `.github/workflows/ci.yml` (Spec §4.3 verbatim), README rewrite.
-- **Local dev machine's Node upgraded 20.17.0 → 20.19.0** (operator-approved live, DECISIONS 017) — vitest 4.x/current ESLint deps needed `require(esm)` support Node didn't stabilize until 20.19. CI is unaffected (`setup-node@v4` pulls a current 20.x patch already).
-- **Known live defects** (fixed in R1, documented in Architecture §4.2): sentinel-row status inflation after trail completion (now has a documenting `it.fails` test); `Math.random` codes with ambiguous characters; completion race; wrong timestamps in gallery email. Mural names/descriptions/years on public pages are still fabricated placeholders (Architecture §4.4; real content in R4).
-- Data reality unchanged: 0/528 paintings have physical size, 1/528 has availability. Leaked secrets (Resend key in git history, Turso token in `Database Token.txt` at `C:\Code\businessWebsites\byRachelPierce\Database Token.txt`, one level above this repo) — rotation (Phase 0.1) remains operator-deferred (DECISIONS 013); NOT a block on R0–R4, **must be re-flagged before R5**.
-- Spec-auditor ran this session (2026-07-04) against `main...r0-process`: 0 BLOCKER, 2 MAJOR (this PROGRESS.md update; a repo-wide ESLint rule disable that got corrected to per-line disables — see DECISIONS 015's correction note), 3 MINOR (a pre-existing duplicate `@tailwindcss/postcss` entry in both `dependencies` and `devDependencies` from the landed stranded work — left as-is per "land as-is, fix nothing," flagged here for R3's quality pass; `src/app/api/**` not yet in the coverage gate, by design per DECISIONS 016; a stale "Database Token.txt" claim in the auditor's own report — false negative, the auditor's tools are sandboxed to the repo dir and that file lives one level above it, so the original DECISIONS 013 claim stands correct).
+- **`trail_completions` table** (`schema.ts`, `drizzle/0001_add_trail_completions.sql`) — `userId` PRIMARY KEY, unique `redemption_code`, `completed_at`, nullable `redeemed_at`. Retires the `mural_id = 0` sentinel hack.
+- **Data migration** `drizzle/0002_migrate_sentinels.sql` — journaled custom migration (idempotent `INSERT OR IGNORE` + `DELETE`) that moves legacy sentinel rows into `trail_completions` then deletes them. Applied automatically by `drizzle-kit migrate`; a harmless no-op on DBs with no sentinels (so tests/CI are unaffected). DECISIONS 021.
+- **`trail-service.ts` rewrite** — status counts distinct `mural_id BETWEEN 1 AND N` (N = `MURAL_LOCATIONS.length`, no more sentinel inflation); code read from `trail_completions`; `recordCheckIn` returns `{ status, completionInserted }`; completion is `INSERT … ON CONFLICT(user_id) DO NOTHING RETURNING` (race-safe — exactly one winner emails); CSPRNG code generator (rejection-sampled over the 31-char unambiguous alphabet, `BRP-` prefix, unique-violation retry ≤ 3).
+- **checkin route + `trail-emails.ts`** — emails gated on `completionInserted` (no double-send); gallery email lists each mural by its verified `address` with its **own stored** `checked_in_at` in `America/New_York`; all counts from `TRAIL_REQUIRED_CHECKINS`; legacy `TrailProgress` type deleted, replaced by explicit `TrailCompletionEmail`.
+- **Content honesty (DECISIONS 022, extends 007)** — `mural-data.ts` `name` now holds the real location/business name; fabricated `description`/`year` values removed (render already guards them, so they vanish; R4 re-adds real ones by data presence). muralId range checks derive from `MURAL_LOCATIONS.length` (operator flagged more murals coming).
+- **Tests** under `tests/trail/` (gate runs `npx vitest run tests/trail`): service (incl. the R0 `it.fails` sentinel bug **flipped** to a passing assertion, completion race, code-alphabet property, idempotency), migration (sentinel→completions), checkin + status route integration (`@/auth` + `resend`/`trail-emails` mocked), email builders (ET timestamps, honest labels, no "Mural #0"), and a mural-data honesty guard. `vitest.config.ts` coverage `include` grown to the trail routes + `trail-emails.ts` (DECISIONS 023).
+
+## Operator action — R1 production migration (run this; the agent must not)
+
+⚠ Escalation-ready (Spec §13): if any count below doesn't match, **stop and report** — do not continue.
+
+1. **Precondition:** confirm the R0 baseline is marked applied on production (the one-time SQL from DECISIONS 020). R1's migrate assumes `0000` is already recorded.
+2. **Back up** (OPERATOR-GUIDE §R1): `turso db shell byrachelpierce ".dump" > backups/2026-07-xx.sql`
+3. **Record the pre-migration sentinel count** — call this **N**:
+   `turso db shell byrachelpierce "SELECT COUNT(*) FROM trail_progress WHERE mural_id = 0;"`
+4. **Apply** (from your machine, `.env.local` pointing at production Turso): `npx drizzle-kit migrate`
+   — applies `0001` (CREATE TABLE trail_completions) then `0002` (sentinel data migration).
+5. **Verify** (all must hold, else escalate):
+   - `SELECT COUNT(*) FROM trail_progress WHERE mural_id = 0;` → **0**
+   - `SELECT COUNT(*) FROM trail_completions;` → **N** (equals the pre-migration sentinel count)
+   - `SELECT COUNT(*) FROM trail_completions WHERE redemption_code IS NULL;` → **0** (every legacy code carried)
+6. **Redeploy** on Vercel so the new code serves against the migrated schema.
+7. **Preview/prod check:** complete a trail run end-to-end with a real magic link to your own inbox — "N/3" stays correct after reload; the gallery email shows real per-check-in timestamps and **no "Mural #0"**.
 
 ## Exact next step
 
-1. Operator: review this branch's diff and DECISIONS 013–018, then open the R0 PR (`r0-process` → `main`). CI runs automatically on the PR.
-2. Once CI is green and the PR is merged and tagged `r0`: start **R1** (trail correctness) in a fresh Opus 4.8 session — prompt bank "Start a milestone" with n=1. R1 reads Spec §6 + Architecture §3.2, §4, §8.
-3. Carry into R1: flip the `it.fails` sentinel-bug test in `tests/lib/trail-service.test.ts` once `trail_completions` lands; mark the R0 baseline migration applied on production per the OPERATOR-GUIDE R0 runbook before R1's own production migration.
+1. Open the R1 PR (`r1-trail` → `main`); CI runs automatically. Merge only when CI is green (never on red/skipped).
+2. Run the operator migration runbook above (backup → migrate → verify) and redeploy.
+3. Once merged, tagged `r1`, and the production migration verified: start **R2** (images & performance) in a fresh Sonnet 5 session. R2 reads Spec §7 + Architecture §6, §12; sanctioned deps `@vercel/blob`, `@playwright/test`.
 
 ## Open questions for operator
 
-- None blocking beyond the DECISIONS veto points (007 — suppressing fabricated mural content pre-R4 — is the one that changes visible behavior; read it deliberately). 013–018 (this session) are informational, not veto points — no action needed unless you disagree with a ruling.
-- The `@tailwindcss/postcss` duplicate dependency entry (see above) is cosmetic for now but worth a deliberate look at R3.
+- None blocking. DECISIONS 021–023 (this session) are informational rulings, not veto points — no action needed unless you disagree. The one visible-behavior item is the mural-content honesty (022, extends the 007 veto point): `/murals`, `/murals/trail`, map popups, and the gallery email now show real **location names** and suppress the fabricated titles/descriptions/years until R4 supplies real content.
