@@ -45,6 +45,19 @@ Left untouched, deliberately out of scope for this step: `next-auth` (Iron rule 
 
 **019 · 2026-07-04 · CI caught a real build bug: eager `Resend` client construction crashed `next build` with no `RESEND_API_KEY`.** First actual CI run on PR #3 failed at "Collecting page data" — `src/lib/trail-emails.ts` built a `new Resend(process.env.RESEND_API_KEY)` client at module scope, which throws immediately if the key is undefined. CI intentionally has no `RESEND_API_KEY` (Invariant 4), and `next build` imports every route module (including the checkin route, which imports `trail-emails.ts`) during page-data collection — so the crash was guaranteed, just never observed locally because `.env.local` has a key set. This is a genuine code defect (not a test-scope call): §5.2's R0 gate explicitly requires "CI green on the PR," so it had to be fixed in R0 despite `trail-emails.ts` otherwise being out of R0's test/coverage scope (DECISIONS 016, R1 rewrites it). Fix: lazy client construction (`getResendClient()`, built on first actual send call, not at import time) — no behavior change, just makes the module import side-effect-free. Added one regression test (`tests/lib/trail-emails.test.ts`) asserting the module imports cleanly with `RESEND_API_KEY` unset; verified the fix directly under CI's exact conditions (temporarily renamed `.env.local` out of the way, ran `db:seed-ci && build` with only CI's env vars set, confirmed pass, restored `.env.local` immediately after).
 
+**020 · 2026-07-04 · R0 baseline-migration "mark as applied" command produced for the operator (not run against production — Iron Invariant 1).** OPERATOR-GUIDE §R0 promised "the agent will give you a one-time command"; this closes that loose end before R1's own production migration. Derived the exact `hash`/`created_at` values `drizzle-orm/libsql/migrator`'s `migrate()` would write by running it once against a throwaway scratch file DB (never touched `drizzle/`, `schema.ts`, or production) and reading back `__drizzle_migrations`. The command (below) creates that same tracking table on production and inserts the identical row, so R1's real `drizzle-kit migrate` sees the baseline as already applied and only runs its own new migration. Given to the operator to run themselves, after their own backup, per OPERATOR-GUIDE §R1 step 1 — never run by the agent.
+
+```sql
+CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
+	id SERIAL PRIMARY KEY,
+	hash text NOT NULL,
+	created_at numeric
+);
+
+INSERT INTO "__drizzle_migrations" ("hash", "created_at")
+VALUES ('ab3fac3df65bc18183f2da9f7f494de6660ca9e1623e487f9f1b6a0072af02c7', 1783181505344);
+```
+
 ---
 
-_(Build sessions append from 020 onward.)_
+_(Build sessions append from 021 onward.)_
