@@ -11,15 +11,20 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      // R0 scopes the enforced gate to exactly what Spec §5.1.4 commissions
-      // tests for — trail-service.ts and art-service.ts (Spec §4.2: "no
-      // lower than 80 for the trail+art services"). Not included yet:
-      // trail-emails.ts and the API routes (R1 rewrites both, Spec §6.1 —
-      // testing today's pre-rewrite code is throwaway work) and
-      // mural-data.ts (a static placeholder array pending real R4 content).
-      // Each joins this list once it has milestone-appropriate tests.
-      // DECISIONS 016, 017.
-      include: ['src/lib/trail-service.ts', 'src/lib/art-service.ts'],
+      // R1 grows the gate to the trail surfaces it now tests end-to-end:
+      // the rewritten trail-service + trail-emails and both trail API route
+      // handlers (Spec §4.2 targets src/lib/** AND src/app/api/**). art-service
+      // stays in scope from R0. Still deferred (join when milestone-tested):
+      // mural-data.ts (static data, real content lands R4) and the collection
+      // API routes (R3's verify-then-fix + Playwright layer). DECISIONS 016,
+      // 023. Thresholds never lowered (Spec §4.2 / §13.2).
+      include: [
+        'src/lib/trail-service.ts',
+        'src/lib/trail-emails.ts',
+        'src/lib/art-service.ts',
+        'src/app/api/trail/checkin/route.ts',
+        'src/app/api/trail/status/route.ts',
+      ],
       thresholds: {
         lines: 80,
         functions: 80,

@@ -21,7 +21,7 @@
 
 import { Resend } from 'resend';
 import { MURAL_LOCATIONS } from '@/lib/mural-data';
-import type { TrailProgress } from '@/types';
+import type { TrailCompletionEmail } from '@/types';
 
 // ── Resend Client ────────────────────────────────────────────────────
 // Lazily instantiated on first send, not at module load — CI and build
@@ -44,6 +44,38 @@ const FROM_ADDRESS = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
 /** Gallery notification recipient */
 const GALLERY_EMAIL = process.env.GALLERY_EMAIL || 'matthew@pierceincode.com';
+
+/**
+ * Number of murals required to complete the quest — the single source
+ * of truth for every count rendered in these emails (Architecture §4.2
+ * hole 4: no hardcoded "3"). Matches trail-service's own read.
+ */
+const REQUIRED_CHECKINS = parseInt(process.env.TRAIL_REQUIRED_CHECKINS ?? '3', 10);
+
+/**
+ * Format an ISO-8601 timestamp for display in the gallery's local time.
+ * Gallery + murals are on Sanibel Island (America/New_York).
+ */
+function formatEastern(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'America/New_York',
+  });
+}
+
+/**
+ * Honest label for a mural in the gallery email. The mural TITLES are
+ * fabricated placeholders until R4 (Architecture §4.4), so we identify
+ * each stop by its verified `address` (which leads with the real
+ * business/location name) — never an invented title, never "Mural #0".
+ * Returns null for an unknown id so the caller can skip it rather than
+ * print "unknown".
+ */
+function muralLabel(muralId: number): string | null {
+  const mural = MURAL_LOCATIONS.find((m) => m.id === muralId);
+  return mural ? mural.address : null;
+}
 
 // ── Email Senders ────────────────────────────────────────────────────
 
@@ -87,17 +119,17 @@ export async function sendRedemptionEmail(
  * This gives the gallery staff a heads-up and includes the code + user info
  * so they can verify when the customer arrives.
  *
- * @param progress - The user's full trail progress (includes email, code, check-ins)
+ * @param payload - The completion payload (email, code, completedAt, check-ins)
  */
 export async function sendGalleryNotification(
-  progress: TrailProgress,
+  payload: TrailCompletionEmail,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const { error } = await getResendClient().emails.send({
       from: `Mural Trail System <${FROM_ADDRESS}>`,
       to: [GALLERY_EMAIL],
-      subject: `Mural Trail completed — ${progress.redemptionCode}`,
-      html: buildGalleryNotificationHtml(progress),
+      subject: `Mural Trail completed — ${payload.code}`,
+      html: buildGalleryNotificationHtml(payload),
     });
 
     if (error) {
@@ -152,7 +184,7 @@ function buildRedemptionEmailHtml(code: string): string {
           <tr>
             <td style="padding:32px 40px;">
               <p style="margin:0 0 20px; font-size:16px; line-height:1.6; color:#577083;">
-                You visited 3 of Rachel Pierce's murals across Sanibel Island — nice work!
+                You visited ${REQUIRED_CHECKINS} of Rachel Pierce's murals across Sanibel Island — nice work!
                 Here's your unique redemption code:
               </p>
 
@@ -221,24 +253,21 @@ function buildRedemptionEmailHtml(code: string): string {
  * This is an internal email — designed for quick scanning by gallery staff.
  * Includes the user's email, code, and which murals they visited.
  */
-function buildGalleryNotificationHtml(progress: TrailProgress): string {
-  // Look up the mural names/addresses for the check-in IDs
-  const visitedMurals = progress.checkIns
+function buildGalleryNotificationHtml(payload: TrailCompletionEmail): string {
+  // List each visited mural by its verified location/address, stamped
+  // with its OWN stored check-in time (not "now") — Architecture §4.2
+  // hole 4. Unknown ids are skipped, so "Mural #0 (unknown)" can't leak.
+  const visitedMurals = payload.checkIns
     .map((checkIn) => {
-      const mural = MURAL_LOCATIONS.find((m) => m.id === checkIn.muralId);
-      if (!mural) return `Mural #${checkIn.muralId} (unknown)`;
-      return `${mural.name} — ${mural.address}`;
+      const label = muralLabel(checkIn.muralId);
+      if (!label) return null;
+      return `${label} <span style="color:#8099aa;">— checked in ${formatEastern(checkIn.checkedInAt)}</span>`;
     })
+    .filter((line): line is string => line !== null)
     .map((text) => `<li style="margin:4px 0; font-size:14px; color:#577083;">${text}</li>`)
     .join('\n');
 
-  const completedDate = progress.completedAt
-    ? new Date(progress.completedAt).toLocaleString('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-        timeZone: 'America/New_York',
-      })
-    : 'Unknown';
+  const completedDate = formatEastern(payload.completedAt);
 
   return `
 <!DOCTYPE html>
@@ -265,11 +294,11 @@ function buildGalleryNotificationHtml(progress: TrailProgress): string {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="padding:8px 0; font-size:13px; color:#8099aa; text-transform:uppercase; letter-spacing:0.08em;">User Email</td>
-                  <td style="padding:8px 0; font-size:15px; color:#3d5264; font-weight:600;">${progress.email}</td>
+                  <td style="padding:8px 0; font-size:15px; color:#3d5264; font-weight:600;">${payload.email}</td>
                 </tr>
                 <tr>
                   <td style="padding:8px 0; font-size:13px; color:#8099aa; text-transform:uppercase; letter-spacing:0.08em;">Code</td>
-                  <td style="padding:8px 0; font-size:20px; color:#36b5cd; font-weight:700; font-family:monospace; letter-spacing:0.1em;">${progress.redemptionCode}</td>
+                  <td style="padding:8px 0; font-size:20px; color:#36b5cd; font-weight:700; font-family:monospace; letter-spacing:0.1em;">${payload.code}</td>
                 </tr>
                 <tr>
                   <td style="padding:8px 0; font-size:13px; color:#8099aa; text-transform:uppercase; letter-spacing:0.08em;">Completed</td>
