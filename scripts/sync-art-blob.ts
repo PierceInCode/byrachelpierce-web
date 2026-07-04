@@ -17,6 +17,9 @@
  * Run: npx tsx scripts/sync-art-blob.ts [--dry-run|--apply]
  */
 
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
 import { list, put } from '@vercel/blob';
 import { createReadStream, statSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
@@ -90,9 +93,15 @@ async function main() {
     return;
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  // @vercel/blob accepts either a static BLOB_READ_WRITE_TOKEN, or the OIDC
+  // pair (VERCEL_OIDC_TOKEN + BLOB_STORE_ID) that `vercel env pull` writes
+  // for stores connected to a project via OIDC — either is fine here.
+  const hasStaticToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const hasOidcCreds = Boolean(process.env.VERCEL_OIDC_TOKEN && process.env.BLOB_STORE_ID);
+  if (!hasStaticToken && !hasOidcCreds) {
     console.error(
-      'sync-art-blob --apply requires BLOB_READ_WRITE_TOKEN (operator-held). Aborting.',
+      'sync-art-blob --apply requires BLOB_READ_WRITE_TOKEN, or VERCEL_OIDC_TOKEN + ' +
+        'BLOB_STORE_ID from `vercel env pull .env.local` (operator-held). Aborting.',
     );
     process.exit(1);
   }
