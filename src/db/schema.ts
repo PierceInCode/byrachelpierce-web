@@ -160,6 +160,41 @@ export const trailProgress = sqliteTable('trail_progress', {
 });
 
 /**
+ * trailCompletions — one row per user who has finished the quest.
+ *
+ * Replaces the old "sentinel row" hack (a `trail_progress` row with
+ * mural_id = 0 that carried the redemption code). That hack corrupted
+ * every status read — the sentinel counted as a visited mural — and
+ * let a completion race issue two codes (Architecture §4.2).
+ *
+ * The design guarantees "one completion per user" at the database
+ * level: userId is the PRIMARY KEY, so a concurrent double-completion
+ * collapses to a single INSERT … ON CONFLICT(user_id) DO NOTHING and
+ * both requests read back the one surviving row (Architecture §3.2).
+ *
+ * For C# devs: userId-as-PK is like a one-to-one relationship enforced
+ * by making the FK column the entity's own key — EF's shared-primary-key
+ * pattern.
+ */
+export const trailCompletions = sqliteTable('trail_completions', {
+  /** Foreign key AND primary key — one completion per user, enforced by the DB */
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** The redemption code shown at the register (e.g. "BRP-A1B2C3"), globally unique */
+  redemptionCode: text('redemption_code').notNull().unique(),
+  /** ISO-8601 timestamp of when the quest was completed */
+  completedAt: text('completed_at').notNull(),
+  /**
+   * ISO-8601 timestamp of when the code was redeemed in person.
+   * NULL until redeemed. The redemption UI is a next-release feature
+   * (Architecture Appendix A.3) — the column ships now so that feature
+   * needs no second migration (DECISIONS 004).
+   */
+  redeemedAt: text('redeemed_at'),
+});
+
+/**
  * emailList — newsletter / mailing list sign-ups.
  * Future feature: collect names + emails from visitors who want
  * updates about new murals, events, etc.
