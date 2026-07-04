@@ -8,3 +8,4 @@ CLAUDE.md
 OPERATOR-GUIDE.md
 scripts/art-data.json
 coverage/
+.github/workflows/ci.yml
