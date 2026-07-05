@@ -41,7 +41,13 @@ export default async function CollectionPage({
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
     return (
-      <AllPaintingsView paintings={paintings} total={total} page={page} totalPages={totalPages} />
+      <AllPaintingsView
+        paintings={paintings}
+        total={total}
+        page={page}
+        totalPages={totalPages}
+        query={query}
+      />
     );
   }
 
@@ -246,21 +252,42 @@ function CategoryGridView({ categories }: { categories: CategoryCardData[] }) {
 }
 
 // ── All-paintings (browse all) view ─────────────────────────────────
-// Note: ArtworkGrid does not yet accept an `emptyState` prop — that's
-// added in a later task. Until then it falls back to its own generic
-// built-in empty message when `paintings` is empty.
 
 function AllPaintingsView({
   paintings,
   total,
   page,
   totalPages,
+  query,
 }: {
   paintings: Awaited<ReturnType<typeof getAllPaintings>>['paintings'];
   total: number;
   page: number;
   totalPages: number;
+  query: string;
 }) {
+  const pageOutOfRange = total > 0 && page > totalPages;
+  const emptyState = pageOutOfRange
+    ? {
+        heading: "That page doesn't exist.",
+        body: `This view only has ${totalPages} page${totalPages !== 1 ? 's' : ''}.`,
+        actionLabel: 'Back to page 1',
+        actionHref: '/collection?view=all',
+      }
+    : query
+      ? {
+          heading: 'No paintings match that search — yet.',
+          body: 'Try a different search term or browse everything instead.',
+          actionLabel: 'Clear search',
+          actionHref: '/collection?view=all',
+        }
+      : {
+          heading: 'Nothing here yet.',
+          body: 'Check back soon — new work is added regularly.',
+          actionLabel: 'Back to categories',
+          actionHref: '/collection',
+        };
+
   return (
     <>
       <section
@@ -326,7 +353,7 @@ function AllPaintingsView({
               &larr; Browse by Category
             </Link>
           </div>
-          <ArtworkGrid paintings={paintings} />
+          <ArtworkGrid paintings={paintings} emptyState={emptyState} />
           <Suspense>
             <Pagination currentPage={page} totalPages={totalPages} />
           </Suspense>
