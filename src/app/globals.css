@@ -182,6 +182,23 @@ a,
     transform var(--transition-base);
 }
 
+/* ── Reduced Motion (Architecture §12.4) ────────────────────────── */
+/* Transform-based lifts are motion; color/shadow transitions are not
+   vestibular triggers, so only transform is disabled here. */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a,
+  [role='button'] {
+    transition-property: color, background-color, border-color, box-shadow, opacity;
+  }
+
+  .btn-coral:hover,
+  .card-hover:hover,
+  .category-card:hover {
+    transform: none !important;
+  }
+}
+
 /* ── Minimum Touch Targets (WCAG 2.5.8) ─────────────────────────── */
 button,
 [role='button'],
