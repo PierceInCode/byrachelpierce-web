@@ -70,139 +70,18 @@ export default function ContactPage() {
         }}
       >
         <div className="container-site">
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: 'clamp(2.5rem, 5vw, 5rem)',
-              alignItems: 'start',
-            }}
-          >
-            {/* Contact form placeholder */}
-            <div>
-              {/* Coming Soon badge */}
-              <div
-                style={{
-                  display: 'inline-block',
-                  backgroundColor: 'var(--color-teal-light)',
-                  color: 'var(--color-teal-dark)',
-                  fontFamily: 'var(--font-nav)',
-                  fontSize: 'var(--text-xs)',
-                  fontWeight: 600,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  padding: '0.375rem 1rem',
-                  borderRadius: 'var(--radius-full)',
-                  marginBottom: '1.25rem',
-                  border: '1px solid rgba(54,181,205,0.3)',
-                }}
-              >
-                Form Coming Soon
-              </div>
-              <h2
-                style={{
-                  fontFamily: 'var(--font-heading)',
-                  fontSize: 'var(--text-2xl)',
-                  color: 'var(--color-slate-dark)',
-                  marginBottom: '1rem',
-                }}
-              >
-                Send a Message
-              </h2>
-              <p
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 'var(--text-base)',
-                  color: 'var(--color-slate)',
-                  lineHeight: 1.7,
-                  marginBottom: '2rem',
-                }}
-              >
-                A contact form with email integration is under construction. In the meantime, reach
-                Rachel directly through social media or visit the gallery on Periwinkle Way.
-              </p>
-
-              {/* Form mockup (visual placeholder) */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  opacity: 0.4,
-                  pointerEvents: 'none',
-                  userSelect: 'none',
-                }}
-                aria-hidden="true"
-              >
-                {['Your Name', 'Email Address', 'Subject'].map((placeholder) => (
-                  <div key={placeholder}>
-                    <div
-                      style={{
-                        height: '48px',
-                        backgroundColor: 'var(--color-offwhite)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--color-border)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        paddingInline: '1rem',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-body)',
-                          fontSize: 'var(--text-sm)',
-                          color: 'var(--color-slate-light)',
-                        }}
-                      >
-                        {placeholder}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                <div
-                  style={{
-                    height: '120px',
-                    backgroundColor: 'var(--color-offwhite)',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--color-border)',
-                    padding: '1rem',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: 'var(--text-sm)',
-                      color: 'var(--color-slate-light)',
-                    }}
-                  >
-                    Your message...
-                  </span>
-                </div>
-                <div
-                  style={{
-                    height: '48px',
-                    backgroundColor: 'var(--color-coral)',
-                    borderRadius: 'var(--radius-full)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-nav)',
-                      fontSize: 'var(--text-sm)',
-                      fontWeight: 600,
-                      color: 'var(--color-white)',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Send Message
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--text-base)',
+                color: 'var(--color-slate)',
+                lineHeight: 1.7,
+                marginBottom: '2rem',
+              }}
+            >
+              Reach Rachel directly through social media, or visit the gallery on Periwinkle Way.
+            </p>
 
             {/* Contact info */}
             <div>
