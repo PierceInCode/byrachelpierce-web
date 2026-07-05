@@ -91,8 +91,12 @@ test.describe('collection browse/filter/paginate/search', () => {
     // Wait for the DOM to settle on the post-navigation result set before
     // taking a one-shot snapshot with `.allTextContents()` — this removes
     // the same URL/content-swap race the `.check()` -> `.click()` fix above
-    // addresses.
-    await expect(page.locator('[data-testid="artwork-title"]')).not.toHaveCount(0);
+    // addresses. Asserting the exact expected count (3) rather than a
+    // non-zero guard is required here: the pre-search sea-life page already
+    // has 8 artwork-title elements, so `not.toHaveCount(0)` would resolve
+    // true against the stale pre-navigation DOM and never force a wait for
+    // the real post-search swap.
+    await expect(page.locator('[data-testid="artwork-title"]')).toHaveCount(3);
     const titles = await page.locator('[data-testid="artwork-title"]').allTextContents();
     expect(titles.sort()).toEqual([
       'Courageous Turtle',
