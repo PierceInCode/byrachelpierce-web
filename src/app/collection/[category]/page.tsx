@@ -10,11 +10,12 @@ import { FilterPanel } from '@/components/collection/FilterPanel';
 import { Pagination } from '@/components/collection/Pagination';
 import { ActiveFilters } from '@/components/collection/ActiveFilters';
 
-// ── Static params for SSG ─────────────────────────────────────────
+// ── Rendering mode ──────────────────────────────────────────────────
+// Architecture §2: this page reads searchParams (q/medium/tags/page).
+// generateStaticParams + searchParams is the R2-audit rendering bug —
+// force-dynamic makes every request re-run the query.
 
-export async function generateStaticParams() {
-  return COLLECTION_CATEGORIES.map((cat) => ({ category: cat.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 // ── Dynamic metadata ──────────────────────────────────────────────
 
