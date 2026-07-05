@@ -14,13 +14,54 @@
 - [x] R0 process retrofit — `r0-process` — gate Spec §5.2 — **MERGED to `main`** (PRs #3, #4; tagged per operator)
 - [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); **production migration run and verified by the operator** (counts matched runbook, Vercel redeployed)
 - [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PR #6 + follow-up PR #7); real images uploaded to Vercel Blob, verified working on a Vercel preview by the operator
-- [ ] R3 collection finish — `r3-collection` — gate Spec §8.2
+- [x] R3 collection finish — `r3-collection` — gate Spec §8.2 — **branch complete, gate green, spec-auditor READY** (not yet merged — awaiting operator PR review/merge + preview verification, Spec §8.2's own final line)
 - [ ] R4 content intake — `r4-content` — gate Spec §9.2 (murals content gates R5)
 - [ ] R5 go-live — `r5-golive` — gate Spec §10.2 + smoke matrix → tag `v1.0.0`
 
-## True current state (2026-07-04, end of R2 session)
+## True current state (2026-07-05, end of R3 session)
 
-**R0, R1, and R2 are all merged to `main` and the repo is fully clean.** `main` HEAD is `a2cb7e7` (merge of follow-up PR #7). R2 (images & performance, Spec §7) is fully shipped: the operator ran the real `sync-art-blob.ts --apply` (1056/1056 uploaded, 0 errors), added the Blob store's env vars in Vercel, confirmed images load correctly on a Vercel preview deploy, and merged PR #6 — then a small follow-up PR #7 landed a fix (`sync-art-blob.ts`'s `.env.local` loading + OIDC-credential acceptance) that PR #6 had missed due to a merge-timing crossover (see "R2 follow-up" below for the full story). All milestone branches (`r1-trail`, `r2-images`, `chore/r2-followup`) are deleted, both locally and on `origin` — nothing stray left over. **⚠ Per operator instruction this session: do NOT start R3 without explicit go-ahead.**
+**R3 (Collection Finish, Spec §8, Architecture §2/§5/§12) is fully built on branch `r3-collection`, gate green, spec-auditor READY.** Built via `superpowers:subagent-driven-development` — 9 implementation tasks, each independently task-reviewed (spec compliance + code quality) before being marked complete, plus a `spec-auditor` whole-branch pass before declaring the PR ready. Not yet merged — that + the operator's Vercel-preview verification (Spec §8.2's own closing line: "pick a category, filter it, page it, search it — results change accordingly") are the remaining steps.
+
+### What R3 changed (see "R3 — collection finish" section below for full detail)
+
+Rendering-mode fix (`/collection` + `/collection/[category]` both `force-dynamic`, Architecture §2); built the `/collection?view=all` all-paintings browse mode that the shipped UI already linked to but never implemented; fixed the fused `'LillyOther plants'` tag bug in `CATEGORY_TAG_MAP.florals` (verified against production by the operator, DECISIONS 029); honest availability display (`src/lib/availability.ts`, Architecture §5.3) replacing a fabricated metadata fallback; design-language empty states for zero-hit search/filter, empty category, and page-out-of-range (Architecture §12.6); removed the dead "Coming Soon" contact form (Architecture A.5); added the `prefers-reduced-motion` media query (Architecture §12.4); component tests for `FilterPanel`/`Pagination`; the full R3 Playwright e2e suite (5 spec files, activated the CI Playwright job).
+
+Two environment fixes landed alongside the feature work: `.env.local`'s `TURSO_DATABASE_URL` was pointing at production Turso (flagged since R2, DECISIONS 026) — fixed to `file:./dev.db` per Spec §2.1's stated default, and the `db:seed-ci`/build env-var relationship this surfaced is now documented (DECISIONS 028). `.prettierignore` also grew a `.superpowers/` entry (this session's own AI-orchestration scratch space, gitignored, unrelated to the deliverable).
+
+### R3 gate result (Spec §8.2, this session, `test-runner`-verified, HEAD after the spec-auditor fix commit)
+
+```
+npm run check                       → lint 0/0, format clean, tsc clean, 71 passed (16 test files)
+npm run test:coverage               → exit 0, thresholds met (80/80). Overall: 89.49% stmts /
+                                       84.39% branches / 97.67% funcs / 90.36% lines (availability.ts
+                                       newly added to the gate, ~100% covered)
+npm run db:seed-ci; npm run build   → SSG build succeeds (34 pages); /collection and
+                                       /collection/[category] both render ƒ (Dynamic), confirming
+                                       the Architecture §2 fix took effect (were ○/● before)
+npm run e2e                         → 12 passed (image-budget 2, collection-journey 4,
+                                       empty-states 2, painting-page 2, trail-signed-out 1,
+                                       contact-page 1 — added post-audit, see below)
+```
+
+### spec-auditor result
+
+**First pass: NOT READY** — 0 BLOCKER, 2 MAJOR, 2 MINOR:
+
+1. MAJOR — the dead-contact-form removal (Spec §8.1.4, Architecture A.5 — "R3 checks this") had zero test coverage. **Fixed**: added `tests/e2e/contact-page.spec.ts` (asserts honest contact details render, no "Form Coming Soon"/disabled-form markup survives).
+2. MAJOR — `PROGRESS.md` itself was stale (still said "do not start R3," R3 unchecked) while the branch was fully built. **Fixed**: this section.
+3. MINOR — `src/lib/constants.ts:148` uses `'Lily'` (single L) matching what the operator's production query actually returned (DECISIONS 029), but Architecture §5.2.3's own parenthetical text says "expect `Lilly`" (double L) — a documentation wording mismatch, not a code defect. The agent cannot edit `docs/`; flagged here for the operator to reconcile the Architecture doc's wording against what production actually has.
+4. MINOR — the §8.1.6 "design-language conformance pass" was interpreted narrowly (the `prefers-reduced-motion` media query + confirming `next/font` `display: swap`), not a full re-audit of every §12 recipe against every collection/painting-page element. Consistent with the plan's judgment that those pages already conformed; noted for completeness, not a defect.
+
+Re-ran the gate after the fix commit (see above, now 12 e2e tests) — clean. **Ready for the operator's PR review.**
+
+### Known, deliberately deferred (not blockers)
+
+- Pagination is only edge-case-tested (page-out-of-range) in e2e, never positive-case-tested with real page-2-differs-from-page-1 content — the CI fixture (20 paintings) is smaller than `PAGE_SIZE` (24), so no category or view can ever have a real second page against this fixture. Not fixable within R3's scope; will resolve naturally once R4's real content lands (528 paintings). Worth remembering if a future fixture change is considered.
+- An `[auth][error] UntrustedHost` warning appears in e2e webServer logs (pre-existing `playwright.config.ts` env config, untouched this milestone) — doesn't fail any current test since no test asserts on an *authenticated* trail state yet, but whoever writes the first such e2e test should check `AUTH_TRUSTED_HOST`/`trustHost` first.
+
+## R2 recap (kept for reference)
+
+**R0, R1, and R2 are all merged to `main` and the repo is fully clean.** `main` HEAD is `a2cb7e7` (merge of follow-up PR #7). R2 (images & performance, Spec §7) is fully shipped: the operator ran the real `sync-art-blob.ts --apply` (1056/1056 uploaded, 0 errors), added the Blob store's env vars in Vercel, confirmed images load correctly on a Vercel preview deploy, and merged PR #6 — then a small follow-up PR #7 landed a fix (`sync-art-blob.ts`'s `.env.local` loading + OIDC-credential acceptance) that PR #6 had missed due to a merge-timing crossover (see "R2 follow-up" below for the full story). All milestone branches (`r1-trail`, `r2-images`, `chore/r2-followup`) are deleted, both locally and on `origin` — nothing stray left over. *(Historical note, now superseded: this session previously carried a "do NOT start R3 without explicit go-ahead" instruction — the operator gave that go-ahead in a later session, and R3 is now built per the section above.)*
 
 ### R1 recap (kept for reference)
 
@@ -100,11 +141,12 @@ npx playwright test tests/e2e/image-budget → 2 passed (grid < 1.5MB, hero < 60
 
 ## Exact next step
 
-**Do not start R3 — explicit operator instruction this session.**
+**R3 is built, gated green, and spec-auditor READY on branch `r3-collection` (not yet merged).**
 
-1. Optional cleanup, not blocking: dedupe the repeated variable lines in `.env.local` from the `vercel env pull` runs this session.
-2. Still open from before: `.env.local`'s `TURSO_DATABASE_URL` points at production Turso rather than `file:./dev.db` (Spec §2.1's default dev mode, DECISIONS 026) — R2's own tooling is unaffected, but plain `npm run dev`/`build` without an override would hit production.
-3. **R3 (collection finish, Spec §8, Architecture §2/§5/§12) starts only when the operator explicitly says so** — do not begin it automatically just because R2 is closed out.
+1. Operator: review and merge the `r3-collection` PR, then do the Spec §8.2 manual check on the Vercel preview — pick a category, filter it, page it, search it, confirm results actually change (this was the exact silently-broken risk R3 fixed).
+2. Operator: reconcile Architecture §5.2.3's parenthetical ("expect `Lilly`") against production's actual tag name (`Lily`, confirmed by the operator's own read-only query, DECISIONS 029) — a doc-wording nit, not a code issue, agent can't edit `docs/`.
+3. **R4 (content intake, Spec §9, Architecture §7/§4.4/§3.3) starts only when the operator explicitly says so** — do not begin it automatically just because R3 is closed out.
+4. Resolved this session (previously open items): `.env.local`'s `TURSO_DATABASE_URL` now correctly points at `file:./dev.db` (was production); the `.env.local` duplicate-line mess from the R2 `vercel env pull` runs was cleaned up as part of that same fix.
 
 ## Open questions for operator
 
