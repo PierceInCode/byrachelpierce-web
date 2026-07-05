@@ -13,14 +13,14 @@
   - [ ] 0.7 Vercel previews confirmed (operator-owned — confirm when done)
 - [x] R0 process retrofit — `r0-process` — gate Spec §5.2 — **MERGED to `main`** (PRs #3, #4; tagged per operator)
 - [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); **production migration run and verified by the operator** (counts matched runbook, Vercel redeployed)
-- [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PR #6); real images uploaded to Vercel Blob, verified working on a Vercel preview by the operator
+- [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PR #6 + follow-up PR #7); real images uploaded to Vercel Blob, verified working on a Vercel preview by the operator
 - [ ] R3 collection finish — `r3-collection` — gate Spec §8.2
 - [ ] R4 content intake — `r4-content` — gate Spec §9.2 (murals content gates R5)
 - [ ] R5 go-live — `r5-golive` — gate Spec §10.2 + smoke matrix → tag `v1.0.0`
 
 ## True current state (2026-07-04, end of R2 session)
 
-**R1 and R2 are both merged to `main`. R2 (images & performance, Spec §7) is fully shipped: the operator ran the real `sync-art-blob.ts --apply` (1056/1056 uploaded, 0 errors), added the Blob store's env vars in Vercel, confirmed images load correctly on a Vercel preview deploy, and merged PR #6. `main` currently HEAD is the R2 merge commit (`5085a22`); one small follow-up PR is in flight (branch `chore/r2-followup`) to land a fix that the R2 PR itself missed — see "R2 follow-up" below. ⚠ Per operator instruction this session: do NOT start R3 without explicit go-ahead.**
+**R0, R1, and R2 are all merged to `main` and the repo is fully clean.** `main` HEAD is `a2cb7e7` (merge of follow-up PR #7). R2 (images & performance, Spec §7) is fully shipped: the operator ran the real `sync-art-blob.ts --apply` (1056/1056 uploaded, 0 errors), added the Blob store's env vars in Vercel, confirmed images load correctly on a Vercel preview deploy, and merged PR #6 — then a small follow-up PR #7 landed a fix (`sync-art-blob.ts`'s `.env.local` loading + OIDC-credential acceptance) that PR #6 had missed due to a merge-timing crossover (see "R2 follow-up" below for the full story). All milestone branches (`r1-trail`, `r2-images`, `chore/r2-followup`) are deleted, both locally and on `origin` — nothing stray left over. **⚠ Per operator instruction this session: do NOT start R3 without explicit go-ahead.**
 
 ### R1 recap (kept for reference)
 
@@ -48,9 +48,9 @@ npm run db:seed-ci; npm build → SSG build succeeds (552 pages) against the fil
 
 The operator ran the runbook (backup → `drizzle-kit migrate` → verify counts → redeploy) against production Turso; counts matched (0 sentinel rows, `trail_completions` populated, no null redemption codes) and Vercel was redeployed. No outstanding R1 follow-up.
 
-## R2 — images & performance (Spec §7, Architecture §6, §12) — code-complete
+## R2 — images & performance (Spec §7, Architecture §6, §12) — MERGED
 
-Branch `r2-images`. Sanctioned deps added: `@vercel/blob` (runtime), `@playwright/test` (dev).
+Was branch `r2-images` (PR #6), now deleted post-merge. Sanctioned deps added: `@vercel/blob` (runtime), `@playwright/test` (dev).
 
 ### What R2 changed
 
@@ -83,7 +83,7 @@ npx playwright test tests/e2e/image-budget → 2 passed (grid < 1.5MB, hero < 60
 4. `.env.local` pointing at production Turso — informational, already flagged (DECISIONS 026), out of R2 scope.
 5. Nothing committed yet at audit time — addressed before merge (PR #6).
 
-## R2 follow-up (branch `chore/r2-followup`, PR pending)
+## R2 follow-up — DONE (PR #7, merged)
 
 **Real Blob upload, done by the operator this session:**
 
@@ -92,16 +92,19 @@ npx playwright test tests/e2e/image-budget → 2 passed (grid < 1.5MB, hero < 60
 - `npx vercel link` + `npx vercel env pull` (scoped `--environment=production` to reach vars that live only on Production/Preview) were used to get `BLOB_STORE_ID` locally; ultimately the static token made this moot, but the pull did leave duplicate var lines in `.env.local` (harmless — later duplicates win — but worth the operator tidying up next time they're in that file).
 - Real upload run: **1056/1056 uploaded, 0 errors, ~202MB.** Verified on a redeployed Vercel preview (images served from the Blob host, confirmed via DevTools/Network) before merging PR #6.
 
-**The gap this follow-up branch fixes:** PR #6 was merged (`5085a22`, 2026-07-04 16:28:48) _before_ a same-session fix commit (`74bd44e`, 16:49:38) was pushed — timing crossed over, so that commit was never part of the merge and `main`'s `scripts/sync-art-blob.ts` is currently the version that does **not** load `.env.local` and **only** accepts a static `BLOB_READ_WRITE_TOKEN` (it would reject the OIDC-pair path). This is the exact fix that made the real upload above work in the working tree at the time — it just needs its own small PR now to land in `main`. Also carries a `.gitignore` addition (`.env*`) that `vercel link` made locally, and this final PROGRESS.md update.
+**The gap PR #7 fixed:** PR #6 was merged (`5085a22`, 2026-07-04 16:28:48) _before_ a same-session fix commit (`74bd44e`, 16:49:38) was pushed — timing crossed over, so that commit was never part of PR #6 and `main`'s `scripts/sync-art-blob.ts` briefly lacked `.env.local` loading and OIDC-credential acceptance (it only accepted a static `BLOB_READ_WRITE_TOKEN`). This was the exact fix that made the real upload above work in the working tree at the time; cherry-picked onto a new branch (`chore/r2-followup`) and landed via **PR #7** (merged, commit `a2cb7e7`), along with the `.gitignore` addition (`.env*`, from `vercel link`) and DECISIONS 027 recording the OIDC/environment discovery.
+
+## Post-merge cleanup (this session)
+
+`main` confirmed fully up to date with `origin/main` (`a2cb7e7`). All three now-merged milestone branches (`r1-trail`, `r2-images`, `chore/r2-followup`) deleted both locally and on `origin` — `git branch -a` shows only `main`, `final-product-planning`, and the unrelated Vercel CVE branch. Working tree clean (only an untracked, non-repo `.lnk` shortcut file remains, ignored).
 
 ## Exact next step
 
 **Do not start R3 — explicit operator instruction this session.**
 
-1. Get the `chore/r2-followup` PR (sync-art-blob.ts fix + `.gitignore` + this PROGRESS.md update) reviewed and merged — small, no new gate needed beyond confirming `npm run check` still passes (it does; verified before this branch was pushed).
-2. Optional cleanup, not blocking: dedupe the repeated variable lines in `.env.local` from the `vercel env pull` runs this session.
-3. Still open from before: `.env.local`'s `TURSO_DATABASE_URL` points at production Turso rather than `file:./dev.db` (Spec §2.1's default dev mode, DECISIONS 026) — R2's own tooling is unaffected, but plain `npm run dev`/`build` without an override would hit production.
-4. **R3 (collection finish, Spec §8, Architecture §2/§5/§12) starts only when the operator explicitly says so** — do not begin it automatically just because R2 is closed out.
+1. Optional cleanup, not blocking: dedupe the repeated variable lines in `.env.local` from the `vercel env pull` runs this session.
+2. Still open from before: `.env.local`'s `TURSO_DATABASE_URL` points at production Turso rather than `file:./dev.db` (Spec §2.1's default dev mode, DECISIONS 026) — R2's own tooling is unaffected, but plain `npm run dev`/`build` without an override would hit production.
+3. **R3 (collection finish, Spec §8, Architecture §2/§5/§12) starts only when the operator explicitly says so** — do not begin it automatically just because R2 is closed out.
 
 ## Open questions for operator
 
