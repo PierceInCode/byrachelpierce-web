@@ -58,8 +58,7 @@ test.describe('collection browse/filter/paginate/search', () => {
     await page.getByRole('checkbox', { name: 'Cats' }).click();
     await page.waitForURL(/tags=/);
 
-    const filteredCount = await page.locator('[data-testid="artwork-card"]').count();
-    expect(filteredCount).toBe(1);
+    await expect(page.locator('[data-testid="artwork-card"]')).toHaveCount(1);
     await expect(page.locator('[data-testid="artwork-title"]')).toHaveText('All These Cats');
   });
 
@@ -89,11 +88,17 @@ test.describe('collection browse/filter/paginate/search', () => {
     await page.getByPlaceholder('Search paintings...').fill('turtle');
     await page.waitForURL(/q=turtle/);
 
+    // Wait for the DOM to settle on the post-navigation result set before
+    // taking a one-shot snapshot with `.allTextContents()` — this removes
+    // the same URL/content-swap race the `.check()` -> `.click()` fix above
+    // addresses.
+    await expect(page.locator('[data-testid="artwork-title"]')).not.toHaveCount(0);
     const titles = await page.locator('[data-testid="artwork-title"]').allTextContents();
-    expect(titles.length).toBeGreaterThan(0);
-    for (const title of titles) {
-      expect(title.toLowerCase()).toContain('turtle');
-    }
+    expect(titles.sort()).toEqual([
+      'Courageous Turtle',
+      'Deep Water Sea Turtle',
+      "Matthew's Turtle",
+    ]);
 
     // Changing the query changes the result set.
     await page.getByPlaceholder('Search paintings...').fill('turtlezzznomatch');
