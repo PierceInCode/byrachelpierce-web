@@ -14,13 +14,13 @@
 - [x] R0 process retrofit — `r0-process` — gate Spec §5.2 — **MERGED to `main`** (PRs #3, #4; tagged per operator)
 - [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); **production migration run and verified by the operator** (counts matched runbook, Vercel redeployed)
 - [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PR #6 + follow-up PR #7); real images uploaded to Vercel Blob, verified working on a Vercel preview by the operator
-- [x] R3 collection finish — `r3-collection` — gate Spec §8.2 — **branch complete, gate green, spec-auditor READY** (not yet merged — awaiting operator PR review/merge + preview verification, Spec §8.2's own final line)
+- [x] R3 collection finish — `r3-collection` — gate Spec §8.2 — **MERGED to `main`** (PR #9, tag `R3`); CI passed on the PR; **operator Vercel-preview verification (Spec §8.2's closing line) still pending**
 - [ ] R4 content intake — `r4-content` — gate Spec §9.2 (murals content gates R5)
 - [ ] R5 go-live — `r5-golive` — gate Spec §10.2 + smoke matrix → tag `v1.0.0`
 
 ## True current state (2026-07-05, end of R3 session)
 
-**R3 (Collection Finish, Spec §8, Architecture §2/§5/§12) is fully built on branch `r3-collection`, gate green, spec-auditor READY.** Built via `superpowers:subagent-driven-development` — 9 implementation tasks, each independently task-reviewed (spec compliance + code quality) before being marked complete, plus a `spec-auditor` whole-branch pass before declaring the PR ready. Not yet merged — that + the operator's Vercel-preview verification (Spec §8.2's own closing line: "pick a category, filter it, page it, search it — results change accordingly") are the remaining steps.
+**R3 (Collection Finish, Spec §8, Architecture §2/§5/§12) is merged to `main`.** Built via `superpowers:subagent-driven-development` — 9 implementation tasks, each independently task-reviewed (spec compliance + code quality) before being marked complete, plus a `spec-auditor` whole-branch pass before the PR was opened. PR #9 merged by the operator; CI passed; `main` fast-forwarded to `fe9677a`; tagged `R3` (pushed). Local branch `r3-collection` still exists (not yet cleaned up — operator didn't request it this session). **Remaining:** the operator's Vercel-preview verification (Spec §8.2's own closing line: "pick a category, filter it, page it, search it — results change accordingly") — this is the one R3 step that isn't done yet.
 
 ### What R3 changed (see "R3 — collection finish" section below for full detail)
 
@@ -141,12 +141,13 @@ npx playwright test tests/e2e/image-budget → 2 passed (grid < 1.5MB, hero < 60
 
 ## Exact next step
 
-**R3 is built, gated green, and spec-auditor READY on branch `r3-collection` (not yet merged).**
+**R3 is merged to `main` (PR #9, tag `R3`). Local git is caught up: `main` fast-forwarded to `fe9677a`, tag `R3` created and pushed to `origin`.**
 
-1. Operator: review and merge the `r3-collection` PR, then do the Spec §8.2 manual check on the Vercel preview — pick a category, filter it, page it, search it, confirm results actually change (this was the exact silently-broken risk R3 fixed).
+1. Operator: do the Spec §8.2 manual check on the Vercel preview (or production, once redeployed) — pick a category, filter it, page it, search it, confirm results actually change (this was the exact silently-broken risk R3 fixed). This is the only R3 item still open.
 2. Operator: reconcile Architecture §5.2.3's parenthetical ("expect `Lilly`") against production's actual tag name (`Lily`, confirmed by the operator's own read-only query, DECISIONS 029) — a doc-wording nit, not a code issue, agent can't edit `docs/`.
-3. **R4 (content intake, Spec §9, Architecture §7/§4.4/§3.3) starts only when the operator explicitly says so** — do not begin it automatically just because R3 is closed out.
-4. Resolved this session (previously open items): `.env.local`'s `TURSO_DATABASE_URL` now correctly points at `file:./dev.db` (was production); the `.env.local` duplicate-line mess from the R2 `vercel env pull` runs was cleaned up as part of that same fix.
+3. Not yet done, not requested this session: delete local/remote `r3-collection` branch (R0–R2 precedent was to clean these up post-merge; left as-is here since it wasn't asked for).
+4. **R4 (content intake, Spec §9, Architecture §7/§4.4/§3.3) starts only when the operator explicitly says so** — do not begin it automatically just because R3 is closed out.
+5. Resolved this session (previously open items): `.env.local`'s `TURSO_DATABASE_URL` now correctly points at `file:./dev.db` (was production); the `.env.local` duplicate-line mess from the R2 `vercel env pull` runs was cleaned up as part of that same fix.
 
 ## Open questions for operator
 
