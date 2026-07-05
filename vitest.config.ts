@@ -7,6 +7,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // R3 Task 5 adds the first Component-layer test (Spec §4.4): tsx files
+  // rendered via @testing-library/react need the automatic JSX runtime so
+  // test files don't need `import React from 'react'`. tsconfig.json's
+  // "jsx": "preserve" is for Next's own SWC build and doesn't apply to
+  // Vitest's esbuild transform. See DECISIONS.md.
+  esbuild: {
+    jsx: 'automatic',
+  },
   test: {
     environment: 'node',
     // tests/e2e/** are Playwright specs (npm run e2e), not Vitest's.
@@ -26,6 +34,7 @@ export default defineConfig({
         'src/lib/trail-emails.ts',
         'src/lib/art-service.ts',
         'src/lib/art-url.ts',
+        'src/lib/availability.ts',
         'src/app/api/trail/checkin/route.ts',
         'src/app/api/trail/status/route.ts',
       ],

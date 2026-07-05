@@ -10,6 +10,7 @@ export function ArtworkCard({ painting }: { painting: Painting }) {
     <Link
       href={`/collection/painting/${painting.slug}`}
       className="card-hover"
+      data-testid="artwork-card"
       style={{
         display: 'block',
         borderRadius: 'var(--radius-xl)',
@@ -51,6 +52,7 @@ export function ArtworkCard({ painting }: { painting: Painting }) {
       </div>
       <div style={{ padding: '0.875rem 1rem' }}>
         <h3
+          data-testid="artwork-title"
           style={{
             fontFamily: 'var(--font-heading)',
             fontSize: 'var(--text-sm)',

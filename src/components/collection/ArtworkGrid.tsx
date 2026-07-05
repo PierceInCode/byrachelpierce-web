@@ -1,20 +1,26 @@
 import type { Painting } from '@/types';
 import { ArtworkCard } from './ArtworkCard';
+import { EmptyState } from './EmptyState';
 
-export function ArtworkGrid({ paintings }: { paintings: Painting[] }) {
+interface ArtworkGridProps {
+  paintings: Painting[];
+  emptyState?: {
+    heading: string;
+    body: string;
+    actionLabel: string;
+    actionHref: string;
+  };
+}
+
+export function ArtworkGrid({ paintings, emptyState }: ArtworkGridProps) {
   if (paintings.length === 0) {
     return (
-      <div
-        style={{
-          textAlign: 'center',
-          padding: '3rem 1rem',
-          color: 'var(--color-slate-light)',
-          fontFamily: 'var(--font-body)',
-          fontSize: 'var(--text-lg)',
-        }}
-      >
-        No paintings found matching your criteria.
-      </div>
+      <EmptyState
+        heading={emptyState?.heading ?? 'No paintings match those filters — yet.'}
+        body={emptyState?.body ?? 'Try clearing a filter or browsing everything instead.'}
+        actionLabel={emptyState?.actionLabel ?? 'Browse everything'}
+        actionHref={emptyState?.actionHref ?? '/collection?view=all'}
+      />
     );
   }
 

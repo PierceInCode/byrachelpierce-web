@@ -10,11 +10,12 @@ import { FilterPanel } from '@/components/collection/FilterPanel';
 import { Pagination } from '@/components/collection/Pagination';
 import { ActiveFilters } from '@/components/collection/ActiveFilters';
 
-// ── Static params for SSG ─────────────────────────────────────────
+// ── Rendering mode ──────────────────────────────────────────────────
+// Architecture §2: this page reads searchParams (q/medium/tags/page).
+// generateStaticParams + searchParams is the R2-audit rendering bug —
+// force-dynamic makes every request re-run the query.
 
-export async function generateStaticParams() {
-  return COLLECTION_CATEGORIES.map((cat) => ({ category: cat.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 // ── Dynamic metadata ──────────────────────────────────────────────
 
@@ -76,7 +77,8 @@ export default async function CollectionCategoryPage({
     total = result.total;
   }
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageOutOfRange = total > 0 && page > totalPages;
   const filterOptions = await getFilterOptions();
 
   return (
@@ -228,7 +230,31 @@ export default async function CollectionCategoryPage({
             </Suspense>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <ArtworkGrid paintings={paintings} />
+              <ArtworkGrid
+                paintings={paintings}
+                emptyState={
+                  pageOutOfRange
+                    ? {
+                        heading: "That page doesn't exist.",
+                        body: `This category only has ${totalPages} page${totalPages !== 1 ? 's' : ''}.`,
+                        actionLabel: 'Back to page 1',
+                        actionHref: `/collection/${cat.slug}`,
+                      }
+                    : hasSearchFilters
+                      ? {
+                          heading: 'No paintings match those filters — yet.',
+                          body: 'Try clearing a filter or searching for something else.',
+                          actionLabel: 'Clear filters',
+                          actionHref: `/collection/${cat.slug}`,
+                        }
+                      : {
+                          heading: 'Nothing here yet.',
+                          body: 'Check back soon — new work is added regularly.',
+                          actionLabel: 'Browse everything',
+                          actionHref: '/collection?view=all',
+                        }
+                }
+              />
               <Suspense>
                 <Pagination currentPage={page} totalPages={totalPages} />
               </Suspense>

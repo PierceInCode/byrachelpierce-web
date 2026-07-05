@@ -1,8 +1,22 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getCategoryCards } from '@/lib/art-service';
+import { Suspense } from 'react';
+import { getCategoryCards, getAllPaintings, searchPaintings } from '@/lib/art-service';
 import { artUrl } from '@/lib/art-url';
+import { PAGE_SIZE } from '@/lib/constants';
+import { ArtworkGrid } from '@/components/collection/ArtworkGrid';
+import { SearchBar } from '@/components/collection/SearchBar';
+import { Pagination } from '@/components/collection/Pagination';
+import type { CategoryCardData } from '@/types';
+
+// ── Rendering mode ──────────────────────────────────────────────────
+// This page reads searchParams (view/q/page) to switch between the
+// category grid and the all-paintings browse view — force-dynamic
+// makes every request re-run the query rather than serving a static
+// snapshot from build time.
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Collection',
@@ -10,9 +24,40 @@ export const metadata: Metadata = {
     'Browse original paintings and prints by Rachel Pierce — Beach & Coastal, Sea Life, Birds & Wildlife, Florals, and more. Gallery on Sanibel Island, Florida.',
 };
 
-export default async function CollectionPage() {
-  const categories = await getCategoryCards();
+export default async function CollectionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string; q?: string; page?: string }>;
+}) {
+  const sp = await searchParams;
+  const query = sp.q ?? '';
+  const isAllView = sp.view === 'all' || !!query || !!sp.page;
 
+  if (isAllView) {
+    const page = Math.max(1, parseInt(sp.page ?? '1', 10) || 1);
+    const { paintings, total } = query
+      ? await searchPaintings(query, {}, { page, limit: PAGE_SIZE })
+      : await getAllPaintings({ page, limit: PAGE_SIZE });
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+    return (
+      <AllPaintingsView
+        paintings={paintings}
+        total={total}
+        page={page}
+        totalPages={totalPages}
+        query={query}
+      />
+    );
+  }
+
+  const categories = await getCategoryCards();
+  return <CategoryGridView categories={categories} />;
+}
+
+// ── Category grid (default) view ────────────────────────────────────
+
+function CategoryGridView({ categories }: { categories: CategoryCardData[] }) {
   return (
     <>
       {/* Hero */}
@@ -200,6 +245,118 @@ export default async function CollectionPage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+// ── All-paintings (browse all) view ─────────────────────────────────
+
+function AllPaintingsView({
+  paintings,
+  total,
+  page,
+  totalPages,
+  query,
+}: {
+  paintings: Awaited<ReturnType<typeof getAllPaintings>>['paintings'];
+  total: number;
+  page: number;
+  totalPages: number;
+  query: string;
+}) {
+  const pageOutOfRange = total > 0 && page > totalPages;
+  const emptyState = pageOutOfRange
+    ? {
+        heading: "That page doesn't exist.",
+        body: `This view only has ${totalPages} page${totalPages !== 1 ? 's' : ''}.`,
+        actionLabel: 'Back to page 1',
+        actionHref: '/collection?view=all',
+      }
+    : query
+      ? {
+          heading: 'No paintings match that search — yet.',
+          body: 'Try a different search term or browse everything instead.',
+          actionLabel: 'Clear search',
+          actionHref: '/collection?view=all',
+        }
+      : {
+          heading: 'Nothing here yet.',
+          body: 'Check back soon — new work is added regularly.',
+          actionLabel: 'Back to categories',
+          actionHref: '/collection',
+        };
+
+  return (
+    <>
+      <section
+        style={{
+          backgroundColor: 'var(--color-teal)',
+          padding: 'clamp(3.5rem, 7vw, 6rem) 0 clamp(2.5rem, 5vw, 4.5rem)',
+        }}
+      >
+        <div className="container-site">
+          <h1
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: 'var(--text-5xl)',
+              fontWeight: 700,
+              color: 'var(--color-white)',
+              lineHeight: 1.1,
+              marginBottom: '1rem',
+            }}
+          >
+            All Paintings
+          </h1>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--text-base)',
+              color: 'rgba(255,255,255,0.82)',
+              maxWidth: '52ch',
+              lineHeight: 1.65,
+            }}
+          >
+            {total} original painting{total !== 1 ? 's' : ''} and prints by Rachel Pierce.
+          </p>
+        </div>
+      </section>
+      <section
+        style={{
+          backgroundColor: 'var(--color-white)',
+          padding: 'clamp(2rem, 4vw, 3rem) 0 clamp(3rem, 6vw, 5rem)',
+        }}
+      >
+        <div className="container-site">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              marginBottom: '1.5rem',
+            }}
+          >
+            <Suspense>
+              <SearchBar />
+            </Suspense>
+            <Link
+              href="/collection"
+              style={{
+                fontFamily: 'var(--font-nav)',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-teal)',
+                textDecoration: 'none',
+              }}
+            >
+              &larr; Browse by Category
+            </Link>
+          </div>
+          <ArtworkGrid paintings={paintings} emptyState={emptyState} />
+          <Suspense>
+            <Pagination currentPage={page} totalPages={totalPages} />
+          </Suspense>
         </div>
       </section>
     </>

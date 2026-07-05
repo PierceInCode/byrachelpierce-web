@@ -6,6 +6,7 @@ import { db } from '@/db';
 import { paintings } from '@/db/schema';
 import { getPaintingBySlug, getRelatedPaintings } from '@/lib/art-service';
 import { artUrl } from '@/lib/art-url';
+import { getAvailabilityDisplay } from '@/lib/availability';
 import { ArtworkGrid } from '@/components/collection/ArtworkGrid';
 
 // ── Static params for SSG ─────────────────────────────────────────
@@ -28,7 +29,7 @@ export async function generateMetadata({
 
   return {
     title: painting.title,
-    description: `"${painting.title}" — ${painting.medium ?? 'original artwork'} by Rachel Pierce. ${painting.availability ?? 'Available at the Sanibel Island gallery.'}`,
+    description: `"${painting.title}" — ${painting.medium ?? 'original artwork'} by Rachel Pierce.${painting.availability ? ` ${painting.availability}.` : ''}`,
     openGraph: painting.webImagePath ? { images: [artUrl(painting.webImagePath)] } : undefined,
   };
 }
@@ -46,6 +47,7 @@ export default async function PaintingDetailPage({
   if (!painting) notFound();
 
   const related = await getRelatedPaintings(painting.id, 6);
+  const availability = getAvailabilityDisplay(painting.availability);
 
   // Group tags by category for display
   const tagsByCategory: Record<string, string[]> = {};
@@ -268,13 +270,30 @@ export default async function PaintingDetailPage({
                     </dd>
                   </>
                 )}
-                {painting.availability && (
+                {availability && (
                   <>
                     <dt style={{ color: 'var(--color-slate-light)', fontWeight: 600 }}>
                       Availability
                     </dt>
                     <dd style={{ color: 'var(--color-slate-dark)', margin: 0 }}>
-                      {painting.availability}
+                      {availability.variant === 'sold' ? (
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-nav)',
+                            fontSize: '12px',
+                            color: 'var(--color-slate)',
+                            backgroundColor: 'var(--color-offwhite)',
+                            border: '1px solid var(--color-border)',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: 'var(--radius-full)',
+                            letterSpacing: '0.04em',
+                          }}
+                        >
+                          {availability.label}
+                        </span>
+                      ) : (
+                        availability.label
+                      )}
                     </dd>
                   </>
                 )}
@@ -295,6 +314,34 @@ export default async function PaintingDetailPage({
                   </>
                 )}
               </dl>
+
+              {/* Availability cross-sell CTA */}
+              {availability?.cta && (
+                <a
+                  href={availability.cta.href}
+                  target={availability.cta.href.startsWith('http') ? '_blank' : undefined}
+                  rel={availability.cta.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="btn-ghost-teal"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontFamily: 'var(--font-nav)',
+                    fontSize: 'var(--text-sm)',
+                    fontWeight: 600,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-teal)',
+                    border: '2px solid var(--color-teal)',
+                    borderRadius: 'var(--radius-full)',
+                    padding: '0.625rem 1.5rem',
+                    textDecoration: 'none',
+                    minHeight: '44px',
+                    marginBottom: '1.5rem',
+                  }}
+                >
+                  {availability.cta.label}
+                </a>
+              )}
 
               {/* Notes */}
               {painting.notes && (
