@@ -145,7 +145,8 @@ export const CATEGORY_TAG_MAP: Record<
       'Sea oats / dune grass',
       'Bougainvillea',
       'Bird of Paradise',
-      'LillyOther plants',
+      'Lily',
+      'Other plants',
     ],
   },
   abstracts: {
