@@ -2,6 +2,15 @@
 
 > The agent updates this at the end of EVERY session. The operator verifies it before /clear.
 
+## ⚠ STOP — read before doing anything else this session
+
+**Do not start R4 under any circumstances until the operator explicitly states both of the following are done and gives the result:**
+
+1. PR #10 (`docs/r3-close-out`) merged.
+2. The operator's Spec §8.2 Vercel-preview manual check for R3 (pick a category, filter it, page it, search it — confirm results actually change) completed.
+
+This is an explicit operator instruction (2026-07-05), not a default inference from milestone order — it overrides the general "gates green → next milestone" pattern until the operator says otherwise. If the operator asks to start R4 without stating both items are done, ask for confirmation of both before proceeding rather than assuming it's fine because R3's automated gate passed.
+
 ## Milestone status (plan: `docs/FINAL-BUILD-SPEC.md`)
 
 - [ ] **Phase 0** (operator) — unblocked per DECISIONS 013 (0.1 and 0.2 deferred/substituted, not gating).
@@ -143,11 +152,14 @@ npx playwright test tests/e2e/image-budget → 2 passed (grid < 1.5MB, hero < 60
 
 **R3 is merged to `main` (PR #9, tag `R3`). Local git is caught up: `main` fast-forwarded to `fe9677a`, tag `R3` created and pushed to `origin`.**
 
-1. Operator: do the Spec §8.2 manual check on the Vercel preview (or production, once redeployed) — pick a category, filter it, page it, search it, confirm results actually change (this was the exact silently-broken risk R3 fixed). This is the only R3 item still open.
-2. Operator: reconcile Architecture §5.2.3's parenthetical ("expect `Lilly`") against production's actual tag name (`Lily`, confirmed by the operator's own read-only query, DECISIONS 029) — a doc-wording nit, not a code issue, agent can't edit `docs/`.
-3. Not yet done, not requested this session: delete local/remote `r3-collection` branch (R0–R2 precedent was to clean these up post-merge; left as-is here since it wasn't asked for).
-4. **R4 (content intake, Spec §9, Architecture §7/§4.4/§3.3) starts only when the operator explicitly says so** — do not begin it automatically just because R3 is closed out.
-5. Resolved this session (previously open items): `.env.local`'s `TURSO_DATABASE_URL` now correctly points at `file:./dev.db` (was production); the `.env.local` duplicate-line mess from the R2 `vercel env pull` runs was cleaned up as part of that same fix.
+**Operator-stated plan (2026-07-05): handling the two items below after a restart, then will explicitly confirm completion before R4 starts. See the STOP banner at the top of this file — do not proceed to R4 on milestone-order inference alone; wait for that explicit confirmation.**
+
+1. Operator: merge PR #10 (`docs/r3-close-out`).
+2. Operator: do the Spec §8.2 manual check on the Vercel preview (or production, once redeployed) — pick a category, filter it, page it, search it, confirm results actually change (this was the exact silently-broken risk R3 fixed). This is the only R3 functional item still open.
+3. Operator: reconcile Architecture §5.2.3's parenthetical ("expect `Lilly`") against production's actual tag name (`Lily`, confirmed by the operator's own read-only query, DECISIONS 029) — a doc-wording nit, not a code issue, agent can't edit `docs/`. Not part of the two gating items above, but still open.
+4. Not yet done, not requested this session: delete local/remote `r3-collection` branch (R0–R2 precedent was to clean these up post-merge; left as-is here since it wasn't asked for).
+5. **R4 (content intake, Spec §9, Architecture §7/§4.4/§3.3) starts only when the operator explicitly confirms items 1 and 2 above are done** — do not begin it automatically just because R3 is closed out, and do not treat R3's automated gate having passed as sufficient on its own.
+6. Resolved this session (previously open items): `.env.local`'s `TURSO_DATABASE_URL` now correctly points at `file:./dev.db` (was production); the `.env.local` duplicate-line mess from the R2 `vercel env pull` runs was cleaned up as part of that same fix.
 
 ## Open questions for operator
 
