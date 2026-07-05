@@ -26,6 +26,7 @@ export default defineConfig({
         'src/lib/trail-emails.ts',
         'src/lib/art-service.ts',
         'src/lib/art-url.ts',
+        'src/lib/availability.ts',
         'src/app/api/trail/checkin/route.ts',
         'src/app/api/trail/status/route.ts',
       ],
