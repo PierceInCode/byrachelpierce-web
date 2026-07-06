@@ -40,6 +40,13 @@ public/art/
 *.db-journal
 backups/
 
+# R4 content-intake pre-fill sheet — regenerated from the DB by
+# scripts/export-catalog-csv.ts (authoritative run is against production).
+# Must not be committed from a build session with dev-DB data (DECISIONS 031).
+# The ingest REPORTS (ingest-report-*.md) and the murals.csv template ARE
+# committed (Spec §9.2), so ignore only this generated sheet.
+docs/intake/paintings.csv
+
 # Vitest coverage output
 coverage/
 
