@@ -4,11 +4,13 @@
 
 ## ⚠ STOP — read before doing anything else this session
 
-**⛔ APPLY MIGRATION `0003` TO PRODUCTION BEFORE MERGING PR #11.** The `r4-content` code adds `width_in`/`height_in`/`depth_in` to the Drizzle schema, so every paintings `select()` now references those columns. Merging to `main` deploys to **production**, and production SSG prerender reads production Turso — if the columns don't exist there, the **live site build fails** (`no such column: width_in`; this already failed the r4-content preview deploy, 2026-07-06). Applying the additive migration first is safe for the currently-live site (it selects the old column set and is unaffected by extra columns existing). **Correct order: backup → apply `0003` to prod → confirm preview rebuilds green → merge.**
+**✅ PRODUCTION MIGRATIONS `0001`+`0002`+`0003` APPLIED 2026-07-06 (agent, operator-authorized — see DECISIONS 035).** The R4 preview deploy failed with `no such column: width_in`, which uncovered that **production had never actually received R1's migration** despite PROGRESS previously claiming it was operator-verified (it was not — the operator confirmed he did not run it). Production Turso (`byrachelpierce-pierceincode…turso.io`, the same DB Vercel Production uses — confirmed) was at pre-R1 schema. With explicit operator authorization to override Iron Rule 1 and "do it correctly," the agent applied `0001` (create `trail_completions`), `0002` (move the 1 sentinel's redemption code into it, delete the sentinel), and `0003` (painting dimension columns), after backing up `trail_progress` + `paintings` to `backups/`, and seeded drizzle's `__drizzle_migrations` tracking (now 4 rows) so future migrations work normally. Verified: `trail_completions` exists (1 completion preserved), 0 sentinels, `trail_progress` 4→3, 528 paintings unchanged, dimension columns present. **This also fixed a latent production bug** — the deployed trail feature had been querying a non-existent table since R1.
 
-**Do not start R5 (go-live) until the operator confirms R4's content is real and applied.** R5 may not begin until:
+**Next: confirm the `r4-content` preview rebuilds green, then merge PR #11.** (A push of this doc update re-triggers the preview build.)
 
-1. Migration `0003` applied to production and PR #11 merged (in that order).
+**Do not start R5 (go-live) until R4's content is real and applied.** R5 may not begin until:
+
+1. PR #11 merged (production is now migration-ready, so merging is safe).
 2. The operator has run the R4 content ritual against **production**: filled the CSVs, run `export-catalog-csv` (prod) → filled `paintings.csv`, `ingest-content.ts --dry-run` reviewed → `--apply` (after a backup) → redeployed, and **all 14 murals show real names** on the deployed site (Spec §9.2 / Iron Invariant 3 — the trail is a headline feature and may not go live with placeholder fiction).
 
 R4's **code** is complete and gated; R4's **content** is an operator+Rachel loop that runs against production and is not something the agent can do. R5's reading list also requires re-flagging the deferred secret rotation (DECISIONS 013 / Phase 0.1) before go-live.
@@ -23,7 +25,7 @@ R4's **code** is complete and gated; R4's **content** is an operator+Rachel loop
   - [ ] 0.6 art folder backed up (operator-owned — confirm when done)
   - [ ] 0.7 Vercel previews confirmed (operator-owned — confirm when done)
 - [x] R0 process retrofit — `r0-process` — gate Spec §5.2 — **MERGED to `main`** (PRs #3, #4)
-- [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); production migration run + verified by operator
+- [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); **production migration was NOT applied at R1 despite the old record — corrected: applied 2026-07-06 (DECISIONS 035)**
 - [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PRs #6, #7); real images on Vercel Blob, verified on a preview
 - [x] R3 collection finish — `r3-collection` — gate Spec §8.2 — **MERGED to `main`** (PR #9, tag `R3`); operator Vercel-preview verification **DONE 2026-07-06** (looked good); close-out PR #10 merged
 - [x] **R4 content intake — `r4-content` — gate Spec §9.2 — CODE COMPLETE, gated green, PR open (see below).** Content apply to production is the operator loop, still pending.
@@ -108,6 +110,6 @@ Not requested this session, left as-is: deleting the merged `r3-collection` bran
 
 **R2 (images & performance, Spec §7) — MERGED (PRs #6, #7).** `src/lib/art-url.ts` as the sole URL-assembly point; `next.config.ts` Blob `remotePatterns`; 4 render sites migrated to `next/image` + `artUrl()`; `scripts/sync-art-blob.ts`; Playwright image-budget scaffold. Operator uploaded 1056/1056 images to a Vercel Blob store, verified on a preview. Local/CLI Blob access needs a static token or explicit Development OIDC trust (DECISIONS 027) — relevant if R4 ever re-syncs images.
 
-**R1 (trail correctness, Spec §6) — MERGED (PR #5, tag `R1`); production migration run + verified.** `trail_completions` table (retires the `mural_id = 0` sentinel); race-safe completion (`INSERT … ON CONFLICT DO NOTHING RETURNING`); CSPRNG redemption codes; emails gated on `completionInserted`; content honesty (real location names, fabricated description/year removed — the exact suppression R4 now reverses by data presence). `mural-data.ts` has 14 murals; all range checks derive from `MURAL_LOCATIONS.length`.
+**R1 (trail correctness, Spec §6) — MERGED (PR #5, tag `R1`); production migration was NOT run at R1 (the old "operator-verified" record was mistaken) — corrected 2026-07-06, DECISIONS 035.** `trail_completions` table (retires the `mural_id = 0` sentinel); race-safe completion (`INSERT … ON CONFLICT DO NOTHING RETURNING`); CSPRNG redemption codes; emails gated on `completionInserted`; content honesty (real location names, fabricated description/year removed — the exact suppression R4 now reverses by data presence). `mural-data.ts` has 14 murals; all range checks derive from `MURAL_LOCATIONS.length`.
 
 **R0 (process retrofit) — MERGED (PRs #3, #4).** Tooling gates, CI (`.github/workflows/ci.yml`), branch discipline, coverage thresholds. Phase-0 secret rotation + branch protection deferred/substituted (DECISIONS 013).
