@@ -6,12 +6,11 @@
 
 **✅ PRODUCTION MIGRATIONS `0001`+`0002`+`0003` APPLIED 2026-07-06 (agent, operator-authorized — see DECISIONS 035).** The R4 preview deploy failed with `no such column: width_in`, which uncovered that **production had never actually received R1's migration** despite PROGRESS previously claiming it was operator-verified (it was not — the operator confirmed he did not run it). Production Turso (`byrachelpierce-pierceincode…turso.io`, the same DB Vercel Production uses — confirmed) was at pre-R1 schema. With explicit operator authorization to override Iron Rule 1 and "do it correctly," the agent applied `0001` (create `trail_completions`), `0002` (move the 1 sentinel's redemption code into it, delete the sentinel), and `0003` (painting dimension columns), after backing up `trail_progress` + `paintings` to `backups/`, and seeded drizzle's `__drizzle_migrations` tracking (now 4 rows) so future migrations work normally. Verified: `trail_completions` exists (1 completion preserved), 0 sentinels, `trail_progress` 4→3, 528 paintings unchanged, dimension columns present. **This also fixed a latent production bug** — the deployed trail feature had been querying a non-existent table since R1.
 
-**Next: confirm the `r4-content` preview rebuilds green, then merge PR #11.** (A push of this doc update re-triggers the preview build.)
+**✅ PR #11 MERGED 2026-07-06; production deploy is green and verified serving** on the public alias `byrachelpierce-web.vercel.app` (`/`, `/collection`, `/collection/painting/2019_06_01_single-flamingo` — the page that previously failed the build — and `/murals/trail` all return 200; painting title renders). Local `main` synced to merge commit `2c9f15e`.
 
-**Do not start R5 (go-live) until R4's content is real and applied.** R5 may not begin until:
+**Do not start R5 (go-live) until R4's CONTENT is real and applied.** The remaining R4 step is the operator+Rachel content loop:
 
-1. PR #11 merged (production is now migration-ready, so merging is safe).
-2. The operator has run the R4 content ritual against **production**: filled the CSVs, run `export-catalog-csv` (prod) → filled `paintings.csv`, `ingest-content.ts --dry-run` reviewed → `--apply` (after a backup) → redeployed, and **all 14 murals show real names** on the deployed site (Spec §9.2 / Iron Invariant 3 — the trail is a headline feature and may not go live with placeholder fiction).
+- Run the R4 content ritual against **production**: fill the CSVs, run `export-catalog-csv` (prod) → fill `paintings.csv`, `ingest-content.ts --dry-run` reviewed → `--apply` (after a backup) → redeploy, and confirm **all 14 murals show real names** on the deployed site (Spec §9.2 / Iron Invariant 3 — the trail is a headline feature and may not go live with placeholder fiction).
 
 R4's **code** is complete and gated; R4's **content** is an operator+Rachel loop that runs against production and is not something the agent can do. R5's reading list also requires re-flagging the deferred secret rotation (DECISIONS 013 / Phase 0.1) before go-live.
 
@@ -28,10 +27,10 @@ R4's **code** is complete and gated; R4's **content** is an operator+Rachel loop
 - [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); **production migration was NOT applied at R1 despite the old record — corrected: applied 2026-07-06 (DECISIONS 035)**
 - [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PRs #6, #7); real images on Vercel Blob, verified on a preview
 - [x] R3 collection finish — `r3-collection` — gate Spec §8.2 — **MERGED to `main`** (PR #9, tag `R3`); operator Vercel-preview verification **DONE 2026-07-06** (looked good); close-out PR #10 merged
-- [x] **R4 content intake — `r4-content` — gate Spec §9.2 — CODE COMPLETE, gated green, PR open (see below).** Content apply to production is the operator loop, still pending.
+- [x] **R4 content intake — `r4-content` — gate Spec §9.2 — MERGED (PR #11) + deployed to production 2026-07-06, verified serving.** Production migrated (`0001`–`0003`, DECISIONS 035). Remaining: the operator+Rachel CONTENT loop (fill CSVs → ingest → real mural names live).
 - [ ] R5 go-live — `r5-golive` — gate Spec §10.2 + smoke matrix → tag `v1.0.0`
 
-## True current state (2026-07-06, end of R4 code session)
+## True current state (2026-07-06, R4 merged + deployed)
 
 **R4 (Content Intake, Spec §9, Architecture §7/§4.4/§3.3) code is complete on branch `r4-content` and all gates are green.** Built directly (not via subagent-driven-development this time — smaller, script-heavy milestone); every test suite/build/gate run was delegated to `test-runner`, and a `spec-auditor` whole-branch pass ran before the PR was declared ready. Auditor verdict after the PROGRESS fix below: 0 BLOCKER, 0 MAJOR, 2 MINOR (both addressed or documented). **The two R3 close-out items are now both done** (PR #10 merged; operator's §8.2 preview check passed 2026-07-06), which is what unblocked R4.
 
@@ -86,17 +85,15 @@ Auditor confirmed all five §9.1 items present + correct, all Iron rules pass (n
 
 ## Exact next step
 
-**R4 code is done and gated green; open PR #11 for `r4-content` is the deliverable of this session.** The remaining R4 work is the operator loop against production. **Order matters — the migration must precede the merge (see the STOP banner):**
+**R4 is merged (PR #11), production is migrated (`0001`–`0003`), and the production deploy is green + verified serving.** All that remains before R5 is the operator+Rachel **content loop** against production:
 
-1. Operator: **back up** production Turso, then **apply migration `0003` to production** (`drizzle-kit migrate` per the Architecture §3.4 runbook). Safe for the currently-live site (additive; live `main` selects the old column set). This is the fix for the failed r4-content preview deploy — once the columns exist, the preview rebuilds green.
-2. Operator: confirm the `r4-content` **preview deploy is green**, then **review + merge PR #11**. (Merging deploys `main`→production, which now has the columns.)
-3. Operator + Rachel: fill `docs/intake/murals.csv` (14 murals) and, after running `npx tsx scripts/export-catalog-csv.ts` against production, fill `docs/intake/paintings.csv`. Filling can start anytime once the formats are merged.
-4. Operator: `ingest-content.ts --dry-run` → review the report → `--apply` (after backup) → redeploy. Verify on the preview/production: all 14 murals show real names; spot-check 5 paintings vs the CSV (size, availability). Commit `docs/intake/ingest-report-*.md`.
-5. **R5 (go-live) starts only when mural content is real and applied** (Spec §9.2 ship-line note; Iron Invariant 3). Painting-data completeness is NOT gating (unknown availability renders honestly as nothing).
+1. Operator + Rachel: fill `docs/intake/murals.csv` (14 murals) and, after running `npx tsx scripts/export-catalog-csv.ts` against production, fill `docs/intake/paintings.csv`.
+2. Operator: `ingest-content.ts --dry-run` → review the report → `--apply` (after backup) → redeploy. Verify on production: all 14 murals show real names; spot-check 5 paintings vs the CSV (size, availability). Commit `docs/intake/ingest-report-*.md`.
+3. **R5 (go-live) starts only when mural content is real and applied** (Spec §9.2 ship-line note; Iron Invariant 3). Painting-data completeness is NOT gating (unknown availability renders honestly as nothing). R5 also needs the deferred secret rotation re-flagged (DECISIONS 013 / Phase 0.1).
 
-**Note on the preview failure (2026-07-06):** `no such column: width_in` on the r4-content preview is the additive-migration discipline working as intended — the code that references the new columns deployed to a preview reading production Turso before the production migration ran. Not a code defect; resolved by step 1. Recorded as DECISIONS 034.
+**How production ops were done this session (reference for R5):** the turso cloud CLI is NOT on this machine's PATH, so backup + migration were done via `@libsql/client` + drizzle's migrator, reading the production creds from `.env.local`'s commented lines (never printed). Production Turso = `byrachelpierce-pierceincode.aws-us-east-1.turso.io` (same DB Vercel Production uses). Anonymous smoke tests must hit the **public alias `byrachelpierce-web.vercel.app`** — the deployment-specific `*-projects.vercel.app` URLs sit behind Vercel Deployment Protection (302 → SSO). See DECISIONS 034 (deploy ordering) + 035 (the R1-migration-gap fix).
 
-Not requested this session, left as-is: deleting the merged `r3-collection` branch (R0–R2 precedent was to clean up post-merge).
+Not requested this session, left as-is: deleting the merged `r3-collection` and `r4-content` branches (R0–R2 precedent was to clean up post-merge); the untracked `R3-PLAN.md` scratch file in the repo root.
 
 ## Open questions for operator
 
