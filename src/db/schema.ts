@@ -219,6 +219,13 @@ export const paintings = sqliteTable('paintings', {
   formatType: text('format_type'),
   location: text('location'),
   physicalSize: text('physical_size'),
+  // R4 (Architecture §3.3): numeric physical dimensions parsed from the
+  // human-entered `physicalSize` string by scripts/ingest-content.ts. NULL
+  // means unknown — the ingest never guesses. The future AR tool (§13) reads
+  // ONLY these numeric columns, never the free-text `physicalSize`.
+  widthIn: real('width_in'), // physical width, inches. NULL = unknown
+  heightIn: real('height_in'), // physical height, inches. NULL = unknown
+  depthIn: real('depth_in'), // canvas depth, inches. NULL = unknown (0.75 assumed for display)
   availability: text('availability'),
   series: text('series'),
   notes: text('notes'),
