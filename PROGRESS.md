@@ -4,9 +4,11 @@
 
 ## ⚠ STOP — read before doing anything else this session
 
-**Do not start R5 (go-live) until the operator confirms R4's content is real and applied.** Specifically, R5 may not begin until:
+**⛔ APPLY MIGRATION `0003` TO PRODUCTION BEFORE MERGING PR #11.** The `r4-content` code adds `width_in`/`height_in`/`depth_in` to the Drizzle schema, so every paintings `select()` now references those columns. Merging to `main` deploys to **production**, and production SSG prerender reads production Turso — if the columns don't exist there, the **live site build fails** (`no such column: width_in`; this already failed the r4-content preview deploy, 2026-07-06). Applying the additive migration first is safe for the currently-live site (it selects the old column set and is unaffected by extra columns existing). **Correct order: backup → apply `0003` to prod → confirm preview rebuilds green → merge.**
 
-1. PR for `r4-content` is merged.
+**Do not start R5 (go-live) until the operator confirms R4's content is real and applied.** R5 may not begin until:
+
+1. Migration `0003` applied to production and PR #11 merged (in that order).
 2. The operator has run the R4 content ritual against **production**: filled the CSVs, run `export-catalog-csv` (prod) → filled `paintings.csv`, `ingest-content.ts --dry-run` reviewed → `--apply` (after a backup) → redeployed, and **all 14 murals show real names** on the deployed site (Spec §9.2 / Iron Invariant 3 — the trail is a headline feature and may not go live with placeholder fiction).
 
 R4's **code** is complete and gated; R4's **content** is an operator+Rachel loop that runs against production and is not something the agent can do. R5's reading list also requires re-flagging the deferred secret rotation (DECISIONS 013 / Phase 0.1) before go-live.
@@ -82,13 +84,15 @@ Auditor confirmed all five §9.1 items present + correct, all Iron rules pass (n
 
 ## Exact next step
 
-**R4 code is done and gated green; open PR for `r4-content` is the deliverable of this session.** The remaining R4 work is the operator content loop, which runs against production:
+**R4 code is done and gated green; open PR #11 for `r4-content` is the deliverable of this session.** The remaining R4 work is the operator loop against production. **Order matters — the migration must precede the merge (see the STOP banner):**
 
-1. Operator: review + merge the `r4-content` PR.
-2. Operator + Rachel: fill `docs/intake/murals.csv` (14 murals) and, after running `npx tsx scripts/export-catalog-csv.ts` against production, fill `docs/intake/paintings.csv`. This can start immediately — the formats are merged.
-3. Operator: run the dimensions migration (`0003`) against production **after a backup** (Architecture §3.4 ritual).
+1. Operator: **back up** production Turso, then **apply migration `0003` to production** (`drizzle-kit migrate` per the Architecture §3.4 runbook). Safe for the currently-live site (additive; live `main` selects the old column set). This is the fix for the failed r4-content preview deploy — once the columns exist, the preview rebuilds green.
+2. Operator: confirm the `r4-content` **preview deploy is green**, then **review + merge PR #11**. (Merging deploys `main`→production, which now has the columns.)
+3. Operator + Rachel: fill `docs/intake/murals.csv` (14 murals) and, after running `npx tsx scripts/export-catalog-csv.ts` against production, fill `docs/intake/paintings.csv`. Filling can start anytime once the formats are merged.
 4. Operator: `ingest-content.ts --dry-run` → review the report → `--apply` (after backup) → redeploy. Verify on the preview/production: all 14 murals show real names; spot-check 5 paintings vs the CSV (size, availability). Commit `docs/intake/ingest-report-*.md`.
 5. **R5 (go-live) starts only when mural content is real and applied** (Spec §9.2 ship-line note; Iron Invariant 3). Painting-data completeness is NOT gating (unknown availability renders honestly as nothing).
+
+**Note on the preview failure (2026-07-06):** `no such column: width_in` on the r4-content preview is the additive-migration discipline working as intended — the code that references the new columns deployed to a preview reading production Turso before the production migration ran. Not a code defect; resolved by step 1. Recorded as DECISIONS 034.
 
 Not requested this session, left as-is: deleting the merged `r3-collection` branch (R0–R2 precedent was to clean up post-merge).
 
