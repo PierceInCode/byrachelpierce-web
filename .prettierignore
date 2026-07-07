@@ -10,3 +10,6 @@ scripts/art-data.json
 coverage/
 .github/workflows/ci.yml
 .superpowers/
+.chuck/session-state.md
+.chuck/run.lock
+.chuck/mode
