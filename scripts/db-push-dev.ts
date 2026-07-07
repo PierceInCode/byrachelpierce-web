@@ -25,16 +25,21 @@ import { isMain } from './lib/entrypoint';
 export const REFUSAL_TOKEN = 'DB PUSH REFUSED';
 
 /**
- * Resolve the effective TURSO_DATABASE_URL the way drizzle-kit would see it:
- * a non-empty `process.env` value wins; otherwise the ACTIVE (uncommented)
- * assignment in `.env.local`. Commented (`#`-prefixed) lines — where the
- * production creds live — can never match, so this never surfaces them.
+ * Resolve the effective TURSO_DATABASE_URL the way drizzle-kit would see it.
+ *
+ * F4 (audit): a DEFINED `process.env` value IS the effective URL — even when it
+ * is empty or whitespace-only. drizzle-kit would see that empty value and act on
+ * it, so a set-but-empty `TURSO_DATABASE_URL` must fall through to the refusal
+ * path (it does not start with `file:`), NOT silently resolve to dev.db. Only an
+ * UNDEFINED env var falls back to the ACTIVE (uncommented) assignment in
+ * `.env.local`. Commented (`#`-prefixed) lines — where the production creds
+ * live — can never match, so this never surfaces them.
  */
 export function resolveEffectiveUrl(
   processUrl: string | undefined,
   envLocalContent: string,
 ): string | undefined {
-  if (processUrl !== undefined && processUrl.trim() !== '') return processUrl;
+  if (processUrl !== undefined) return processUrl;
 
   const match = envLocalContent.match(
     /^[ \t]*TURSO_DATABASE_URL[ \t]*=[ \t]*["']?([^"'\r\n]+?)["']?[ \t]*$/m,

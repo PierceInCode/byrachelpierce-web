@@ -19,8 +19,15 @@ describe('resolveEffectiveUrl (db:push:dev guard)', () => {
     expect(resolveEffectiveUrl(undefined, envLocal)).toBe('file:./dev.db');
   });
 
-  it('treats an empty-string process env value as unset', () => {
-    expect(resolveEffectiveUrl('', envLocal)).toBe('file:./dev.db');
+  // F4 (audit): a DEFINED env var IS the effective URL, even when empty/whitespace.
+  // Falling back to .env.local for a set-but-empty value is fail-open — an empty
+  // TURSO_DATABASE_URL must reach the refusal path, not silently resolve to dev.db.
+  it('treats a set-but-empty process env value as the effective URL (not unset)', () => {
+    expect(resolveEffectiveUrl('', envLocal)).toBe('');
+  });
+
+  it('treats a whitespace-only process env value as the effective URL (not unset)', () => {
+    expect(resolveEffectiveUrl('   ', envLocal)).toBe('   ');
   });
 
   it('never reads a commented-out (production) .env.local line', () => {

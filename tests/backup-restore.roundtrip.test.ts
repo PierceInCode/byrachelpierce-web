@@ -115,3 +115,31 @@ describe('backup → restore roundtrip', () => {
     }
   });
 });
+
+describe('restoreTables is atomic (F2 — a mid-restore collision rolls everything back)', () => {
+  it('throws on a PK collision AND leaves the destination byte-state unchanged', async () => {
+    // A conflict DB pre-seeded with a users row whose PK collides with the dump's
+    // 'user-1'. Restore inserts parents-first: tag_categories succeeds, then the
+    // users INSERT throws on the UNIQUE/PK collision. Non-transactionally, the
+    // committed tag_categories row would persist (Bill's proof). Transactionally,
+    // the whole restore must roll back — the tag_categories rows must NOT appear.
+    const conflict = await freshDb('conflict');
+    try {
+      await conflict.execute({
+        sql: 'INSERT INTO users (id, name, email) VALUES (?, ?, ?)',
+        args: ['user-1', 'Preexisting', 'preexisting@example.test'],
+      });
+
+      const before: Record<string, number> = {};
+      for (const { sql } of BACKUP_TABLES) before[sql] = await count(conflict, sql);
+
+      await expect(restoreTables(conflict, scratch)).rejects.toThrow();
+
+      for (const { sql } of BACKUP_TABLES) {
+        expect(await count(conflict, sql), `table ${sql} after rollback`).toBe(before[sql]);
+      }
+    } finally {
+      conflict.close();
+    }
+  });
+});

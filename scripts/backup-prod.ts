@@ -12,6 +12,13 @@
  *   (The verification_tokens dump comes from the camelCase `verificationTokens`
  *   SQL table — schema.ts names it that way for the Auth.js adapter.)
  *
+ *   SAME-DAY RE-RUN (F3): filenames are date-only. A second backup on the same
+ *   date preserves the earlier snapshot by renaming it to
+ *   `<file>-<date>-superseded-<HHmmss>.json` before writing the fresh dump; the
+ *   primary `<file>-<date>.json` always holds the NEWEST snapshot. Nothing is
+ *   destroyed. (The gate probe and the restore's newest-dump selector read only
+ *   the primary name, so superseded files are inert to both.)
+ *
  * READ-ONLY
  *   The backup path issues SELECT only. It never writes the source DB and never
  *   prints a credential. Production credentials are read from the COMMENTED
@@ -44,9 +51,30 @@
  */
 
 import type { Client, ResultSet } from '@libsql/client';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { isMain } from './lib/entrypoint';
+
+/**
+ * F6 (audit, defensive hardening): table identifiers are interpolated straight
+ * into SQL (SQLite cannot bind an identifier). Every identifier this module uses
+ * comes from the fixed BACKUP_TABLES constant, but assert the invariant at the
+ * interpolation boundary so a future edit that adds a hostile name fails loudly
+ * instead of building injectable SQL. Bare letters/underscores only.
+ */
+export function assertSafeIdentifier(identifier: string): string {
+  if (!/^[A-Za-z_]+$/.test(identifier)) {
+    throw new Error(`backup-prod: refusing unsafe SQL identifier ${JSON.stringify(identifier)}`);
+  }
+  return identifier;
+}
 
 /**
  * The ten app tables, in foreign-key-safe order (referenced tables first) so a
@@ -110,9 +138,21 @@ export async function backupTables(
 
   const counts: Record<string, number> = {};
   for (const { file, sql } of BACKUP_TABLES) {
+    assertSafeIdentifier(sql);
     const result = (await client.execute(`SELECT * FROM "${sql}"`)) as ResultSet;
     const rows = toPlainRows(result);
-    writeFileSync(join(outDir, backupFileName(file, stamp)), JSON.stringify(rows, null, 2), 'utf8');
+    const target = join(outDir, backupFileName(file, stamp));
+    // F3 (audit): a same-day re-run must never destroy the earlier snapshot.
+    // The dump filename is date-only, so a second backup on the same date would
+    // overwrite the first. Preserve the existing dump under a -superseded-<HHmmss>
+    // name (the gate probe reads only the primary `<file>-<date>.json`, and the
+    // restore's newest-dump regex is anchored to `.json$`, so neither picks up a
+    // superseded file) and let the fresh, newest dump keep the primary name.
+    if (existsSync(target)) {
+      const hhmmss = new Date().toISOString().slice(11, 19).replace(/:/g, '');
+      renameSync(target, join(outDir, `${file}-${stamp}-superseded-${hhmmss}.json`));
+    }
+    writeFileSync(target, JSON.stringify(rows, null, 2), 'utf8');
     counts[file] = rows.length;
   }
   return counts;
@@ -133,30 +173,44 @@ function newestDumpFor(inDir: string, file: string): string | null {
  * parents-first (BACKUP_TABLES order) so foreign keys resolve. Returns a map of
  * dump base name → row count restored. The target's tables must already exist
  * (schema applied) and should be empty.
+ *
+ * F2 (audit): the entire restore runs inside a single write transaction. A
+ * mid-restore failure (e.g. a primary-key collision against a non-empty target)
+ * rolls back EVERY insert, leaving the destination byte-state unchanged — no
+ * committed parent rows orphaned behind a failed child. Either the whole
+ * snapshot lands or none of it does.
  */
 export async function restoreTables(
   client: Client,
   inDir: string,
 ): Promise<Record<string, number>> {
   const counts: Record<string, number> = {};
-  for (const { file, sql } of BACKUP_TABLES) {
-    const dump = newestDumpFor(inDir, file);
-    if (!dump) {
-      counts[file] = 0;
-      continue;
+  const tx = await client.transaction('write');
+  try {
+    for (const { file, sql } of BACKUP_TABLES) {
+      assertSafeIdentifier(sql);
+      const dump = newestDumpFor(inDir, file);
+      if (!dump) {
+        counts[file] = 0;
+        continue;
+      }
+      const rows = JSON.parse(readFileSync(join(inDir, dump), 'utf8')) as Record<string, unknown>[];
+      for (const row of rows) {
+        const columns = Object.keys(row);
+        if (columns.length === 0) continue;
+        const placeholders = columns.map(() => '?').join(', ');
+        const colList = columns.map((c) => `"${c}"`).join(', ');
+        await tx.execute({
+          sql: `INSERT INTO "${sql}" (${colList}) VALUES (${placeholders})`,
+          args: columns.map((c) => row[c] as never),
+        });
+      }
+      counts[file] = rows.length;
     }
-    const rows = JSON.parse(readFileSync(join(inDir, dump), 'utf8')) as Record<string, unknown>[];
-    for (const row of rows) {
-      const columns = Object.keys(row);
-      if (columns.length === 0) continue;
-      const placeholders = columns.map(() => '?').join(', ');
-      const colList = columns.map((c) => `"${c}"`).join(', ');
-      await client.execute({
-        sql: `INSERT INTO "${sql}" (${colList}) VALUES (${placeholders})`,
-        args: columns.map((c) => row[c] as never),
-      });
-    }
-    counts[file] = rows.length;
+    await tx.commit();
+  } catch (err) {
+    await tx.rollback();
+    throw err;
   }
   return counts;
 }
