@@ -158,14 +158,14 @@ turso db shell byrachelpierce "SELECT u.email, c.redemption_code, c.completed_at
 
 # Chuck takeover addendum (2026-07-06)
 
-Everything above is the original R0–R5 operator guide and remains valid — M0–M3 of the takeover run wrap it rather than replace it (`BUILD-SPEC.md` maps the milestones; §R4/§R5 above are now protocols HT2/HT3 under `.chuck/human-tests/`). This addendum is the Chuck-run operating manual: your two gates, checkpoints, escalations, and the credential steps that are yours alone.
+Everything above is the original R0–R5 operator guide and remains valid — M0–M4 of the takeover run wrap it rather than replace it (`BUILD-SPEC.md` maps the milestones; §R4/§R5 above are now protocols HT2/HT3 under `.chuck/human-tests/`, and M3's admin panel adds HT4). This addendum is the Chuck-run operating manual: your two gates, checkpoints, escalations, and the credential steps that are yours alone.
 
 ## Gate 1 — approve the plan
 
 Nothing executes until you do this. Read three documents in this order:
 
-1. **DECISIONS.md** — 15 judgment calls; every `VETO POINT: yes` is an explicit invitation to overrule (D4 branch model, D7 db:push guard, D8 read-only prod probes, D11 rotation timing, D12 file dispositions, and D15 — the plan-refutation resolutions — are the ones most worth your minute).
-2. **BUILD-SPEC.md** — the four milestones and their exact acceptance gates. If a "done" you care about is not machine-checkable there, reject the plan.
+1. **DECISIONS.md** — 17 judgment calls; every `VETO POINT: yes` is an explicit invitation to overrule (D4 branch model, D7 db:push guard, D8 read-only prod probes, D11 rotation timing, D12 file dispositions, D15 refutation resolutions, and D16/D17 — the admin panel you added and its invariant/count consequences — are the ones most worth your minute).
+2. **BUILD-SPEC.md** — the five milestones (M3 admin panel added at your direction) and their exact acceptance gates. If a "done" you care about is not machine-checkable there, reject the plan.
 3. **BUDGET.md** — estimate ranges and the overrun threshold.
 
 Also worth reading once: `TAKEOVER-AUDIT-2026-07-06.md` §4 — the list of things you currently believe that are not true.
@@ -181,7 +181,7 @@ Approval write-protects BUILD-SPEC.md, DECISIONS.md (above the Amendments line),
 
 ## Gate 2
 
-The ship gate, at the end of M3. Milo assembles `ship-report.md`; you decide whether v1.0.0 stands.
+The ship gate, at the end of M4. Milo assembles `ship-report.md`; you decide whether v1.0.0 stands.
 
 1. Read **ship-report.md**: the whole-project coverage manifest (what was checked AND what was not), accumulated flags, and the known-gaps list — plus the executed HT3 smoke matrix.
 2. Perform the operator credential steps it lists (they are yours alone — see Credentials below).
@@ -189,7 +189,7 @@ The ship gate, at the end of M3. Milo assembles `ship-report.md`; you decide whe
 
 ## Checkpoints
 
-In checkpoint mode the run pauses after each milestone (M0 → M1 → M2 → M3). A clean checkpoint is a pause, not a question — Milquetoast writes `milestone-report.md`, reading it is optional, and silence is consent. Resume with `/chuck:run`. Each checkpoint here also carries one concrete operator action: merging the `chuck/integration` → `main` PR (which is the production deploy). A checkpoint only becomes a decision when it carries an escalation.
+In checkpoint mode the run pauses after each milestone (M0 → M1 → M2 → M3 → M4). A clean checkpoint is a pause, not a question — Milquetoast writes `milestone-report.md`, reading it is optional, and silence is consent. Resume with `/chuck:run`. Each checkpoint here also carries one concrete operator action: merging the `chuck/integration` → `main` PR (which is the production deploy). A checkpoint only becomes a decision when it carries an escalation.
 
 ## Escalations
 
@@ -204,13 +204,13 @@ The run stops and asks you only when it genuinely cannot proceed; entries appear
 
 ## Human-hands test protocols
 
-Three are pre-written in `.chuck/human-tests/`: **HT1** (M0 — secret rotation + Phase-0 confirmations), **HT2** (M2 — the content loop with Rachel), **HT3** (M3 — DNS cutover + smoke matrix). Each is numbered steps a non-engineer could follow, with a result form; save the filled form at the path the protocol names and resume with `/chuck:run`. Batch them on your schedule — the run waits.
+Four are pre-written in `.chuck/human-tests/`: **HT1** (M0 — secret rotation + Phase-0 confirmations), **HT2** (M2 — the content loop with Rachel), **HT4** (M4, before any DNS step — admin-panel acceptance + Laciey's collection QC), **HT3** (M4 — DNS cutover + smoke matrix; runs only after HT4 is all-Pass). Each is numbered steps a non-engineer could follow, with a result form; save the filled form at the path the protocol names and resume with `/chuck:run`. Batch them on your schedule — the run waits.
 
 ## Credentials
 
 Operator-only material; agents never see, request, or store these — they escalate and wait:
 
-- **Resend, Turso, Vercel, GitHub, DNS-host logins** — all dashboard actions (rotation, env vars, domain verification, DNS records) are yours.
-- **Production env values** — you enter them in the Vercel dashboard (M3 checklist); agents verify outcomes only ever through public HTTP.
-- **Production DB writes** — only through the backup-first ritual you authorize; the agent side is read-only probes (DECISIONS D8).
+- **Resend, Turso, Vercel, GitHub, DNS-host logins** — all dashboard actions (rotation, env vars, domain verification, DNS records) are yours. **Resend domain verification (SPF + DKIM) now happens in M3**, not at cutover — admin magic links must reach Rachel's and Laciey's inboxes pre-cutover.
+- **Production env values** — you enter them in the Vercel dashboard (M4 checklist; `BLOB_READ_WRITE_TOKEN` already added in M3 for panel uploads); agents verify outcomes only ever through public HTTP.
+- **Production DB writes** — through the backup-first ritual you authorize (schema, bulk, admin flags — including M3's migration 0004 and the `npx tsx scripts/set-admin.ts <email> 1` flips for matthew/rachel/laciey), or through the admin panel itself once M3 ships (its normal operation, D17); the agent side stays read-only probes (DECISIONS D8).
 - One Wix task: supply (or approve the crawled) list of top Wix page URLs for the M1 redirect map — a 10-minute task.

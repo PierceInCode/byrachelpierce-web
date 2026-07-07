@@ -9,7 +9,7 @@
 1. Resend dashboard → API Keys → revoke the key beginning `re_cQuXwBZ1` → create a new key — expected: old key shows revoked; new key created.
 2. Turso dashboard → the `byrachelpierce` database → revoke the auth token that was in `Database Token.txt` (rotate if you cannot identify it individually) → create a new token — expected: a new token exists; the old one is invalid.
 3. Update `.env.local`: new Resend key in the active lines; new Turso token in the commented production block. Do NOT commit this file — expected: `git status` does not list `.env.local`.
-4. Run `npm run dev` and send yourself a trail magic link — expected: email arrives (test domain delivers to your own address only — that is normal pre-M3).
+4. Run `npm run dev` and send yourself a trail magic link — expected: email arrives (test domain delivers to your own address only — that is normal until the M3 domain verification).
 5. Check `C:\Code\businessWebsites\byRachelPierce\Database Token.txt` — expected: file does not exist; delete it if it does.
 6. Confirm `public/art/` (205MB) is backed up outside this repo (external drive or cloud) — record WHERE in Notes. This is Phase 0.6.
 7. Vercel dashboard → project → confirm PRs produce preview deployments — expected: the most recent PR shows a preview URL. This is Phase 0.7.

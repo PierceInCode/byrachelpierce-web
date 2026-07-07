@@ -191,6 +191,60 @@
     },
     {
       "id": "M3",
+      "title": "Admin panel: non-developer collection CRUD",
+      "gates": [
+        {
+          "name": "check",
+          "cmd": "npm run check",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "coverage",
+          "cmd": "npm run test:coverage",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "build-seeded",
+          "cmd": "bash -c \"export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build\"",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "e2e",
+          "cmd": "npm run e2e",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "dep-audit",
+          "cmd": "npm audit --omit=dev --audit-level=high",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "admin-schema",
+          "cmd": "node .chuck/probes/admin-schema.mjs",
+          "lane": "local",
+          "expect": "contains:ADMIN SCHEMA OK"
+        },
+        {
+          "name": "admin-lockout",
+          "cmd": "node .chuck/probes/admin-lockout.mjs",
+          "lane": "local",
+          "expect": "contains:LOCKOUT OK"
+        },
+        {
+          "name": "ci-green",
+          "cmd": "gh run list --branch chuck/M3 --limit 1 --json conclusion --jq .[0].conclusion",
+          "lane": "ci",
+          "expect": "contains:success"
+        }
+      ]
+    },
+    {
+      "id": "M4",
       "title": "Go-live: cutover, smoke, v1.0.0",
       "gates": [
         {
@@ -212,10 +266,16 @@
           "expect": "contains:DOMAIN OK"
         },
         {
-          "name": "sitemap-prod",
-          "cmd": "node .chuck/probes/sitemap-count.mjs",
+          "name": "sitemap-vs-db",
+          "cmd": "node .chuck/probes/sitemap-vs-db.mjs",
           "lane": "local",
-          "expect": "contains:SITEMAP OK"
+          "expect": "contains:SITEMAP-DB OK"
+        },
+        {
+          "name": "admin-lockout-prod",
+          "cmd": "bash -c \"ADMIN_BASE_URL=https://byrachelpierce.com node .chuck/probes/admin-lockout.mjs\"",
+          "lane": "local",
+          "expect": "contains:LOCKOUT OK"
         },
         {
           "name": "lighthouse-config",
@@ -234,6 +294,12 @@
           "cmd": "node .chuck/probes/secret-sweep.mjs",
           "lane": "local",
           "expect": "contains:SWEEP CLEAN"
+        },
+        {
+          "name": "admin-qc-recorded",
+          "cmd": "node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT4-result.md 10",
+          "lane": "local",
+          "expect": "contains:HT OK"
         },
         {
           "name": "smoke-matrix-recorded",

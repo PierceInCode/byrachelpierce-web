@@ -17,10 +17,12 @@ Marketing and experience website for the **by Rachel Pierce** art gallery on San
 
 **The job to be done now:** carry the project from its current state (R4 merged + deployed; production migrated 0001–0003; R4 _content_ loop pending with Rachel) through **R5 go-live** to a verified, publicly serving **v1.0.0** — with the deferred pre-launch debts actually resolved, not re-deferred. The one job that makes it pointless if missed: the site live on the real domain with the trail working against production and **all 14 murals showing real names** (Iron Invariant: the trail may not go live with placeholder fiction).
 
+**Scope addition (operator, 2026-07-07, pre-Gate-1):** an **admin panel** for non-developer CRUD over the painting collection, shipping **in this run, before cutover** — the ops manager must edit and QC the site through it before DNS moves. Full population control: edit any painting's fields and tags, archive duplicates (soft-delete, restorable), and create new paintings by uploading pre-processed images (Photoshop pipeline produces files that already fit the existing web/thumb requirements) plus title, a description (stored in the existing `notes` column — there is no `description` column), tags, and dimensions in inches. Admins: Matthew, Rachel, Laciey (byRachelPierce.com addresses), authenticated by the existing magic-link flow plus an admin flag; admin management is a CLI/operator action, never a UI surface. Full design contract: Architecture v1 §11; judgment ledger: DECISIONS D16/D17.
+
 ## Audience
 
 **Primary:** gallery visitors and Sanibel tourists on phones — browsing the collection, walking the mural trail outdoors, tapping check-ins on weak signal.
-**Secondary:** Rachel (content owner — the CSV intake loop is hers), and the operator (deploys, secrets, production rituals).
+**Secondary:** Rachel (content owner — the CSV intake loop is hers), Laciey (ops manager — QCs and maintains the painting collection through the admin panel), and the operator (deploys, secrets, production rituals, admin-flag CLI).
 **Tertiary:** returning trail players with accounts (Auth.js magic-link sessions must keep working across the launch).
 
 ## Platform & domain
@@ -67,6 +69,7 @@ Not applicable — the design language already exists (Architecture §12) and th
 5. **No deferred-debt laundering:** secrets rotated (operator step, recorded), eol renormalization done, art backup + preview confirmations recorded — or each carries an explicit operator-accepted waiver in the ship report.
 6. **Production-data safety:** zero unauthorized production writes across the whole run; every production touch traceable to a backup + authorization record.
 7. **Honest state docs at ship:** PROGRESS/DECISIONS reflect execution-verified reality (the DECISIONS-035 standard), and the ship report's coverage manifest says plainly what was NOT checked.
+8. **Admin panel observable pass (added 2026-07-07):** each allowlisted admin can sign in on the deployed site via magic link and reach `/admin`; an unauthenticated or non-admin request to `/admin` gets 404, never content (probe `admin-lockout`); an admin edit to a painting's title is visible on its public page after revalidation; an archived painting disappears from `/collection` and the sitemap and is restorable; a created painting (uploaded web+thumb images + fields) renders publicly; the live sitemap's painting-URL count equals the DB's non-archived count (probe `sitemap-vs-db`). Ops-manager QC recorded via protocol HT4.
 
 ## Intake settlements
 

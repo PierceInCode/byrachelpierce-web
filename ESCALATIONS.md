@@ -4,7 +4,7 @@
 
 Entry types (exactly one per entry): `core-bet-failure` | `gate-3-strikes` | `irreversible-op` | `budget-overrun` | `human-hands` | `spec-amendment`.
 
-Likely candidates this run, so none surprises you: `human-hands` (HT1 rotation, HT2 content loop with Rachel, HT3 cutover smoke), `irreversible-op` (anything touching production data), and `blocked-gate`-style `gate-3-strikes` if Lighthouse budgets resist remediation.
+Likely candidates this run, so none surprises you: `human-hands` (HT1 rotation, HT2 content loop with Rachel, HT4 admin QC with Laciey, HT3 cutover smoke), `irreversible-op` (anything touching production data, including the M3 migration ritual), and `blocked-gate`-style `gate-3-strikes` if Lighthouse budgets or the M3 auth seam resist remediation.
 
 _The log below is empty by design; the run appends entries at the moment of escalation._
 

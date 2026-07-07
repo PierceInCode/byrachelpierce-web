@@ -173,6 +173,28 @@ VETO POINT: yes
 
 VETO POINT: yes
 
+## D16 — Admin panel: in-run, pre-cutover, full CRUD, magic-link + admin flag, soft-delete (scope added at Gate 1 intake, 2026-07-07)
+
+**Decision:** A new milestone **M3 — Admin panel** ships non-developer CRUD over the painting collection BEFORE cutover; go-live renumbers to **M4** (references to "M3" in D1–D15 mean the go-live milestone, now M4). Operator-settled at intake 2026-07-07: (a) timing — in this run, pre-cutover, so the ops manager can edit and QC the site through it before DNS moves; (b) scope — field/tag edits, archive/restore, AND create with upload of pre-processed images (the Photoshop pipeline produces web/thumb JPEGs that already fit the existing requirements; the panel uploads them and collects the full edit field set — the form's "Description" writes the existing `notes` column, no `description` column exists or is added — plus tags and dimensions-in-inches); (c) admins — Matthew, Rachel, Laciey (byRachelPierce.com addresses) via the EXISTING magic-link flow plus an additive `users.is_admin` flag; admin management is CLI-only (`scripts/set-admin.ts`, operator-run), no admin-management UI; (d) deletes are soft (additive `paintings.archived_at`; archive/restore; no hard delete from the panel). Full behavior contract: Architecture v1 §11 — routes, `requireAdmin()` 404 posture, slug immutability, upload conventions (`<slug>-<hash8>.jpg`, 600 KB/200 KB caps), JPEG SOF px parsing (no new dependency), revalidation set, e2e session seam.
+
+**Ordering call within the decision:** M3 runs AFTER M2 (content loop) because the CSV ingest ritual assumes a single writer to `paintings` — the CSV era ends before the panel becomes a second writer, killing the lost-update/diverging-dry-run window. Cost: if Rachel's content drags, panel work waits behind it. The M2 escalation path names the mitigation: the operator may reorder M2↔M3 via `/chuck:change`, accepting that the panel must not open to admins until `--apply` has run.
+
+**Why:** Operator direction (the feature "does not exist" was correct — nothing in R0–R5 or the legacy spec provides any in-app write surface); the intake answers above are the operator's own; the design maximizes reuse (Auth.js flow, Blob conventions, existing honesty rules) and adds zero dependencies.
+
+**Alternatives rejected:** (a) Post-launch release — operator explicitly overruled (QC must happen through the panel pre-cutover); (b) separate admin credential system — new attack surface the architecture deliberately avoids; (c) hard delete — irreversible against live data where mis-clicks live; (d) slug editing in the panel — permalink/SEO breakage with no redirect story this release; (e) panel-before-content ordering — concurrent-writer risk on the ingest ritual (recorded above with its escape hatch).
+
+VETO POINT: yes
+
+## D17 — Invariant-1 amendment + the count contract after the panel exists
+
+**Decision:** Two consequences of D16, settled now so no gate quietly rots: (1) **Invariant 1 amended** — production writes now have two sanctioned channels: the operator ritual (schema, bulk, admin-flag flips) and, from M3 on, row-level painting/tag mutations through the authenticated admin panel (admin DB-sessions only, soft-delete only). Destructive/raw SQL, hard deletes, and schema changes remain ritual-only; agents still never write production. (2) **The collection count stops being a constant** once the panel is live. Every 528-asserting gate runs pre-panel and stays valid (M0 `prod-verify`, M2 `backup-check` — both run before M3 starts); from M4 on, count gates compare two live sources: the new `sitemap-vs-db` probe (live sitemap painting URLs === production non-archived count) **replaces** `sitemap-count.mjs` (written for refutation R6 earlier today, superseded before ever gating — deleted, not orphaned). `admin-lockout` re-runs at M4 against the real domain.
+
+**Why:** The refutation standard (D15): a gate that asserts a stale constant after the world can legally change is a gate that fails honest operators or passes dishonest states. Comparing sitemap to live DB is strictly stronger than comparing to 528 — it also catches archived-but-still-in-sitemap leaks, which is the exact regression the archived-exclusion sweep must prevent.
+
+**Alternatives rejected:** (a) Keeping 528 with a "update the constant when it changes" comment — a manual step on a machine gate is a future lie; (b) freezing the collection until after go-live — defeats the operator's stated purpose (pre-cutover QC edits).
+
+VETO POINT: yes
+
 ---
 
 ## Amendments

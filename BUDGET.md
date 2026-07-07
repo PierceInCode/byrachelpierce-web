@@ -7,7 +7,8 @@ _Otis's ledger. Estimates are ranges, not promises. Counts come from the determi
 - **Unit:** input+output tokens per the usage script's `total` field (cache reads/writes are reported for transparency but excluded from the bands — they are plan-limit-relevant but rate-discounted). Planning measured 27.2M cache-read tokens against 0.50M in/out — expect a similar ~50× cache-read multiplier on milestone sessions.
 - **Model mix:** orchestration on the operator's session model; Oliver/Binkley-wave dispatches on sonnet/opus per the routing doctrine (haiku is denied by the routing hook — measured fact, this session). Planning itself ran on a Fable-class session.
 - **Variance driver #1 is remediation cycles:** a milestone that passes its gates first try lands near the low end; three remediation cycles lands near the high end. M2's band is narrow because the work is human-hands (agent side is verification only); its calendar time is unbounded but its token cost is small.
-- **Blow-the-estimate risks:** a `spec-amendment` mid-run (re-plan cost), production state diverging from the audit at M0's `prod-verify` gate (investigation cost), or Lighthouse budgets resisting remediation in M1.
+- **Blow-the-estimate risks:** a `spec-amendment` mid-run (re-plan cost), production state diverging from the audit at M0's `prod-verify` gate (investigation cost), Lighthouse budgets resisting remediation in M1, or the M3 auth seam (Auth.js pinned beta + session-cookie e2e seam) fighting back.
+- **M3 band basis (added 2026-07-07 with D16):** estimated at 1.6–1.7× M1's band — M1 is code-only against existing pages; M3 adds a migration, an authz layer, five mutation surfaces, an upload path, and new e2e infrastructure. No comparable milestone has run yet in this project; the band is reasoning, not history — flagged for re-baseline at the M0 and M1 checkpoints.
 - **Cash:** existing accounts only; the run itself commits no spend beyond plan/API usage.
 
 ## Rates table (version 2026-07-06)
@@ -22,12 +23,13 @@ On a subscription plan these read as API-equivalent value against plan limits, n
 
 ## Per-milestone estimate
 
-| Milestone | Estimate (low–high) | Notes                                                                                                                                                  |
-| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| M0        | 0.4M–1.2M tokens    | Small code items (backup script, push guard, renorm) but many gates + the Closet wave; high end if renormalization or prod re-verification fights back |
-| M1        | 0.6M–1.8M tokens    | The real code milestone (sitemap/robots/metadata/redirects/LHCI); high end driven by Lighthouse remediation cycles                                     |
-| M2        | 0.15M–0.5M tokens   | Human-hands long pole; agent side is probes, verification, suite re-runs, and the gate wave only                                                       |
-| M3        | 0.3M–0.9M tokens    | Operator-heavy; agent side is probes, final sweeps, ship report (Milo) + Gate 2 assembly                                                               |
+| Milestone | Estimate (low–high) | Notes                                                                                                                                                                                                                                                  |
+| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| M0        | 0.4M–1.2M tokens    | Small code items (backup script, push guard, renorm) but many gates + the Closet wave; high end if renormalization or prod re-verification fights back                                                                                                 |
+| M1        | 0.6M–1.8M tokens    | The real code milestone (sitemap/robots/metadata/redirects/LHCI); high end driven by Lighthouse remediation cycles                                                                                                                                     |
+| M2        | 0.15M–0.5M tokens   | Human-hands long pole; agent side is probes, verification, suite re-runs, and the gate wave only                                                                                                                                                       |
+| M3        | 1.0M–3.0M tokens    | Admin panel (added at Gate 1, D16/D17) — the largest code milestone: migration, authz, CRUD server actions + forms, upload path, JPEG parser, e2e seam + journeys; high end driven by remediation cycles on the auth seam and archived-exclusion sweep |
+| M4        | 0.35M–1.0M tokens   | Go-live (was M3 pre-D16); operator-heavy; agent side is probes (incl. sitemap-vs-db, admin-lockout re-run), final sweeps, ship report (Milo) + Gate 2 assembly                                                                                         |
 
 threshold: 200%
 

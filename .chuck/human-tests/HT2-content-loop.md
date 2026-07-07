@@ -13,7 +13,7 @@
 5. Apply: `npx tsx scripts/ingest-content.ts --apply` — expected: report matches the dry-run plan.
 6. Re-comment the production creds in `.env.local` — expected: active `TURSO_DATABASE_URL` is `file:./dev.db` again.
 7. Commit the regenerated `src/lib/mural-data.ts`, `docs/intake/murals.csv`, and `docs/intake/ingest-report-*.md` via PR; merge on green CI — expected: production deploy goes green.
-8. Open `https://byrachelpierce-web.vercel.app/murals/trail` (or the live domain if M3 already cut over) with Rachel — expected: **she confirms every one of the 14 names/descriptions is hers and true.** Also spot-check 5 paintings against the CSV (size, availability).
+8. Open `https://byrachelpierce-web.vercel.app/murals/trail` (or the live domain if M4 already cut over) with Rachel — expected: **she confirms every one of the 14 names/descriptions is hers and true.** Also spot-check 5 paintings against the CSV (size, availability).
 
 ## Result form
 
