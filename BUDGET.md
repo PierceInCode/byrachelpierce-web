@@ -33,6 +33,7 @@ threshold: 50%
 
 ## Ledger
 
-| Date       | Milestone | Actual                                                                                               | Est. band | Cumulative | Variance vs. est. |
-| ---------- | --------- | ---------------------------------------------------------------------------------------------------- | --------- | ---------- | ----------------- |
-| 2026-07-06 | planning  | 497,724 in/out tokens (input=118,393; output=379,331; cache_read=27,173,549; cache_create=1,191,070) | 0.3M–0.8M | 497,724    | in band           |
+| Date       | Milestone             | Actual                                                                                                 | Est. band | Cumulative | Variance vs. est.                                 |
+| ---------- | --------------------- | ------------------------------------------------------------------------------------------------------ | --------- | ---------- | ------------------------------------------------- |
+| 2026-07-06 | planning              | 497,724 in/out tokens (input=118,393; output=379,331; cache_read=27,173,549; cache_create=1,191,070)   | 0.3M–0.8M | 497,724    | in band                                           |
+| 2026-07-07 | planning (refutation) | 1,232,853 in/out tokens (input=367,069; output=865,784; cache_read=69,454,934; cache_create=5,008,396) | 0.3M–0.8M | 1,730,577  | over band — crossed 50% threshold; ESCALATIONS E1 |

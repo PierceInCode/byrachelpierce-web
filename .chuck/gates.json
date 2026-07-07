@@ -44,6 +44,18 @@
           "expect": "contains:EOL OK"
         },
         {
+          "name": "push-guard",
+          "cmd": "node .chuck/probes/push-guard.mjs",
+          "lane": "local",
+          "expect": "contains:PUSH-GUARD OK"
+        },
+        {
+          "name": "restore-roundtrip",
+          "cmd": "npx vitest run tests/backup-restore.roundtrip.test.ts",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
           "name": "prod-verify",
           "cmd": "node .chuck/probes/prod-verify.mjs",
           "lane": "local",
@@ -102,6 +114,12 @@
           "cmd": "npm run e2e",
           "lane": "local",
           "expect": "exit0"
+        },
+        {
+          "name": "lighthouse-config",
+          "cmd": "node .chuck/probes/lighthouse-config-check.mjs",
+          "lane": "local",
+          "expect": "contains:LHCI CONFIG OK"
         },
         {
           "name": "lighthouse",
@@ -192,6 +210,18 @@
           "cmd": "node .chuck/probes/domain-live.mjs",
           "lane": "local",
           "expect": "contains:DOMAIN OK"
+        },
+        {
+          "name": "sitemap-prod",
+          "cmd": "node .chuck/probes/sitemap-count.mjs",
+          "lane": "local",
+          "expect": "contains:SITEMAP OK"
+        },
+        {
+          "name": "lighthouse-config",
+          "cmd": "node .chuck/probes/lighthouse-config-check.mjs",
+          "lane": "local",
+          "expect": "contains:LHCI CONFIG OK"
         },
         {
           "name": "lighthouse-prod",

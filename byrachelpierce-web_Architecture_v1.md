@@ -65,7 +65,7 @@ Migrations: `drizzle/0000`–`0003`, journal-tracked; production has `__drizzle_
 ## 6. Production operations contract (audit F6/F7 remediations land in M0)
 
 - The Turso cloud CLI is **not installed** on the dev machine; all production DB access goes through `@libsql/client` (+ drizzle migrator for migrations), reading creds from `.env.local`'s commented lines without ever printing them.
-- **Backups:** `scripts/backup-prod.ts` (M0) dumps **all app tables** as dated JSON into `backups/` (read-only SELECTs). Its restore procedure is documented in the script header and dry-tested against a local file DB in M0. Backup-first is a recorded protocol step before any production write.
+- **Backups:** `scripts/backup-prod.ts` (M0) dumps **all app tables** as dated JSON into `backups/` — one `backups/<table>-<YYYY-MM-DD>.json` per table, each a JSON array of row objects; `backup-check.mjs` gates that shape and the paintings row count (528). Its restore procedure is documented in the script header and proven by the M0 `restore-roundtrip` gate (`tests/backup-restore.roundtrip.test.ts`, local `file:` DBs only). Backup-first is a recorded protocol step before any production write.
 - **Read-only verification probes** (`.chuck/probes/`) are sanctioned agent-runnable production access: SELECT/PRAGMA only, zero writes, no cred output (DECISIONS D8). Anything that writes production remains operator-authorized, backup-first, additive-only.
 - Anonymous HTTP smoke tests target `https://byrachelpierce-web.vercel.app` (pre-cutover) and `https://byrachelpierce.com` (post-cutover).
 
@@ -77,7 +77,7 @@ Migrations: `drizzle/0000`–`0003`, journal-tracked; production has `__drizzle_
 
 ## 8. Security posture (Architecture §10, audit-annotated)
 
-- **Leak precedent is live:** a Resend key and a Turso token were committed/leaked pre-R0; rotation was deferred (legacy DECISIONS 013) and **is executed in M0 (protocol HT1), not deferred again.** The leaked values remain in git history by choice (rotation over history-rewrite, legacy DECISIONS 003) — the M3 secret sweep allowlists those known-rotated instances and fails on anything else.
+- **Leak precedent is live:** a Resend key and a Turso token were leaked pre-R0; rotation was deferred (legacy DECISIONS 013) and **is executed in M0 (protocol HT1), not deferred again.** The leak predates this repo: an executed all-branch history sweep (2026-07-07, refutation R4) found zero secret-shaped strings — only an unusable 11-character key prefix appears, in two committed docs. Rotation is owed because the values were exposed outside git (the old trail-spec document trail), not because they sit in this history. The M3 secret sweep fails on ANY secret-shaped string; its former known-rotated allowlist matched nothing and was removed.
 - No secrets in repo/logs/agent output, ever. Tests send no real email. CI carries no production credentials (enforced by absence).
 - Input validation at API boundaries (check-in route is the template); Drizzle parameterized builders only; no new attack surface (uploads/comments/webhooks) without a DECISIONS amendment.
 - Threat model is small (no UGC, no payments) — keep it that way; dependency CVEs are triaged within one milestone (audit L9 verified the one open case resolved).

@@ -4,7 +4,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 
 ## Environment setup
 
-- Runtime: Node.js 20.x (dev machine is Windows 11; CI is ubuntu-latest with Node 20)
+- Runtime: Node.js 20.x in CI (ubuntu-latest — the authoritative lane when a version-sensitive result diverges); the Windows 11 dev machine runs Node 24.4.0 (audit-verified, unpinned). M0 adds an advisory `"engines": { "node": ">=20 <25" }` to `package.json`; installing Node 20 locally is the operator's call (DECISIONS D15-R11)
 - Package manager: npm (v10 line, bundled with Node 20); lockfile `package-lock.json` committed and authoritative
 - System dependencies: git, GitHub CLI `gh` (authenticated), Playwright chromium (`npx playwright install chromium`)
 - Bootstrap: `npm ci`
@@ -15,7 +15,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 
 1. **The production database is live and holds real data.** Production writes happen only inside an operator-authorized, backup-first, additive-only ritual with expected-count verification. Destructive SQL at production, or counts that don't match, is an immediate `irreversible-op`/`blocked-gate` escalation. Tests and CI touch `file:` databases only. Agent-runnable production access is read-only probes (`.chuck/probes/`, SELECT/PRAGMA, no cred output) per DECISIONS D8.
 2. **`main` is the deploy branch and moves only by PR on green CI** (branch protection is unavailable on this GitHub plan; PR-only discipline substitutes and has held for PRs #2–#12). Chuck work branches `chuck/M<n>` merge to `chuck/integration` only with a PASS gate artifact on the exact HEAD; `chuck/integration` reaches `main` by operator-merged PR at each checkpoint (DECISIONS D4).
-3. **No secret ever enters the repo, logs, or agent output.** Tests send no real email (`resend` mocked; key absent in CI). The two historically leaked credentials are rotated in M0 (protocol HT1) and the M3 history sweep fails on any non-allowlisted secret pattern.
+3. **No secret ever enters the repo, logs, or agent output.** Tests send no real email (`resend` mocked; key absent in CI). The two historically leaked credentials are rotated in M0 (protocol HT1) — the leak predates this repo (an executed all-branch sweep found zero secret-shaped strings in history, 2026-07-07); rotation is owed because the values were exposed outside git. The M3 history sweep fails on ANY secret-shaped string, no allowlist.
 4. **Public content is honest.** Nothing fabricated renders as fact; unknown availability renders as nothing; ingest never guesses (unparseable input routes to the error report); the trail does not go live with placeholder fiction — M3 is hard-blocked on M2's mural-content gate.
 5. **No image binaries in git or in agent context.** `public/art/` stays gitignored; artwork URLs only via `artUrl()`.
 6. **Quality floors never drop:** coverage thresholds (80/80 configured; 90.36%/97.67% actual) are never lowered, lint stays at zero warnings, and `next-auth@5.0.0-beta.25` stays exactly pinned (upgrade = escalation).
@@ -23,7 +23,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 
 ## Testing strategy
 
-- **Test layers:** unit + integration (Vitest, per-test `file:` libSQL DBs, mocked `@/auth` and `resend`), component (@testing-library/react, happy-dom), journey-level E2E (Playwright chromium against a built-and-started seeded site), plus deterministic production probes (`.chuck/probes/`) for deployed-state gates.
+- **Test layers:** unit + integration (Vitest, per-test `file:` libSQL DBs, mocked `@/auth` and `resend`), component (@testing-library/react, happy-dom), journey-level E2E (Playwright chromium against a built-and-started seeded site), plus deployed-state production probes (`.chuck/probes/`) — the probes are network-dependent, not deterministic: a persistent outage is a `blocked-gate` escalation with the outage evidence, never a silently-skipped gate. Gate `lane` names where the command executes (`local` = this machine, `ci` = GitHub Actions); network-touching probes are `local`-lane commands.
 - **Journey-level E2E:** the critical paths stay covered on the real interface — collection browse/filter/paginate/search, painting page render, trail signed-out state, image request-weight budgets; M1 adds redirect (308) journeys and metadata-uniqueness assertions.
 - **Dependency policy (standing gate):** proprietary product over permissive-licensed deps (MIT/Apache-2.0/BSD/ISC — Steve reviews the tree in M0); lockfile in sync (`npm ci` fails otherwise); vulnerability audit `npm audit --omit=dev --audit-level=high` fails the gate on known-vulnerable production deps. New dependency = escalation (Invariant 7).
 - **Dev-secrets protocol:** `.gitignore` already covers `.env*`, `*.db`, `public/art/`, `docs/intake/paintings.csv`; M0 adds `byrachelpierce-web.lnk`. Secrets live in `.env.local` (active dev values) and the Vercel dashboard, nowhere else.
@@ -50,15 +50,16 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 ### Work items
 
 1. Branch setup: create `chuck/integration` off `main` @ `33f9f4f`; work on `chuck/M0` off `chuck/integration`. Commit the planning package (this spec, gates, probes, state docs, audit, SCOPE.md).
-2. `scripts/backup-prod.ts` (+ unit tests, TDD): dated JSON dump of **all app tables** to `backups/`, read-only, creds from `.env.local` commented lines, never printed; restore procedure documented in the header and dry-tested against a local file DB (closes F6/F7).
-3. Guard the loaded gun: replace `db:push` with `db:push:dev` — a wrapper that refuses when the effective `TURSO_DATABASE_URL` is not `file:` (closes F8; DECISIONS D7).
-4. Line-ending renormalization (closes F13, legacy DECISIONS 033): add `.gitattributes` (`* text=auto eol=lf`, binary exceptions as needed), `git add --renormalize .`, set `.prettierrc` `endOfLine: "lf"`, full suite green after.
+2. `scripts/backup-prod.ts` (+ unit tests, TDD): dated JSON dump of **all app tables** to `backups/` — one `backups/<table>-<YYYY-MM-DD>.json` per table, each a JSON array of row objects (the shape `backup-check.mjs` gates) — read-only, creds from `.env.local` commented lines, never printed; restore procedure documented in the header AND proven by the roundtrip test `tests/backup-restore.roundtrip.test.ts` (seed a local `file:` DB → back it up → restore into a fresh `file:` DB → per-table row counts equal), which is itself an M0 gate (closes F6/F7; refutation R1).
+3. Guard the loaded gun: replace `db:push` with `db:push:dev` (+ unit tests, TDD) — a wrapper that refuses when the effective `TURSO_DATABASE_URL` (process env first, then `.env.local`'s active value) is not `file:`, exiting non-zero with output containing the literal token `DB PUSH REFUSED`. Probe-gated by `push-guard` (closes F8; DECISIONS D7; refutation R1).
+4. Line-ending renormalization (closes F13, legacy DECISIONS 033): add `.gitattributes` (`* text=auto eol=lf`; binary exceptions: `*.ico`, `*.png`, `*.jpg`, `*.webp`, `*.woff2` marked `binary`), `git add --renormalize .`, set `.prettierrc` `endOfLine: "lf"`, full suite green after.
 5. File dispositions (F12): gitignore `byrachelpierce-web.lnk`; move `R3-PLAN.md` to `archive/R3-PLAN.md` (operator may overrule to delete at Gate 1).
 6. Tag `R4` at `2c9f15e` and push the tag (operator-authorized; closes F3). Delete merged/closed remote branches per audit §2 list (operator approves the list; closes F11).
-7. Run the pending audit probes when network permits: `prod-verify` (read-only production DB state vs legacy DECISIONS 035 claims) and `alias-smoke`; append verbatim results to the audit file's §5.
+7. Re-prove the audit's production verifications on M0's HEAD: `prod-verify` and `alias-smoke` run as M0 gates. (The audit already cleared both — L7/L8 VERIFIED, audit §5; the gate run re-proves them at milestone close, it does not "complete" them. The one genuinely pending audit item, F17's Wix page inventory, is an M1 input the operator supplies at the M0 checkpoint — refutation R3/R12.)
 8. Dependency hygiene: dedupe `@tailwindcss/postcss` (F16); Steve's license sweep of the production dependency tree (review dimension, recorded in milestone report).
 9. **Operator (HT1, human-hands):** rotate the leaked Resend key + Turso token per `OPERATOR-GUIDE.md` Phase 0.1, update `.env.local`, confirm dev + magic-link still work, delete `Database Token.txt` if it still exists; confirm the `public/art/` backup (0.6) and Vercel previews (0.7). Return the HT1 result form.
-10. Operator one-liner (F15): fix Architecture §5.2.3 `Lilly`→`Lily` (agents cannot edit `docs/`).
+10. Operator one-liner (F15): in `docs/SITE-ARCHITECTURE-v2.md` §5.2 list item 3 (line 171), fix `Lilly`→`Lily` — both occurrences on that line (agents cannot edit `docs/`; refutation R10).
+11. Node version advisory (refutation R11): add `"engines": { "node": ">=20 <25" }` to `package.json`. CI (Node 20) stays the authoritative lane for any version-sensitive divergence.
 
 ### Acceptance gates
 
@@ -70,6 +71,8 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 | e2e               | local | `npm run e2e`                                                                             | exit0                   |
 | dep-audit         | local | `npm audit --omit=dev --audit-level=high`                                                 | exit0                   |
 | eol-clean         | local | `node .chuck/probes/eol-check.mjs`                                                        | contains:EOL OK         |
+| push-guard        | local | `node .chuck/probes/push-guard.mjs`                                                       | contains:PUSH-GUARD OK  |
+| restore-roundtrip | local | `npx vitest run tests/backup-restore.roundtrip.test.ts`                                   | exit0                   |
 | prod-verify       | local | `node .chuck/probes/prod-verify.mjs`                                                      | contains:PROD-VERIFY OK |
 | alias-smoke       | local | `node .chuck/probes/alias-smoke.mjs`                                                      | contains:SMOKE OK       |
 | tag-r4            | local | `git tag -l R4`                                                                           | contains:R4             |
@@ -85,7 +88,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 
 ### Definition of done
 
-`chuck/integration` exists and is green; the planning package is committed; every audit finding F1–F16 is closed or explicitly operator-waived at the checkpoint; the pending F17/L7/L8 verifications have run with verbatim output appended to the audit; secrets are rotated (HT1 all-Pass); R4 is tagged; the suite, e2e, dep-audit, eol, and smoke gates are green on HEAD; and the operator has merged `chuck/integration` → `main` (deploying the hygiene commits) at the checkpoint.
+`chuck/integration` exists and is green; the planning package is committed; every audit finding F1–F16 is closed or explicitly operator-waived at the checkpoint, with the two highest-severity closures probe-proven — the `db:push` guard by the `push-guard` gate and the backup/restore path by the `restore-roundtrip` gate (F17's Wix inventory is an M1 input, not an M0 deliverable); secrets are rotated (HT1 all-Pass); R4 is tagged; the suite, e2e, dep-audit, eol, prod-verify, and alias-smoke gates are green on HEAD; and the operator has merged `chuck/integration` → `main` (deploying the hygiene commits) at the checkpoint.
 
 ---
 
@@ -99,24 +102,25 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 
 ### Work items
 
-1. `src/app/sitemap.ts` + `src/app/robots.ts` (App Router conventions): all public pages + all 528 painting pages; trail status/API routes disallowed. Unit tests first; e2e asserts `/sitemap.xml` returns 200 and contains a painting URL, and `/robots.txt` disallows the trail API routes.
+1. `src/app/sitemap.ts` + `src/app/robots.ts` (App Router conventions): all public pages + every published painting page, enumerated from the DB (20 pages under the seeded fixture; 528 at production — the production count is gated at M3 by `sitemap-prod`, refutation R6); trail status/API routes disallowed. Unit tests first; e2e asserts `/sitemap.xml` returns 200 and contains exactly the 20 fixture painting URLs (`/collection/painting/<slug>`), and `/robots.txt` disallows the trail API routes.
 2. Metadata audit: unique `title`/`description` per public page, real OG images (painting pages already have them via `webImagePath`); add a vitest/e2e assertion that no two public pages share a title or description.
-3. Redirect map: operator supplies the top Wix page URLs (10-minute task — request at the M0 checkpoint; if unavailable, Rosebud inventories the live Wix site and the operator approves the list). Implement `next.config.ts` `redirects()`; Playwright asserts 308s per mapped URL.
+3. Redirect map: operator supplies the top Wix page URLs (10-minute task — request at the M0 checkpoint; if unavailable, Rosebud — Chuck's standing-crew researcher, present in every run alongside Oliver/Bill/Hodge-Podge and distinct from D9's Closet-specialist roster (DECISIONS D15-R5) — inventories the live Wix site and the operator approves the list). Implement `next.config.ts` `redirects()`; Playwright asserts 308s per mapped URL.
 4. `@vercel/analytics` in the root layout (sanctioned dependency).
-5. Lighthouse budgets: add `@lhci/cli` (devDependency, sanctioned; DECISIONS D6); `npm run lighthouse` runs it against the seeded local build for `/`, `/collection`, one painting page, `/murals/trail` with assertions Performance ≥ 85 (mobile), Accessibility ≥ 95, SEO ≥ 95; `npm run lighthouse:prod` runs the same assertions against `https://byrachelpierce.com` (used in M3).
+5. Lighthouse budgets: add `@lhci/cli` (devDependency, sanctioned; DECISIONS D6); assertion config committed at `lighthouserc.json` with **error-level** assertions `categories:performance` minScore 0.85, `categories:accessibility` minScore 0.95, `categories:seo` minScore 0.95 — the `lighthouse-config` gate (`lighthouse-config-check.mjs`) fails unless the config actually asserts, because an LHCI run that only collects exits 0 regardless of score (refutation R13). `npm run lighthouse` runs it against the seeded local build for `/`, `/collection`, the painting page `/collection/painting/matthews-turtle` (first fixture slug), `/murals/trail`; `npm run lighthouse:prod` runs the same assertions against `https://byrachelpierce.com` (used in M3).
 6. `.chuck/probes/mural-content.ts` finalized (it ships with the package; M1 adds its e2e-adjacent test) so M2's gate is proven runnable before M2 starts.
 
 ### Acceptance gates
 
-| Name         | Lane  | Command                                                                                   | Expected         |
-| ------------ | ----- | ----------------------------------------------------------------------------------------- | ---------------- |
-| check        | local | `npm run check`                                                                           | exit0            |
-| coverage     | local | `npm run test:coverage`                                                                   | exit0            |
-| build-seeded | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build"` | exit0            |
-| e2e          | local | `npm run e2e`                                                                             | exit0            |
-| lighthouse   | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run lighthouse"`                  | exit0            |
-| dep-audit    | local | `npm audit --omit=dev --audit-level=high`                                                 | exit0            |
-| ci-green     | ci    | `gh run list --branch chuck/M1 --limit 1 --json conclusion --jq .[0].conclusion`          | contains:success |
+| Name              | Lane  | Command                                                                                   | Expected                |
+| ----------------- | ----- | ----------------------------------------------------------------------------------------- | ----------------------- |
+| check             | local | `npm run check`                                                                           | exit0                   |
+| coverage          | local | `npm run test:coverage`                                                                   | exit0                   |
+| build-seeded      | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build"` | exit0                   |
+| e2e               | local | `npm run e2e`                                                                             | exit0                   |
+| lighthouse-config | local | `node .chuck/probes/lighthouse-config-check.mjs`                                          | contains:LHCI CONFIG OK |
+| lighthouse        | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run lighthouse"`                  | exit0                   |
+| dep-audit         | local | `npm audit --omit=dev --audit-level=high`                                                 | exit0                   |
+| ci-green          | ci    | `gh run list --branch chuck/M1 --limit 1 --json conclusion --jq .[0].conclusion`          | contains:success        |
 
 ### Escalation triggers
 
@@ -144,7 +148,7 @@ _This milestone is mostly human work (legacy Spec §9.2's ship-line condition). 
 
 1. **Operator + Rachel (HT2):** fill `docs/intake/murals.csv` (14 rows: real titles, descriptions, years); run `npx tsx scripts/export-catalog-csv.ts` against production (read-only ritual) and fill `docs/intake/paintings.csv` as far as records allow.
 2. **Operator (HT2):** `npx tsx scripts/backup-prod.ts` (backup recorded) → `ingest-content.ts --dry-run` → review the report (zero unresolved parse errors on murals; painting parse errors are acceptable and stay unwritten) → `--apply` → commit the regenerated `mural-data.ts`, the ingest report, and `murals.csv` via PR → merge → production deploy.
-3. Agent: verify the applied result — `mural-content` probe (14/14 descriptions locally + all 14 titles present in the deployed HTML), spot-check ingest report against the CSV, confirm no honesty regressions (`availability` free-text renders as supplied, never invented).
+3. Agent: verify the applied result — `mural-content` probe (14/14 descriptions in `mural-data.ts` + all 14 titles AND all 14 descriptions present in the deployed HTML, normalized against entity escaping; refutation R7), spot-check ingest report against the CSV, confirm no honesty regressions (`availability` free-text renders as supplied, never invented).
 4. Agent: re-run the full suite on the post-content `main` (the mural rewrite touches checked-in code; prettier-clean regeneration is already tested but the gate re-proves it).
 
 ### Acceptance gates
@@ -185,32 +189,34 @@ _Operator-heavy by design; the agent prepares checklists and verifies outcomes, 
 1. **Operator:** Vercel production env checklist — all §4.5 production values with the M0-rotated secrets, strong `AUTH_SECRET`, Blob token, `EMAIL_FROM` on the verified domain, real `GALLERY_EMAIL`, `NEXTAUTH_URL=https://byrachelpierce.com`.
 2. **Operator:** Resend domain verification (SPF + DKIM at the DNS host) — before cutover day; propagation is slow.
 3. **Operator (HT3):** DNS cutover per runbook — TTL 300 a day ahead → point apex + www at Vercel → cert + www-redirect verification → execute the smoke matrix (every nav link; trail magic-link round trip on a phone to a non-owner inbox; collection filter journey; painting page; 3 Wix-redirect spot checks) and return the form.
-4. Agent: `domain-live` probe (apex 200 via Vercel, www redirects), `lighthouse:prod` against the real domain, secret-history sweep, and the full local suite one final time.
+4. Agent: `domain-live` probe (apex 200 via Vercel, www redirects), `sitemap-prod` probe (the live sitemap enumerates all 528 painting URLs — refutation R6), `lighthouse:prod` against the real domain, secret-history sweep, and the full local suite one final time.
 5. Tag `v1.0.0` on the shipped `main` commit; flip `PROGRESS.md` to shipped; Milo assembles the ship report (`/chuck:ship`, Gate 2); DECISIONS review sweep.
 
 ### Acceptance gates
 
-| Name                  | Lane  | Command                                                                      | Expected             |
-| --------------------- | ----- | ---------------------------------------------------------------------------- | -------------------- |
-| check                 | local | `npm run check`                                                              | exit0                |
-| e2e                   | local | `npm run e2e`                                                                | exit0                |
-| domain-live           | local | `node .chuck/probes/domain-live.mjs`                                         | contains:DOMAIN OK   |
-| lighthouse-prod       | local | `npm run lighthouse:prod`                                                    | exit0                |
-| secret-sweep          | local | `node .chuck/probes/secret-sweep.mjs`                                        | contains:SWEEP CLEAN |
-| smoke-matrix-recorded | local | `node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT3-result.md 12` | contains:HT OK       |
-| v1-tag                | local | `git tag -l v1.0.0`                                                          | contains:v1.0.0      |
-| ci-green              | ci    | `gh run list --branch main --limit 1 --json conclusion --jq .[0].conclusion` | contains:success     |
+| Name                  | Lane  | Command                                                                      | Expected                |
+| --------------------- | ----- | ---------------------------------------------------------------------------- | ----------------------- |
+| check                 | local | `npm run check`                                                              | exit0                   |
+| e2e                   | local | `npm run e2e`                                                                | exit0                   |
+| domain-live           | local | `node .chuck/probes/domain-live.mjs`                                         | contains:DOMAIN OK      |
+| sitemap-prod          | local | `node .chuck/probes/sitemap-count.mjs`                                       | contains:SITEMAP OK     |
+| lighthouse-config     | local | `node .chuck/probes/lighthouse-config-check.mjs`                             | contains:LHCI CONFIG OK |
+| lighthouse-prod       | local | `npm run lighthouse:prod`                                                    | exit0                   |
+| secret-sweep          | local | `node .chuck/probes/secret-sweep.mjs`                                        | contains:SWEEP CLEAN    |
+| smoke-matrix-recorded | local | `node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT3-result.md 12` | contains:HT OK          |
+| v1-tag                | local | `git tag -l v1.0.0`                                                          | contains:v1.0.0         |
+| ci-green              | ci    | `gh run list --branch main --limit 1 --json conclusion --jq .[0].conclusion` | contains:success        |
 
 ### Escalation triggers
 
 - Any smoke-matrix row fails → `blocked-gate` with the operator's observed values; rollback guidance (repoint DNS to Wix) attached if user-facing.
 - Production emails do not deliver to a non-owner inbox → `blocked-gate` (Resend domain verification is the usual suspect; do not restructure auth).
-- The sweep finds a non-allowlisted secret pattern in history → `irreversible-op` escalation (rotation decision is the operator's).
+- The sweep finds any secret-shaped string in history → `irreversible-op` escalation (rotation decision is the operator's).
 - Anything requiring a production DB write → `irreversible-op` (none is planned in M3).
 
 ### Definition of done
 
-`byrachelpierce.com` serves the site from Vercel with cert and www redirect; Wix redirects work; the smoke matrix returned all-Pass with dates/initials; production email proven delivered to a non-owner inbox; Lighthouse budgets green against production; secret sweep clean; `v1.0.0` tagged; ship report assembled and awaiting the operator's Gate 2. Legacy Spec §14's Definition of Done is satisfiable line by line.
+`byrachelpierce.com` serves the site from Vercel with cert and www redirect; Wix redirects work; the smoke matrix returned all-Pass with dates/initials; production email proven delivered to a non-owner inbox; Lighthouse budgets green against production; the live sitemap enumerates all 528 painting pages (probe-verified); secret sweep clean; `v1.0.0` tagged; ship report assembled and awaiting the operator's Gate 2. Legacy Spec §14's Definition of Done is satisfiable line by line.
 
 ---
 

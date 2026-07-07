@@ -11,7 +11,7 @@
 ## Phase 0 — One-time setup (~1–2 hours). Do these IN ORDER before any milestone.
 
 **0.1 — Rotate the leaked secrets (YOU, first, before anything else).**
-1. Resend dashboard → API Keys → revoke the key beginning `re_cQuXwBZ1` (it was committed to git in the old trail spec and is public to anyone with repo access) → create a new key.
+1. Resend dashboard → API Keys → revoke the key beginning `re_cQuXwBZ1` (leaked in the pre-repo trail-spec document trail; the full key is NOT in this repo's git history — sweep-verified 2026-07-07 — but it was exposed and must be rotated) → create a new key.
 2. Turso dashboard → byrachelpierce database → rotate/revoke the auth token that was in `Database Token.txt` → create a new one.
 3. Update `.env.local` with both new values. Confirm `npm run dev` + a magic-link send still work.
 4. Delete `C:\Code\businessWebsites\byRachelPierce\Database Token.txt`.
@@ -164,7 +164,7 @@ Everything above is the original R0–R5 operator guide and remains valid — M0
 
 Nothing executes until you do this. Read three documents in this order:
 
-1. **DECISIONS.md** — 14 judgment calls; every `VETO POINT: yes` is an explicit invitation to overrule (D4 branch model, D7 db:push guard, D8 read-only prod probes, D11 rotation timing, and D12 file dispositions are the ones most worth your minute).
+1. **DECISIONS.md** — 15 judgment calls; every `VETO POINT: yes` is an explicit invitation to overrule (D4 branch model, D7 db:push guard, D8 read-only prod probes, D11 rotation timing, D12 file dispositions, and D15 — the plan-refutation resolutions — are the ones most worth your minute).
 2. **BUILD-SPEC.md** — the four milestones and their exact acceptance gates. If a "done" you care about is not machine-checkable there, reject the plan.
 3. **BUDGET.md** — estimate ranges and the overrun threshold.
 
