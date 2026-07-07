@@ -42,6 +42,8 @@ RIDER 2 (operator one-liner, F15): in docs/SITE-ARCHITECTURE-v2.md §5.2 list it
 
 Answer format suggestion: "HT1 returned at <path>; branches: <decision>; F15: done/deferred".
 
+**Operator note (2026-07-07, recorded after the stop):** the leaked Resend key (`re_cQuXwBZ1…`) has already been DELETED — the kill half of HT1 step 1 is done. The plan forward, per the operator: **create a brand-new Resend account dedicated to ByRachelPierce**, then create a new API key under it. HT1 step 1 therefore reads "create the dedicated account + new key" instead of "revoke + recreate", and step 4 (magic-link send test) only works once the new key is in `.env.local`'s active lines. Downstream consequences, so no milestone trips on them: (a) the M3 Resend **domain verification** (SPF/DKIM for byrachelpierce.com) must be performed in the NEW account; (b) the M4 env checklist's Resend key comes from the new account; (c) until the new key lands, magic-link email is broken in dev and previews — automated tests are unaffected (`resend` is mocked, key absent in CI), but any manual trail check will fail to send. Free-tier limits (100/day) assumed unchanged unless the new account differs.
+
 **Answer:**
 
 ---
