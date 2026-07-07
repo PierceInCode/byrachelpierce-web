@@ -151,3 +151,66 @@ turso db shell byrachelpierce "SELECT COUNT(*) FROM trail_completions;"         
 turso db shell byrachelpierce "SELECT mural_id, COUNT(*) FROM trail_progress GROUP BY mural_id ORDER BY 2 DESC;"  # popularity
 turso db shell byrachelpierce "SELECT u.email, c.redemption_code, c.completed_at FROM trail_completions c JOIN users u ON u.id = c.user_id ORDER BY c.completed_at DESC LIMIT 20;"
 ```
+
+⚠ **Audit note (2026-07-06):** the `turso` cloud CLI is NOT installed on this machine (only the local `tursodb.exe`), so the three queries above and the §R1 `.dump` backup command do not run as written. Until you install the CLI, use the libsql path: backups via `npx tsx scripts/backup-prod.ts` (arrives in M0), ad-hoc reads via the same `@libsql/client` pattern. See `TAKEOVER-AUDIT-2026-07-06.md` F6.
+
+---
+
+# Chuck takeover addendum (2026-07-06)
+
+Everything above is the original R0–R5 operator guide and remains valid — M0–M3 of the takeover run wrap it rather than replace it (`BUILD-SPEC.md` maps the milestones; §R4/§R5 above are now protocols HT2/HT3 under `.chuck/human-tests/`). This addendum is the Chuck-run operating manual: your two gates, checkpoints, escalations, and the credential steps that are yours alone.
+
+## Gate 1 — approve the plan
+
+Nothing executes until you do this. Read three documents in this order:
+
+1. **DECISIONS.md** — 14 judgment calls; every `VETO POINT: yes` is an explicit invitation to overrule (D4 branch model, D7 db:push guard, D8 read-only prod probes, D11 rotation timing, and D12 file dispositions are the ones most worth your minute).
+2. **BUILD-SPEC.md** — the four milestones and their exact acceptance gates. If a "done" you care about is not machine-checkable there, reject the plan.
+3. **BUDGET.md** — estimate ranges and the overrun threshold.
+
+Also worth reading once: `TAKEOVER-AUDIT-2026-07-06.md` §4 — the list of things you currently believe that are not true.
+
+To send the plan back: state objections; `/chuck:plan` re-plans. To approve:
+
+```powershell
+New-Item -ItemType File .chuck/plan-approved
+Set-Content .chuck/mode "checkpoint"   # or "continuous"
+```
+
+Approval write-protects BUILD-SPEC.md, DECISIONS.md (above the Amendments line), and the architecture doc; later changes go only through `/chuck:change`.
+
+## Gate 2
+
+The ship gate, at the end of M3. Milo assembles `ship-report.md`; you decide whether v1.0.0 stands.
+
+1. Read **ship-report.md**: the whole-project coverage manifest (what was checked AND what was not), accumulated flags, and the known-gaps list — plus the executed HT3 smoke matrix.
+2. Perform the operator credential steps it lists (they are yours alone — see Credentials below).
+3. Approve to ship, or reject with objections to send specific items back. The `v1.0.0` tag and the final `main` merge are the ship action; nothing user-facing moves without this gate.
+
+## Checkpoints
+
+In checkpoint mode the run pauses after each milestone (M0 → M1 → M2 → M3). A clean checkpoint is a pause, not a question — Milquetoast writes `milestone-report.md`, reading it is optional, and silence is consent. Resume with `/chuck:run`. Each checkpoint here also carries one concrete operator action: merging the `chuck/integration` → `main` PR (which is the production deploy). A checkpoint only becomes a decision when it carries an escalation.
+
+## Escalations
+
+The run stops and asks you only when it genuinely cannot proceed; entries appear in `ESCALATIONS.md` and the run stays paused until you fill the entry's `**Answer:**` line, then resume with `/chuck:run`. The six types and your bounded action:
+
+- **human-hands-needed** — run the named protocol (HT1 rotation, HT2 content loop, HT3 cutover) on your own schedule; return the result form to `.chuck/human-tests/HT<n>-result.md`.
+- **irreversible-op** — anything touching production data or DNS beyond the approved rituals; you give explicit go-ahead or refuse.
+- **blocked-gate / gate-3-strikes** — a gate stayed red through remediation; you adjudicate: accept as known gap, re-scope, or direct a fix.
+- **budget-overrun** — actuals crossed BUDGET.md's threshold; raise it, approve the spend, or cut scope.
+- **decision-gap / spec-amendment** — a choice isn't in DECISIONS.md or the plan must change; routes through `/chuck:change`'s mini-veto.
+- **core-bet-failure** — not applicable to this run (no unproven core bets; the product is built and serving).
+
+## Human-hands test protocols
+
+Three are pre-written in `.chuck/human-tests/`: **HT1** (M0 — secret rotation + Phase-0 confirmations), **HT2** (M2 — the content loop with Rachel), **HT3** (M3 — DNS cutover + smoke matrix). Each is numbered steps a non-engineer could follow, with a result form; save the filled form at the path the protocol names and resume with `/chuck:run`. Batch them on your schedule — the run waits.
+
+## Credentials
+
+Operator-only material; agents never see, request, or store these — they escalate and wait:
+
+- **Resend, Turso, Vercel, GitHub, DNS-host logins** — all dashboard actions (rotation, env vars, domain verification, DNS records) are yours.
+- **Production env values** — you enter them in the Vercel dashboard (M3 checklist); agents verify outcomes only ever through public HTTP.
+- **Production DB writes** — only through the backup-first ritual you authorize; the agent side is read-only probes (DECISIONS D8).
+- One Wix task: supply (or approve the crawled) list of top Wix page URLs for the M1 redirect map — a 10-minute task.
