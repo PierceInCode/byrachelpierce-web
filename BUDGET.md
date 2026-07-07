@@ -29,11 +29,13 @@ On a subscription plan these read as API-equivalent value against plan limits, n
 | M2        | 0.15M–0.5M tokens   | Human-hands long pole; agent side is probes, verification, suite re-runs, and the gate wave only                                                       |
 | M3        | 0.3M–0.9M tokens    | Operator-heavy; agent side is probes, final sweeps, ship report (Milo) + Gate 2 assembly                                                               |
 
-threshold: 50%
+threshold: 200%
+
+_Threshold history: originally 50%; raised to 200% by the operator's E1 answer (2026-07-07, "Accept and widen bands to allow for 200% overage"). Implemented as the overrun-allowance threshold against the UNCHANGED estimate bands above — the bands remain Otis's honest estimates; the allowance is what moved. The next `budget-overrun` escalation fires when a milestone's cumulative actuals exceed its band's high end by 200% (i.e., 3× the high end). Planning's overage (1,730,577 vs 0.8M high end, ≈116% over) is accepted as sunk under this allowance._
 
 ## Ledger
 
-| Date       | Milestone             | Actual                                                                                                 | Est. band | Cumulative | Variance vs. est.                                 |
-| ---------- | --------------------- | ------------------------------------------------------------------------------------------------------ | --------- | ---------- | ------------------------------------------------- |
-| 2026-07-06 | planning              | 497,724 in/out tokens (input=118,393; output=379,331; cache_read=27,173,549; cache_create=1,191,070)   | 0.3M–0.8M | 497,724    | in band                                           |
-| 2026-07-07 | planning (refutation) | 1,232,853 in/out tokens (input=367,069; output=865,784; cache_read=69,454,934; cache_create=5,008,396) | 0.3M–0.8M | 1,730,577  | over band — crossed 50% threshold; ESCALATIONS E1 |
+| Date       | Milestone             | Actual                                                                                                 | Est. band | Cumulative | Variance vs. est.                                                                 |
+| ---------- | --------------------- | ------------------------------------------------------------------------------------------------------ | --------- | ---------- | --------------------------------------------------------------------------------- |
+| 2026-07-06 | planning              | 497,724 in/out tokens (input=118,393; output=379,331; cache_read=27,173,549; cache_create=1,191,070)   | 0.3M–0.8M | 497,724    | in band                                                                           |
+| 2026-07-07 | planning (refutation) | 1,232,853 in/out tokens (input=367,069; output=865,784; cache_read=69,454,934; cache_create=5,008,396) | 0.3M–0.8M | 1,730,577  | over band — crossed then-50% threshold; E1 answered: accepted, allowance now 200% |

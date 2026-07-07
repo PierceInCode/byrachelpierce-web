@@ -25,5 +25,5 @@ _The log below is empty by design; the run appends entries at the moment of esca
 - (c) Cut scope before approving the plan.
 
 **Answer:**
-
+Accept and widen bands to allow for 200% overage.
 ---
