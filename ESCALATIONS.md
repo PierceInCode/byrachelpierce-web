@@ -27,3 +27,21 @@ _The log below is empty by design; the run appends entries at the moment of esca
 **Answer:**
 Accept and widen bands to allow for 200% overage.
 ---
+
+## E2 — human-hands — 2026-07-07 — M0 secret rotation (HT1)
+
+**Type:** `human-hands`
+
+**What happened:** M0's machine work is COMPLETE on chuck/M0 @ 102a0b9. Gates already executed green this session (quote): check/coverage/build-seeded/e2e green via Bill (coverage 90.36% lines / 97.67% funcs; build 34/34; e2e 12 passed); dep-audit exit 0 AFTER drizzle-orm 0.45.2 CVE bump (was red: GHSA-gpj5-g38j-94v9 HIGH); eol-clean "EOL OK"; push-guard "PUSH-GUARD OK"; restore-roundtrip 3/3; prod-verify "PROD-VERIFY OK" (528 paintings, 0 sentinels, 4 migrations); alias-smoke "SMOKE OK" (4/4 routes 200); tag-r4 (R4 @ 2c9f15e pushed). Pending: ci-green on 102a0b9 (running, PR #13 draft), rotation-recorded (THIS escalation), then Binkley's full gate.
+
+The operator action: run protocol `.chuck/human-tests/HT1-secret-rotation.md` (rotate the leaked Resend key + Turso token, update .env.local, confirm dev + magic-link, delete Database Token.txt if present, confirm art backup 0.6 + Vercel previews 0.7), save the filled form at `.chuck/human-tests/HT1-result.md`, resume with /chuck:run. Rotation is contractually not deferrable again (D11).
+
+RIDER 1 (operator approval requested in your Answer): remote-branch deletion list per audit §2/F11 — merged-and-stale: r3-collection, r4-content, docs/r3-close-out, docs/r4-close-out, final-product-planning; closed-unmerged: vercel/react-server-components-cve-vu-y3bp7s. Approve deletion (all/some/none) in the Answer; deletion happens after your answer.
+
+RIDER 2 (operator one-liner, F15): in docs/SITE-ARCHITECTURE-v2.md §5.2 list item 3 (line 171), fix Lilly->Lily (both occurrences on the line) — agents cannot edit docs/.
+
+Answer format suggestion: "HT1 returned at <path>; branches: <decision>; F15: done/deferred".
+
+**Answer:**
+
+---

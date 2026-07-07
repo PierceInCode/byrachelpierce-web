@@ -10,16 +10,17 @@ Nothing has been built and nothing executes until the marker exists. Standing ri
 
 ## Milestone board
 
-| Milestone                                                               | Status  | Gate verdict | Checkpoint date |
-| ----------------------------------------------------------------------- | ------- | ------------ | --------------- |
-| M0 — Takeover baseline: audit closure, hygiene, production verification | planned | —            | —               |
-| M1 — R5 code: SEO, redirects, analytics, Lighthouse                     | planned | —            | —               |
-| M2 — Content loop completion: real mural content live                   | planned | —            | —               |
-| M3 — Admin panel: non-developer collection CRUD (added at Gate 1, D16)  | planned | —            | —               |
-| M4 — Go-live: cutover, smoke, v1.0.0 (was M3 pre-D16)                   | planned | —            | —               |
+| Milestone                                                               | Status                                             | Gate verdict | Checkpoint date |
+| ----------------------------------------------------------------------- | -------------------------------------------------- | ------------ | --------------- |
+| M0 — Takeover baseline: audit closure, hygiene, production verification | in progress — machine work done, awaiting HT1 (E2) | —            | —               |
+| M1 — R5 code: SEO, redirects, analytics, Lighthouse                     | planned                                            | —            | —               |
+| M2 — Content loop completion: real mural content live                   | planned                                            | —            | —               |
+| M3 — Admin panel: non-developer collection CRUD (added at Gate 1, D16)  | planned                                            | —            | —               |
+| M4 — Go-live: cutover, smoke, v1.0.0 (was M3 pre-D16)                   | planned                                            | —            | —               |
 
 ## History
 
+- 2026-07-07 — M0 built and remediated (three feature/fix commits 781f894, d4089a3, a788cf1, 102a0b9); Bill's stress found a red dep-audit gate (drizzle-orm CVE GHSA-gpj5-g38j-94v9 HIGH) plus restore-atomicity and snapshot-overwrite hazards, all remediated same-session; run stopped clean on E2 (HT1 rotation + riders).
 - 2026-07-07 — delta refutation completed and resolved: fresh Snorklewacker over the admin-panel delta returned 4 REFUTED (Δ1 create-field/`notes` mapping; Δ2–Δ4 stale M3→M4 references in Architecture §7/§8/§9 + OPERATOR-GUIDE Gate 2) + 1 NEEDS-SENIOR-REVIEW (Δ5 M3 lockout vacuity, resolved by naming the e2e journey load-bearing in BUILD-SPEC) + 1 minor (PROGRESS recap). All fixed in-package. STANDS: 48/48 gate rows 1:1, 0004 complete, cookie seam verified, budget math consistent, D17 ordering holds.
 - 2026-07-07 — scope added at Gate 1 (operator): admin panel for non-developer painting CRUD, pre-cutover — new M3, go-live renumbered M4. Intake settled: full CRUD incl. create with pre-processed uploads; Matthew/Rachel/Laciey via magic-link + is_admin; soft-delete. Package delta authored (SCOPE, Architecture §11, BUILD-SPEC M3/M4, gates.json, probes admin-schema/admin-lockout/sitemap-vs-db, HT4, D16/D17, BUDGET M3 band 1.0M–3.0M); sitemap-count.mjs superseded and removed (D17). E1 answered: allowance 200%.
 - 2026-07-07 — plan refutation completed and resolved: fresh Snorklewacker (opus, max effort) returned 13 findings + 1 UNVERIFIED; dispositions in DECISIONS D15. Package hardened: 4 new gates (push-guard, restore-roundtrip, lighthouse-config, sitemap-prod), 3 probes strengthened (backup-check content fidelity, secret-sweep allowlist removed, mural-content deployed-description assertion), narratives corrected (leak-not-in-history, L7/L8 verified-not-pending, F17→M1, Node 20-vs-24 policy, §5.2 citation). Re-validated: `PACKAGE OK`, `npm run check` green (18 files / 143 tests), sweep `SWEEP CLEAN`. Awaiting Gate 1.
