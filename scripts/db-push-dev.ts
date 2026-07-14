@@ -11,14 +11,15 @@
  * On the success path it execs `npx drizzle-kit push` with inherited stdio.
  *
  * The production credentials in `.env.local` live on COMMENTED lines; this
- * wrapper never reads them (the active-line regex is anchored so `#`-prefixed
- * lines can never match) and never prints any env value.
+ * wrapper never reads them (dotenv, which parses `.env.local`, ignores
+ * `#`-prefixed lines) and never prints any env value.
  *
  * Run: npm run db:push:dev
  */
 
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { parse as parseDotenv } from 'dotenv';
 import { isMain } from './lib/entrypoint';
 
 /** The exact literal the `push-guard` probe scans for on the refusal path. */
@@ -35,13 +36,17 @@ export const REFUSAL_TOKEN = 'DB PUSH REFUSED';
  * `.env.local`. Commented (`#`-prefixed) lines — where the production creds
  * live — can never match, so this never surfaces them.
  *
- * F-BINK-2: drizzle-kit loads `.env.local` via dotenv, which is LAST-match-wins
- * on a duplicate key. On a `.env.local` with two active `TURSO_DATABASE_URL`
- * lines (e.g. a bad merge or half-reverted edit that leaves a local `file:` line
- * followed by a remote `libsql:` line), a first-match resolution would read the
- * safe `file:` value and ALLOW the push while drizzle-kit actually targets the
- * remote URL — bypassing the guard. The guard must resolve the SAME value
- * drizzle-kit will use, so it takes the LAST active match to mirror dotenv.
+ * F-BINK-2 / F-RG-1: drizzle-kit loads `.env.local` via dotenv. A hand-rolled
+ * regex cannot fully model dotenv's grammar — it strips an `export` prefix,
+ * strips inline `#` comments after a (quoted) value, tolerates spaces around
+ * `=` and trailing whitespace, and is LAST-match-wins on a duplicate key. Any
+ * divergence is a guard bypass: the earlier regex read a safe `file:` value and
+ * ALLOWED the push while drizzle-kit's dotenv resolved a remote `libsql:` URL
+ * (a bad merge or half-reverted edit). So the guard parses `.env.local` with
+ * dotenv ITSELF — the exact parser drizzle-kit uses — making the guard's view
+ * byte-identical to the URL drizzle-kit will actually target. Commented
+ * (`#`-prefixed) lines are ignored by dotenv, so the production creds that live
+ * commented in `.env.local` are never surfaced.
  */
 export function resolveEffectiveUrl(
   processUrl: string | undefined,
@@ -49,14 +54,11 @@ export function resolveEffectiveUrl(
 ): string | undefined {
   if (processUrl !== undefined) return processUrl;
 
-  // Global match: take the LAST active line so a duplicate key resolves the same
-  // way dotenv (and therefore drizzle-kit) would — last assignment wins.
-  const matches = [
-    ...envLocalContent.matchAll(
-      /^[ \t]*TURSO_DATABASE_URL[ \t]*=[ \t]*["']?([^"'\r\n]+?)["']?[ \t]*$/gm,
-    ),
-  ];
-  return matches.length ? matches[matches.length - 1][1]?.trim() || undefined : undefined;
+  // Parse with dotenv itself so the resolved value is identical to what
+  // drizzle-kit (which calls `dotenv.config({ path: '.env.local' })`) will use.
+  const parsed = parseDotenv(envLocalContent);
+  const value = parsed.TURSO_DATABASE_URL;
+  return value !== undefined && value.length > 0 ? value : undefined;
 }
 
 /** True only for a local `file:` database — the one target push is allowed at. */

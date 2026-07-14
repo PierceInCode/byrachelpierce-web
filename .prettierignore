@@ -13,3 +13,8 @@ coverage/
 .chuck/session-state.md
 .chuck/run.lock
 .chuck/mode
+.chuck/reports/
+.chuck/probes/*.md
+.chuck/probes/*.log
+.chuck/probes/*.json
+.chuck/now

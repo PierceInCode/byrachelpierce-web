@@ -63,6 +63,52 @@ describe('resolveEffectiveUrl (db:push:dev guard)', () => {
     // And that effective URL is NOT a local file: DB, so the guard refuses.
     expect(isLocalFileUrl(effective)).toBe(false);
   });
+
+  // F-RG-1 (re-gate cycle 2): the hand-rolled regex diverged from what dotenv
+  // (and therefore drizzle-kit) actually resolves. Each shape below is a REAL
+  // bypass reproduced against dotenv 16.6.1: the guard must resolve the remote
+  // libsql URL (BLOCK), not fall back to the earlier file: line (ALLOW). The
+  // guard now parses via dotenv itself so its view is byte-identical to
+  // drizzle-kit's.
+  it('BLOCKS an export-prefixed remote line (dotenv strips `export`)', () => {
+    const content = [
+      'TURSO_DATABASE_URL=file:./dev.db',
+      'export TURSO_DATABASE_URL=libsql://prod.example.turso.io',
+    ].join('\n');
+    const effective = resolveEffectiveUrl(undefined, content);
+    expect(effective).toBe('libsql://prod.example.turso.io');
+    expect(isLocalFileUrl(effective)).toBe(false);
+  });
+
+  it('BLOCKS a quoted remote value with an inline comment after it (dotenv strips the comment)', () => {
+    const content = [
+      'TURSO_DATABASE_URL=file:./dev.db',
+      'TURSO_DATABASE_URL="libsql://prod.example.turso.io" # bad merge',
+    ].join('\n');
+    const effective = resolveEffectiveUrl(undefined, content);
+    expect(effective).toBe('libsql://prod.example.turso.io');
+    expect(isLocalFileUrl(effective)).toBe(false);
+  });
+
+  it('BLOCKS a remote value with spaces around `=`, quotes, and a trailing inline comment', () => {
+    const content = [
+      'TURSO_DATABASE_URL=file:./dev.db',
+      'TURSO_DATABASE_URL = "libsql://prod.example.turso.io"   # oops   ',
+    ].join('\n');
+    const effective = resolveEffectiveUrl(undefined, content);
+    expect(effective).toBe('libsql://prod.example.turso.io');
+    expect(isLocalFileUrl(effective)).toBe(false);
+  });
+
+  it('ALLOWS a plain duplicate key when the LAST value is file: (dotenv last-wins)', () => {
+    const content = [
+      'TURSO_DATABASE_URL=libsql://prod.example.turso.io',
+      'TURSO_DATABASE_URL=file:./dev.db',
+    ].join('\n');
+    const effective = resolveEffectiveUrl(undefined, content);
+    expect(effective).toBe('file:./dev.db');
+    expect(isLocalFileUrl(effective)).toBe(true);
+  });
 });
 
 describe('isLocalFileUrl', () => {
