@@ -2,36 +2,53 @@
 
 milestone: M0
 
-## Position (written 2026-07-14 — Amendment A1 applied)
+## Position (written 2026-07-14 — gate cycle 1 FAIL, remediation committed, stopped clean on E3)
 
-Mode: continuous. Gate 1 approved; plan frozen at BUILD-SPEC M0–M4.
+Mode: continuous. Branch chuck/M0 @ tip ed2aae5 (pushed; CI running on this tip). Run lock
+RELEASED by the orchestrator at this stop.
 
-CR1 mini-veto: APPROVED WITH AMENDMENT (2026-07-14). The operator COMPLETED secret rotation
-(NOT waived): both leaked credentials rotated — new Resend API key AND new Turso production
-database auth token; `Database Token.txt` deleted; `public/art/` backup (Phase 0.6) confirmed.
-No standing production-DB exposure risk (Turso token is rotated). Recorded: ESCALATIONS E2
-Answer filled; DECISIONS D18 (Amendment A1) appended; CR1 stamped "APPROVED WITH AMENDMENT";
-HT1-secret-rotation.md annotated "RETIRED / COMPLETED 2026-07-14 by Amendment A1".
+Binkley gated M0 (fresh context, HEAD acd4bbd) -> VERDICT FAIL. All 12 machine gates PASSED,
+but the Anxiety-Closet wave reproduced 4 findings on executed evidence. Full reports:
+`.chuck/reports/M0/` (milestone-report.md + bobbi/ronald-ann/steve/snorklewacker cycle1). Probe
+ledger: `.chuck/probes/M0-ledger.md`. This is gate CYCLE 1 of the 3-strike limit (1 used).
 
-Two HT1 items NOT confirmed, carried forward (not gated): magic-link send-test (step 4) ->
-deferred to M3 (needs the dedicated ByRachelPierce Resend account+key; magic-link auth stays
-unverified until then); Vercel-preview confirmation (step 7 / Phase 0.7) -> carried to Milo's
-ship-report at Gate 2. Because the HT1 result form is only 4/7 operator-observed, the
-`rotation-recorded` machine gate was RETIRED — gates.json M0 now has 12 gates (was 13).
+F-BINK-2/3/4 (MAJOR, code) REMEDIATED by Oliver test-first and COMMITTED at ed2aae5: (2) db:push
+guard now resolves last-match TURSO_DATABASE_URL so a duplicate-key .env.local cannot bypass it;
+(3) restoreTables routes column identifiers through assertSafeIdentifier (closes SQLi via dump
+column names); (4) restoreTables throws on a missing dump instead of silent empty-success. Full
+`npm run check` GREEN after remediation (171 tests pass, lint/format/typecheck clean).
 
-## Resume steps (in order, from here)
+F-BINK-5 (build-tooling licenses MPL-2.0/CC-BY-4.0) + F-BINK-7 (.prettierignore) DISPOSITIONED
+in DECISIONS D19 (operator accepted the licenses 2026-07-14; D10 clarified to govern
+runtime-bundled deps, not build tooling).
 
-1. Run prettier + `npm run check` (via test-runner) on chuck/M0.
-2. Commit the amendment on chuck/M0, push, wait for CI success on the exact new tip sha.
-3. Dispatch Binkley (fresh context, opus) for the M0 Anxiety Closet against gates.json M0
-   (12 gates, no rotation-recorded).
-4. On PASS -> close in PIN-ONCE-LAST order: Scribe commits report/PROGRESS/session-state/ledger;
-   push; CI on tip; Binkley's last act verifies CI + re-runs gates + writes the pinned artifact;
-   merge chuck/M0 to the integration branch; Otis actuals + re-baseline.
-5. Continuous mode -> then M1. First need: operator's Wix page URL list (M1 item 3).
+F-BINK-6 (draft PR #13 targets `main` directly instead of the two-stage flow via the integration
+branch) — PROCESS NOTE, to handle at close: retarget or close PR #13 when M0 merges to the
+integration branch. Non-blocking now.
 
-Note: the amendment changes ONLY gates.json + docs, so code gates are unaffected — Binkley
-re-runs them fresh regardless.
+F-BINK-1 (IMPORTANT/credential) -> ESCALATIONS **E3** (human-hands, Answer empty). The
+production Turso token in .env.local is a JWT issued 2026-03-01, unchanged since 2026-07-04, and
+still authenticates against live prod — contradicting A1's "rotated 2026-07-14." Operator must:
+verify/replace the .env.local token with the new one, and REVOKE the old/leaked token at Turso.
+THIS IS M0's REMAINING BLOCKER.
+
+CURRENT POSITION: Run STOPPING CLEAN on escalation E3 (human-hands). Code remediation landed
+(ed2aae5, pushed). M0 CANNOT close until E3 is answered.
+
+## Resume steps (in order, on operator's E3 answer + /chuck:run)
+
+1. Re-acquire the run lock.
+2. Re-probe the Turso token: decode the .env.local prod JWT `iat` (must be > 2026-07-14) and
+   confirm the OLD token no longer authenticates against prod; then confirm or correct
+   Amendment A1's rotation/no-exposure claim (via a DECISIONS note if correction needed).
+3. Scoped re-gate M0 (Binkley, per binkley.md §7): verify F-BINK-2/3/4 fixed on ed2aae5
+   (owner-verifiers) + F-BINK-1 resolved + one fresh-eyes remediation-diff review + one
+   Snorklewacker refutation that the fixes are real; re-run all 12 deterministic gates; confirm
+   CI green on the re-gate tip.
+4. On PASS -> close M0 in PIN-ONCE-LAST order (Scribe commits report/PROGRESS/session-state/
+   ledger; push; CI; Binkley last act writes the pinned artifact; merge chuck/M0 to the
+   integration branch — and retarget/close draft PR #13 per F-BINK-6; Otis actuals +
+   re-baseline). Continuous -> then M1.
 
 ## Gate status on b693556 (all executed this session; quotes in PROGRESS/ESCALATIONS)
 
@@ -49,6 +66,8 @@ probe spawn) + F7 (pre-existing e2e UntrustedHost log noise) = known-low, carry 
 
 ## Open operator items (non-blocking, batch anytime)
 
+- E3 (BLOCKING M0 close): confirm/replace the .env.local prod Turso token and revoke the
+  old/leaked token at Turso; reconcile against Amendment A1's rotation claim.
 - E2 RIDER 1: remote-branch deletion approval (r3-collection, r4-content, docs/r3-close-out,
   docs/r4-close-out, final-product-planning, vercel/react-server-components-cve-vu-y3bp7s).
 - E2 RIDER 2: F15 docs one-liner (docs/SITE-ARCHITECTURE-v2.md line 171, Lilly->Lily, both).
