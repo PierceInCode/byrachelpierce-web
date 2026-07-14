@@ -229,3 +229,15 @@ Records the operator's dispositions of two NEEDS-SENIOR-REVIEW / NIT findings fr
 **F-BINK-5 — build-tooling licenses accepted (operator-approved 2026-07-14).** `lightningcss` / `lightningcss-win32-x64-msvc` 1.31.1 (MPL-2.0, pulled via `tailwindcss`) and `caniuse-lite` (CC-BY-4.0, pulled via `next`) appear in the `npm ls --omit=dev` tree, outside D10's allowlist (MIT / Apache-2.0 / BSD / ISC). Both are build-time-only tooling with zero app-source references and are never bundled into the running site (MPL is file-level copyleft on the tool's own files; CC-BY is data attribution). Clarification of D10: the allowlist governs runtime-BUNDLED dependencies (code shipped in the deployed app), not build/tooling transitive dependencies. These two are accepted on that basis. If a future dependency introduces a non-permissive license into the runtime bundle, D10 still applies in full.
 
 **F-BINK-7 — `.prettierignore` recorded.** The `.prettierignore` added during M0 (excludes generated/vendored files from Prettier) was not itemized in a BUILD-SPEC work item or a DECISIONS entry (rule-10 ambiguity-protocol miss). Its contents are benign and standard; it is recorded here retroactively. No behavior change.
+
+---
+
+## D20 — Amendment: Turso token — operator waiver of F-BINK-1; correction of A1's rotation claim (2026-07-14)
+
+Continues the sequence per the `## Amendments` rule. Corrects Amendment A1 (D18) on one point and records the operator's disposition of gate finding F-BINK-1 (report `.chuck/reports/M0/milestone-report.md`; ESCALATIONS E3).
+
+A1 recorded the Turso production token as rotated 2026-07-14 with "no standing exposure." Binkley's executed evidence (F-BINK-1) showed the token in `.env.local` is a JWT issued 2026-03-01, unchanged since 2026-07-04, still authenticating against live production — so the rotation is NOT independently verifiable and the "no standing exposure" framing was UNVERIFIED.
+
+**Operator decision (2026-07-14, explicit).** Accept the current Turso token as-is; waive further rotation/verification; do not re-raise. Basis: the credential was never in the public GitHub repo (secret-sweep CLEAN across full history); known exposure is local-machine files and retained AI-conversation history only, not any indexed/public location.
+
+**Effect.** F-BINK-1 is closed by operator waiver (not by a fix). The M0 DoD "secrets rotated" clause is satisfied for the Turso token by this waiver; the token continues in use as-is. The Resend key replacement remains an M3 functional prerequisite (magic-link auth). No code change. This supersedes A1 only on the Turso rotation/exposure characterization; A1's gate/spec deltas (retired `rotation-recorded`, etc.) stand.

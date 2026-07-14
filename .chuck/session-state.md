@@ -2,10 +2,10 @@
 
 milestone: M0
 
-## Position (written 2026-07-14 — gate cycle 1 FAIL, remediation committed, stopped clean on E3)
+## Position (written 2026-07-14 — E3 resolved by operator waiver, proceeding to scoped re-gate)
 
-Mode: continuous. Branch chuck/M0 @ tip ed2aae5 (pushed; CI running on this tip). Run lock
-RELEASED by the orchestrator at this stop.
+Mode: continuous. Branch chuck/M0, tip 56d48a2 (an E3-answer/D20 commit is about to be added by
+the orchestrator on top of this). Run lock RE-ACQUIRED (held).
 
 Binkley gated M0 (fresh context, HEAD acd4bbd) -> VERDICT FAIL. All 12 machine gates PASSED,
 but the Anxiety-Closet wave reproduced 4 findings on executed evidence. Full reports:
@@ -26,29 +26,33 @@ F-BINK-6 (draft PR #13 targets `main` directly instead of the two-stage flow via
 branch) — PROCESS NOTE, to handle at close: retarget or close PR #13 when M0 merges to the
 integration branch. Non-blocking now.
 
-F-BINK-1 (IMPORTANT/credential) -> ESCALATIONS **E3** (human-hands, Answer empty). The
-production Turso token in .env.local is a JWT issued 2026-03-01, unchanged since 2026-07-04, and
-still authenticates against live prod — contradicting A1's "rotated 2026-07-14." Operator must:
-verify/replace the .env.local token with the new one, and REVOKE the old/leaked token at Turso.
-THIS IS M0's REMAINING BLOCKER.
+F-BINK-1 (IMPORTANT/credential) -> ESCALATIONS **E3**. RESOLVED 2026-07-14 by operator WAIVER
+(explicit in-session instruction): accept the current Turso production token as-is; do not
+re-raise. ESCALATIONS E3 `**Answer:**` is filled (WAIVED). DECISIONS **D20** records the waiver
+and corrects Amendment A1's Turso claim: the rotation is not independently verifiable (token in
+.env.local issued 2026-03-01, still valid) so A1's "no standing exposure" framing is corrected to
+"accepted as-is, unverified, residual risk waived by operator." Basis: credential never in the
+public GitHub repo (secret-sweep CLEAN across full history); known exposure is local files +
+AI-conversation history only.
 
-CURRENT POSITION: Run STOPPING CLEAN on escalation E3 (human-hands). Code remediation landed
-(ed2aae5, pushed). M0 CANNOT close until E3 is answered.
+CURRENT POSITION: E3 resolved by operator waiver (D20). M0's remaining blocker is therefore
+RESOLVED. Proceeding to the SCOPED RE-GATE of M0 — no longer blocked. Code remediation
+F-BINK-2/3/4 already landed and committed (ed2aae5), full `npm run check` GREEN (171 tests), CI
+green on ed2aae5.
 
-## Resume steps (in order, on operator's E3 answer + /chuck:run)
+## Resume steps (in order)
 
-1. Re-acquire the run lock.
-2. Re-probe the Turso token: decode the .env.local prod JWT `iat` (must be > 2026-07-14) and
-   confirm the OLD token no longer authenticates against prod; then confirm or correct
-   Amendment A1's rotation/no-exposure claim (via a DECISIONS note if correction needed).
-3. Scoped re-gate M0 (Binkley, per binkley.md §7): verify F-BINK-2/3/4 fixed on ed2aae5
-   (owner-verifiers) + F-BINK-1 resolved + one fresh-eyes remediation-diff review + one
-   Snorklewacker refutation that the fixes are real; re-run all 12 deterministic gates; confirm
-   CI green on the re-gate tip.
-4. On PASS -> close M0 in PIN-ONCE-LAST order (Scribe commits report/PROGRESS/session-state/
+1. Orchestrator commits the E3-answer + D20 + these ledger updates on chuck/M0, pushes, confirms
+   CI green on the new tip.
+2. Scoped re-gate M0 (Binkley, per binkley.md §7): verify F-BINK-2/3/4 are actually fixed on the
+   re-gate tip (owner-verifiers re-run the new tests) + F-BINK-1 marked WAIVED per D20/E3 (not
+   re-probed) + one fresh-eyes remediation-diff review + one Snorklewacker refutation that the
+   fixes are real; re-run all 12 deterministic gates; confirm CI green on the re-gate tip. This is
+   the re-attempt of gate cycle 1 (still 1 of the 3-strike limit unless it FAILs again).
+3. On PASS -> close M0 in PIN-ONCE-LAST order (Scribe commits report/PROGRESS/session-state/
    ledger; push; CI; Binkley last act writes the pinned artifact; merge chuck/M0 to the
-   integration branch — and retarget/close draft PR #13 per F-BINK-6; Otis actuals +
-   re-baseline). Continuous -> then M1.
+   integration branch AND retarget/close draft PR #13 per F-BINK-6; Otis actuals + re-baseline).
+   Continuous -> then M1.
 
 ## Gate status on b693556 (all executed this session; quotes in PROGRESS/ESCALATIONS)
 
@@ -66,8 +70,6 @@ probe spawn) + F7 (pre-existing e2e UntrustedHost log noise) = known-low, carry 
 
 ## Open operator items (non-blocking, batch anytime)
 
-- E3 (BLOCKING M0 close): confirm/replace the .env.local prod Turso token and revoke the
-  old/leaked token at Turso; reconcile against Amendment A1's rotation claim.
 - E2 RIDER 1: remote-branch deletion approval (r3-collection, r4-content, docs/r3-close-out,
   docs/r4-close-out, final-product-planning, vercel/react-server-components-cve-vu-y3bp7s).
 - E2 RIDER 2: F15 docs one-liner (docs/SITE-ARCHITECTURE-v2.md line 171, Lilly->Lily, both).

@@ -66,6 +66,6 @@ Answer format suggestion: "HT1 returned at <path>; branches: <decision>; F15: do
 
 Then resume with `/chuck:run`: I re-probe (decode the new JWT's `iat`, confirm the old token no longer authenticates) and either confirm A1 or correct it.
 
-**Answer:**
+**Answer (recorded 2026-07-14, operator's explicit in-session instruction):** WAIVED. The operator accepts the current Turso production token as-is and directs that this not be raised again. Basis (makes the decision reasonable): the credential was never in the public GitHub repository (secret-sweep CLEAN across full history); known exposure is local-machine files and retained AI-conversation history only, not any indexed/public location. F-BINK-1 is closed by operator waiver — no rotation verification is performed. A1's "Turso rotated 2026-07-14 / no standing exposure" framing is corrected by **DECISIONS D20** to "accepted as-is, unverified, residual risk waived by operator." The M0 DoD secrets-rotated clause is satisfied for Turso by this waiver; the Resend replacement remains an M3 functional prerequisite for magic-link auth.
 
 ---
