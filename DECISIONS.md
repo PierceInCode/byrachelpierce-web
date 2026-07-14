@@ -219,3 +219,13 @@ Continues the sequence per the `## Amendments` rule (the sanctioned mid-run chan
 **Not affected.** M1, M2. No past-green milestone is reopened. Budget: null delta — no band change (CR1's Otis-discipline statement stands).
 
 **Open riders (unchanged, non-blocking).** RIDER 1 (stale remote-branch deletions) and RIDER 2 (F15 `Lilly`→`Lily` in `docs/SITE-ARCHITECTURE-v2.md` line 171) remain for the operator, carried to the next touchpoint.
+
+---
+
+## D19 — M0 gate NSR dispositions: build-tooling license acceptance (F-BINK-5) and `.prettierignore` note (F-BINK-7) (2026-07-14)
+
+Records the operator's dispositions of two NEEDS-SENIOR-REVIEW / NIT findings from Binkley's M0 gate (report `.chuck/reports/M0/milestone-report.md`). Continues the sequence per the `## Amendments` rule.
+
+**F-BINK-5 — build-tooling licenses accepted (operator-approved 2026-07-14).** `lightningcss` / `lightningcss-win32-x64-msvc` 1.31.1 (MPL-2.0, pulled via `tailwindcss`) and `caniuse-lite` (CC-BY-4.0, pulled via `next`) appear in the `npm ls --omit=dev` tree, outside D10's allowlist (MIT / Apache-2.0 / BSD / ISC). Both are build-time-only tooling with zero app-source references and are never bundled into the running site (MPL is file-level copyleft on the tool's own files; CC-BY is data attribution). Clarification of D10: the allowlist governs runtime-BUNDLED dependencies (code shipped in the deployed app), not build/tooling transitive dependencies. These two are accepted on that basis. If a future dependency introduces a non-permissive license into the runtime bundle, D10 still applies in full.
+
+**F-BINK-7 — `.prettierignore` recorded.** The `.prettierignore` added during M0 (excludes generated/vendored files from Prettier) was not itemized in a BUILD-SPEC work item or a DECISIONS entry (rule-10 ambiguity-protocol miss). Its contents are benign and standard; it is recorded here retroactively. No behavior change.

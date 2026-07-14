@@ -34,6 +34,14 @@ export const REFUSAL_TOKEN = 'DB PUSH REFUSED';
  * UNDEFINED env var falls back to the ACTIVE (uncommented) assignment in
  * `.env.local`. Commented (`#`-prefixed) lines — where the production creds
  * live — can never match, so this never surfaces them.
+ *
+ * F-BINK-2: drizzle-kit loads `.env.local` via dotenv, which is LAST-match-wins
+ * on a duplicate key. On a `.env.local` with two active `TURSO_DATABASE_URL`
+ * lines (e.g. a bad merge or half-reverted edit that leaves a local `file:` line
+ * followed by a remote `libsql:` line), a first-match resolution would read the
+ * safe `file:` value and ALLOW the push while drizzle-kit actually targets the
+ * remote URL — bypassing the guard. The guard must resolve the SAME value
+ * drizzle-kit will use, so it takes the LAST active match to mirror dotenv.
  */
 export function resolveEffectiveUrl(
   processUrl: string | undefined,
@@ -41,10 +49,14 @@ export function resolveEffectiveUrl(
 ): string | undefined {
   if (processUrl !== undefined) return processUrl;
 
-  const match = envLocalContent.match(
-    /^[ \t]*TURSO_DATABASE_URL[ \t]*=[ \t]*["']?([^"'\r\n]+?)["']?[ \t]*$/m,
-  );
-  return match?.[1]?.trim() || undefined;
+  // Global match: take the LAST active line so a duplicate key resolves the same
+  // way dotenv (and therefore drizzle-kit) would — last assignment wins.
+  const matches = [
+    ...envLocalContent.matchAll(
+      /^[ \t]*TURSO_DATABASE_URL[ \t]*=[ \t]*["']?([^"'\r\n]+?)["']?[ \t]*$/gm,
+    ),
+  ];
+  return matches.length ? matches[matches.length - 1][1]?.trim() || undefined : undefined;
 }
 
 /** True only for a local `file:` database — the one target push is allowed at. */

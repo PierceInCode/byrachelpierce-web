@@ -190,14 +190,26 @@ export async function restoreTables(
     for (const { file, sql } of BACKUP_TABLES) {
       assertSafeIdentifier(sql);
       const dump = newestDumpFor(inDir, file);
+      // F-BINK-4: a missing dump for a table expected present (deleted, renamed,
+      // or never written by a partial backup) is NOT a genuinely-empty table —
+      // an empty table still writes a `[]` dump. Fail loud rather than silently
+      // committing counts[file]=0, which an operator cannot distinguish from a
+      // real empty table on the production-recovery path.
       if (!dump) {
-        counts[file] = 0;
-        continue;
+        throw new Error(
+          `backup-prod: no dump file found for table ${JSON.stringify(file)} in ${JSON.stringify(inDir)}; ` +
+            `refusing to restore a partial snapshot (an empty table still writes a [] dump).`,
+        );
       }
       const rows = JSON.parse(readFileSync(join(inDir, dump), 'utf8')) as Record<string, unknown>[];
       for (const row of rows) {
         const columns = Object.keys(row);
         if (columns.length === 0) continue;
+        // F-BINK-3: column names come from the dump JSON (untrusted file content),
+        // not from the fixed BACKUP_TABLES constant — route every one through the
+        // same identifier guard as the table name before it reaches SQL, so a
+        // hostile key cannot break out of the column-list quoting.
+        for (const c of columns) assertSafeIdentifier(c);
         const placeholders = columns.map(() => '?').join(', ');
         const colList = columns.map((c) => `"${c}"`).join(', ');
         await tx.execute({

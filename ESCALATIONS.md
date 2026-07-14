@@ -51,3 +51,21 @@ Answer format suggestion: "HT1 returned at <path>; branches: <decision>; F15: do
 **Answer (recorded 2026-07-14 from the operator's in-session confirmation):** DONE — not waived. The operator rotated BOTH leaked credentials: a new Resend API key and a new Turso production database auth token were created and the old ones invalidated; `Database Token.txt` was deleted; the `public/art/` backup (Phase 0.6) is confirmed. The security purpose of HT1 is met and there is no standing production-DB exposure (the Turso token is rotated). Two HT1 items are NOT confirmed and are carried forward, not gated here: the magic-link send test (step 4) — deferred to M3, which stands up the dedicated ByRachelPierce Resend account + key (magic-link auth stays unverified until then); and the Vercel preview confirmation (step 7 / Phase 0.7) — carried to Milo's ship-report checklist at Gate 2. Because only 4 of 7 form rows are operator-observed, the `rotation-recorded` machine gate is RETIRED and superseded by this direct operator confirmation via **Amendment A1 (DECISIONS D18)**; M0's remaining 12 gates stand. RIDER 1 (stale remote-branch deletions) and RIDER 2 (F15 `Lilly`→`Lily` docs one-liner) are NOT resolved by this answer — they remain open as non-blocking items carried to the next operator touchpoint.
 
 ---
+
+## E3 — human-hands — 2026-07-14 — M0 gate: Turso token rotation not verifiable (F-BINK-1)
+
+**Type:** `human-hands`
+
+**What happened:** Binkley's M0 gate (fresh context, HEAD `acd4bbd`) rendered FAIL. All 12 machine gates passed, but finding **F-BINK-1** (IMPORTANT / NEEDS-SENIOR-REVIEW) contradicts Amendment A1's claim that the Turso production token was rotated 2026-07-14. Executed evidence (report `.chuck/reports/M0/milestone-report.md`, probes SC1/SC4): the production `TURSO_AUTH_TOKEN` currently in `.env.local` is an EdDSA JWT with `iat = 2026-03-01` (issued in March, not July); `.env.local` has not been rewritten since 2026-07-04; and that same token STILL authenticates against live production right now (`prod-verify.mjs` → PROD-VERIFY OK, run repeatedly). A token issued in March cannot be a token created on 2026-07-14. Two readings, both bad: (a) a new token was created in the Turso dashboard but `.env.local` was never updated, so the pre-rotation token is still the one in use — and if it is the leaked-lineage credential, the leak is NOT closed; or (b) no Turso rotation actually happened. The distinguishing artifact (Turso token-audit log) is outside session reach (no Turso cloud CLI). Consequence: the M0 DoD "secrets rotated" clause and Invariant 3 are NOT verifiably satisfied, and A1's "no standing production-DB exposure" framing is UNVERIFIED — possibly false. The three code findings from the same gate (F-BINK-2/3/4) are being remediated by Oliver in parallel and do not need you.
+
+**Operator action needed:**
+
+1. In the Turso dashboard for the `byrachelpierce` database, confirm whether the auth token now in `.env.local`'s production block is the NEW token you created on 2026-07-14, or an older one.
+2. Ensure the OLD / leaked-lineage Turso token is actually REVOKED at Turso — creating a new token does not revoke old ones, and Binkley proved the token in `.env.local` still authenticates.
+3. If `.env.local` still holds the old token, replace it with the new post-rotation token (do NOT commit `.env.local`).
+
+Then resume with `/chuck:run`: I re-probe (decode the new JWT's `iat`, confirm the old token no longer authenticates) and either confirm A1 or correct it.
+
+**Answer:**
+
+---

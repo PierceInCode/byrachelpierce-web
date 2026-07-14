@@ -47,6 +47,22 @@ describe('resolveEffectiveUrl (db:push:dev guard)', () => {
   it('returns undefined when neither source supplies a URL', () => {
     expect(resolveEffectiveUrl(undefined, '')).toBeUndefined();
   });
+
+  // F-BINK-2: dotenv (used by drizzle-kit) is LAST-match-wins on a duplicate key.
+  // On a .env.local with two active TURSO_DATABASE_URL lines (a local file: line
+  // followed by a remote libsql line), the guard must resolve the SAME value
+  // drizzle-kit will actually push to — the LAST one, the remote URL — so the
+  // guard BLOCKS. First-match resolution reads `file:` and bypasses the guard.
+  it('resolves the LAST active TURSO_DATABASE_URL line (mirrors dotenv/drizzle-kit) on a duplicate-key file', () => {
+    const duplicate = [
+      'TURSO_DATABASE_URL=file:./dev.db',
+      'TURSO_DATABASE_URL=libsql://prod.example.turso.io',
+    ].join('\n');
+    const effective = resolveEffectiveUrl(undefined, duplicate);
+    expect(effective).toBe('libsql://prod.example.turso.io');
+    // And that effective URL is NOT a local file: DB, so the guard refuses.
+    expect(isLocalFileUrl(effective)).toBe(false);
+  });
 });
 
 describe('isLocalFileUrl', () => {
