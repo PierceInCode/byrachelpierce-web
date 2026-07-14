@@ -241,3 +241,13 @@ A1 recorded the Turso production token as rotated 2026-07-14 with "no standing e
 **Operator decision (2026-07-14, explicit).** Accept the current Turso token as-is; waive further rotation/verification; do not re-raise. Basis: the credential was never in the public GitHub repo (secret-sweep CLEAN across full history); known exposure is local-machine files and retained AI-conversation history only, not any indexed/public location.
 
 **Effect.** F-BINK-1 is closed by operator waiver (not by a fix). The M0 DoD "secrets rotated" clause is satisfied for the Turso token by this waiver; the token continues in use as-is. The Resend key replacement remains an M3 functional prerequisite (magic-link auth). No code change. This supersedes A1 only on the Turso rotation/exposure characterization; A1's gate/spec deltas (retired `rotation-recorded`, etc.) stand.
+
+---
+
+## D21 — E4 resolution: cycle-4 authorized for the db:push guard `.env`-layering fix (F-RG-3); F-RG-4 accepted (2026-07-14)
+
+Records the operator's resolution of escalation **E4** (gate-3-strikes). The operator authorized ONE more scoped cycle (cycle 4) past the §7 three-strike line for this specific bounded fix.
+
+**F-RG-3 (HIGH) — to be fixed (cycle 4).** The `db:push` guard reads only `.env.local`, but `drizzle-kit push` also auto-loads a sibling plain `.env` (before `.env.local`, `override=false`), so a remote URL placed in `.env` would target production while the guard says ALLOW (reproduced hermetically, cycle-3 report `.chuck/reports/M0/snorklewacker-regate2.md`). Fix: the guard replicates drizzle-kit's full env resolution (load `.env` then `.env.local` with drizzle-kit's precedence) so its resolved URL matches drizzle-kit's actual target in the `.env`-present case; tests cover the layering shapes; the `push-guard.mjs` gate probe is extended to exercise the `.env`-layering axis so the gate itself catches this class.
+
+**F-RG-4 (MEDIUM) — ACCEPTED as an inherent limitation.** A raw `npx drizzle-kit push` (bypassing the npm wrapper scripts) is not interceptable by a wrapper guard. The guard's remit is the sanctioned `npm run db:push*` path (D7 disarms those); running the raw binary against production is an out-of-band operator action outside M0's guard scope. Documented, not gated.

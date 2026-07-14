@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { REFUSAL_TOKEN, isLocalFileUrl, resolveEffectiveUrl } from '../../scripts/db-push-dev';
+import {
+  REFUSAL_TOKEN,
+  isLocalFileUrl,
+  resolveEffectiveUrl,
+  resolveLayeredUrl,
+} from '../../scripts/db-push-dev';
 
 describe('resolveEffectiveUrl (db:push:dev guard)', () => {
   const envLocal = [
@@ -108,6 +113,80 @@ describe('resolveEffectiveUrl (db:push:dev guard)', () => {
     const effective = resolveEffectiveUrl(undefined, content);
     expect(effective).toBe('file:./dev.db');
     expect(isLocalFileUrl(effective)).toBe(true);
+  });
+});
+
+// F-RG-3 (re-gate cycle 3): `drizzle-kit push` auto-loads a sibling plain `.env`
+// FIRST (its bin calls dotenv config() with the default `.env` path,
+// override=false), and drizzle.config.ts then loads `.env.local` (also
+// override=false). So `.env` WINS over `.env.local` — it is loaded first and a
+// later load with override=false cannot clobber an already-set key. The earlier
+// guard read ONLY `.env.local`, so a sibling `.env` with a remote URL made the
+// guard ALLOW while drizzle-kit pushed remote — a prod-write bypass. The guard
+// must replicate drizzle-kit's FULL layered resolution: process.env, then `.env`,
+// then `.env.local`, override=false throughout.
+//
+// Precedence verified empirically against the repo's dotenv 16.6.1 and Binkley's
+// hermetic real-drizzle-kit runtime probe (ledger P4 / RG3-6): `.env` always wins.
+describe('resolveLayeredUrl (F-RG-3 — .env + .env.local layering)', () => {
+  const line = (u: string) => `TURSO_DATABASE_URL=${u}`;
+  const REMOTE = 'libsql://prod.example.turso.io';
+  const FILE = 'file:./dev.db';
+
+  // (i) .env=remote + .env.local=file: -> drizzle-kit targets the REMOTE .env
+  // value (.env wins), so the guard must BLOCK.
+  it('BLOCKS when a sibling .env holds a remote URL and .env.local holds file: (.env wins)', () => {
+    const effective = resolveLayeredUrl(undefined, line(REMOTE), line(FILE));
+    expect(effective).toBe(REMOTE);
+    expect(isLocalFileUrl(effective)).toBe(false);
+  });
+
+  // (ii) .env=file: + .env.local=remote -> .env still wins (loaded first,
+  // override=false), so drizzle-kit targets file: -> ALLOW. Verified empirically.
+  it('resolves the .env file: value even when .env.local holds remote (.env wins, ALLOW)', () => {
+    const effective = resolveLayeredUrl(undefined, line(FILE), line(REMOTE));
+    expect(effective).toBe(FILE);
+    expect(isLocalFileUrl(effective)).toBe(true);
+  });
+
+  // (iii) only .env=remote (no .env.local defines the key) -> BLOCK.
+  it('BLOCKS when only .env supplies a remote URL', () => {
+    const effective = resolveLayeredUrl(undefined, line(REMOTE), '');
+    expect(effective).toBe(REMOTE);
+    expect(isLocalFileUrl(effective)).toBe(false);
+  });
+
+  // (iv) only .env.local=file: (no .env) -> ALLOW (unchanged legacy behaviour).
+  it('ALLOWS when only .env.local supplies a file: URL (no sibling .env)', () => {
+    const effective = resolveLayeredUrl(undefined, '', line(FILE));
+    expect(effective).toBe(FILE);
+    expect(isLocalFileUrl(effective)).toBe(true);
+  });
+
+  // .env absent entirely + .env.local supplies remote -> BLOCK (falls to .env.local).
+  it('falls back to .env.local when .env is absent (remote -> BLOCK)', () => {
+    const effective = resolveLayeredUrl(undefined, '', line(REMOTE));
+    expect(effective).toBe(REMOTE);
+    expect(isLocalFileUrl(effective)).toBe(false);
+  });
+
+  // Neither file supplies the key -> undefined (refusal path).
+  it('returns undefined when neither .env nor .env.local supplies a URL', () => {
+    expect(resolveLayeredUrl(undefined, '', '')).toBeUndefined();
+  });
+
+  // A non-empty process.env value short-circuits both files (drizzle sees it,
+  // override=false means an already-set process.env wins over both files).
+  it('prefers a non-empty process.env value over both files', () => {
+    expect(resolveLayeredUrl('libsql://from-process.invalid', line(FILE), line(FILE))).toBe(
+      'libsql://from-process.invalid',
+    );
+  });
+
+  // Commented production creds in either file are never surfaced (dotenv ignores #).
+  it('never reads a commented-out line in .env or .env.local', () => {
+    const commented = `# ${line(REMOTE)}`;
+    expect(resolveLayeredUrl(undefined, commented, commented)).toBeUndefined();
   });
 });
 

@@ -22,6 +22,17 @@ import { existsSync, readFileSync } from 'node:fs';
 import { parse as parseDotenv } from 'dotenv';
 import { isMain } from './lib/entrypoint';
 
+/**
+ * True if `content` (a dotenv file body) has an ACTIVE — uncommented —
+ * `TURSO_DATABASE_URL` assignment, even one whose value is empty. Under
+ * `dotenv` with `override=false`, a key PRESENT in the first-loaded file (`.env`)
+ * blocks a later file (`.env.local`) from setting it — regardless of value. This
+ * lets the layered resolver mirror that precedence exactly.
+ */
+function definesUrl(content: string): boolean {
+  return Object.prototype.hasOwnProperty.call(parseDotenv(content), 'TURSO_DATABASE_URL');
+}
+
 /** The exact literal the `push-guard` probe scans for on the refusal path. */
 export const REFUSAL_TOKEN = 'DB PUSH REFUSED';
 
@@ -61,13 +72,56 @@ export function resolveEffectiveUrl(
   return value !== undefined && value.length > 0 ? value : undefined;
 }
 
+/**
+ * Resolve the effective TURSO_DATABASE_URL exactly the way `drizzle-kit push`
+ * does — across BOTH the sibling plain `.env` and `.env.local`.
+ *
+ * F-RG-3 (re-gate cycle 3): `drizzle-kit push` does not read `.env.local` alone.
+ * Its bin auto-loads a plain `.env` FIRST via `dotenv.config()` with the default
+ * path and `override=false`; drizzle.config.ts THEN loads `.env.local`, also with
+ * `override=false`. Because a later `override=false` load cannot clobber an
+ * already-set key, **`.env` wins over `.env.local`**. The earlier guard read only
+ * `.env.local`, so a sibling `.env` holding a remote `libsql:` URL made the guard
+ * resolve a safe `file:` value and ALLOW the push while drizzle-kit actually
+ * targeted the remote DB — a production-write bypass (Iron Rule 1).
+ *
+ * This models that full layered resolution, in drizzle-kit's order:
+ *   1. a defined `process.env` value is the effective URL (drizzle sees it, and
+ *      `override=false` means an already-set process var wins over both files);
+ *   2. otherwise the ACTIVE value from `.env` (loaded first);
+ *   3. otherwise the ACTIVE value from `.env.local` (loaded second, cannot
+ *      override `.env`).
+ * Both files are parsed with dotenv ITSELF, so commented (`#`-prefixed) lines —
+ * where production creds live — are never surfaced, and the guard's view is
+ * byte-identical to what drizzle-kit will target in every `.env`/`.env.local`
+ * combination. Precedence verified empirically against dotenv 16.6.1 and a
+ * hermetic real-drizzle-kit runtime probe (ledger P4 / RG3-6).
+ */
+export function resolveLayeredUrl(
+  processUrl: string | undefined,
+  envContent: string,
+  envLocalContent: string,
+): string | undefined {
+  if (processUrl !== undefined) return processUrl;
+
+  // `.env` is loaded first with override=false, so if it DEFINES the key at all
+  // (even to an empty value) it wins over `.env.local` — a later override=false
+  // load cannot clobber an already-set key. In that case its parsed value is the
+  // effective URL (an empty value stays empty — the F4 empty-is-effective
+  // semantics — so it reaches the refusal path, never falls through to a file:
+  // in `.env.local`). Only if `.env` does not define the key at all does
+  // `.env.local` supply it, via the same dotenv parse.
+  if (definesUrl(envContent)) return parseDotenv(envContent).TURSO_DATABASE_URL;
+  return resolveEffectiveUrl(undefined, envLocalContent);
+}
+
 /** True only for a local `file:` database — the one target push is allowed at. */
 export function isLocalFileUrl(url: string | undefined): boolean {
   return typeof url === 'string' && url.startsWith('file:');
 }
 
-function readEnvLocal(): string {
-  const path = new URL('../.env.local', import.meta.url);
+function readSibling(name: string): string {
+  const path = new URL(`../${name}`, import.meta.url);
   try {
     return existsSync(path) ? readFileSync(path, 'utf8') : '';
   } catch {
@@ -76,7 +130,13 @@ function readEnvLocal(): string {
 }
 
 function main(): void {
-  const url = resolveEffectiveUrl(process.env.TURSO_DATABASE_URL, readEnvLocal());
+  // Model drizzle-kit's FULL env resolution: process.env, then a sibling `.env`
+  // (loaded first, wins), then `.env.local`. See resolveLayeredUrl / F-RG-3.
+  const url = resolveLayeredUrl(
+    process.env.TURSO_DATABASE_URL,
+    readSibling('.env'),
+    readSibling('.env.local'),
+  );
 
   if (!isLocalFileUrl(url)) {
     // No env value is printed — only the fact that the target is non-local.

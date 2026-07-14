@@ -69,3 +69,25 @@ Then resume with `/chuck:run`: I re-probe (decode the new JWT's `iat`, confirm t
 **Answer (recorded 2026-07-14, operator's explicit in-session instruction):** WAIVED. The operator accepts the current Turso production token as-is and directs that this not be raised again. Basis (makes the decision reasonable): the credential was never in the public GitHub repository (secret-sweep CLEAN across full history); known exposure is local-machine files and retained AI-conversation history only, not any indexed/public location. F-BINK-1 is closed by operator waiver — no rotation verification is performed. A1's "Turso rotated 2026-07-14 / no standing exposure" framing is corrected by **DECISIONS D20** to "accepted as-is, unverified, residual risk waived by operator." The M0 DoD secrets-rotated clause is satisfied for Turso by this waiver; the Resend replacement remains an M3 functional prerequisite for magic-link auth.
 
 ---
+
+## E4 — gate-3-strikes — 2026-07-14 — M0 db:push guard: `.env`-layering gap (F-RG-3)
+
+**Type:** `gate-3-strikes`
+
+**What happened:** M0's Anxiety-Closet gate returned FAIL three cycles running, all on the `db:push` production-write guard, so the 3-strike line stops the run for your decision. Nuance that matters: this is NOT one defect grinding — each cycle's finding was genuinely fixed and adversarial review surfaced an adjacent one.
+
+- **Cycle 1** (`acd4bbd`): guard bypassable on a duplicate-key `.env.local` (first-match vs dotenv last-match) → FIXED.
+- **Cycle 2** (`de0c8ba`): still bypassable via export-prefix / inline-comment / whitespace+quote shapes → FIXED at the root by resolving through `dotenv.parse` itself (0 bypasses across 12 shapes, independently verified).
+- **Cycle 3** (`dbc8638`): NEW adjacent vector — **F-RG-3 (HIGH)**: real `drizzle-kit push` also auto-loads a sibling plain `.env` (before `.env.local`, `override=false`); the guard reads only `.env.local`, so a remote URL placed in `.env` would win while the guard says ALLOW. Reproduced hermetically. NOT currently exploitable (no `.env` file exists; it is gitignored), but it is the same loaded-gun class the guard exists to disarm. Plus **F-RG-4 (MEDIUM)**: a raw `npx drizzle-kit push` (bypassing the npm wrapper) is inherently unguarded.
+
+All 12 deterministic gates PASS on `dbc8638`; the other two cycle-1 findings (restore SQL-injection, silent missing-dump) are fixed and regression-clean; F-BINK-1 is waived by you (E3 / D20). Cycle-3 reports: `.chuck/reports/M0/milestone-report-regate2.md`, `snorklewacker-regate2.md`.
+
+**Decision needed (pick one):**
+
+- (a) **Authorize one more scoped cycle** (RECOMMENDED): fix F-RG-3 by making the guard replicate drizzle-kit's full env resolution (load `.env` then `.env.local` with the same precedence), and document F-RG-4 as an accepted inherent limitation of a wrapper guard (raw `drizzle-kit` is out of scope; D7 already disarms the npm push scripts). Small, bounded fix; closes the HIGH gap; then re-gate and close M0.
+- (b) **Accept F-RG-3 and F-RG-4 as low-risk latent gaps and pass M0 now**: the guard is materially hardened (all `.env.local` bypasses closed), the gap is dev-workflow-only and not currently exploitable (no `.env` present, gitignored). I record the acceptance in DECISIONS with a follow-up note, write the gate artifact, and close M0.
+- (c) Something else / hand off.
+
+**Answer (recorded 2026-07-14, operator decision):** Option (a) — AUTHORIZED. Proceed with one more scoped cycle (cycle 4): fix F-RG-3 by making the guard replicate drizzle-kit's full env resolution (load `.env` then `.env.local` with drizzle-kit's precedence/override semantics), with tests for the `.env`-layering shapes and the push-guard gate probe extended to exercise that axis; accept F-RG-4 (raw `npx drizzle-kit push`) as an inherent wrapper limitation, documented in DECISIONS D21. Then re-gate and close M0. This cycle-4 authorization is an explicit operator extension past the §7 three-strike line for this specific bounded fix.
+
+---
