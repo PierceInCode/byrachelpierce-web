@@ -29,5 +29,5 @@ Otis-discipline statement (null delta): **no band changes.** M0 remains 0.4M–1
 
 ## Mini-veto
 
-**Operator approval:** {{APPROVED_DATE}}
+**Operator approval:** 2026-07-14 — APPROVED WITH AMENDMENT. The operator did not waive rotation as CR1 originally proposed; they COMPLETED it (both credentials rotated on 2026-07-14). The change is entered via **Amendment A1 (DECISIONS D18)**, which records completion rather than a waiver and omits the standing-exposure risk statement CR1 §Delta-plan step 6 had drafted (the Turso token is rotated, so there is no such risk). The gate/spec delta is applied exactly as CR1 specifies (remove `rotation-recorded`; retire the HT1 obligation; keep the M3 Resend-account prerequisite; M4 wording); only the rationale (completed, not waived) and the risk line (none) differ.
 _(ISO date the operator approved this change — blank means unapproved, and the change does not proceed. On approval, the change enters BUILD-SPEC via the amendment flow: it appends to the DECISIONS.md Amendments section, the affected milestones and their gates are updated, and Otis re-baselines the remainder.)_

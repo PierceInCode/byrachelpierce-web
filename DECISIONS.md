@@ -200,3 +200,22 @@ VETO POINT: yes
 ## Amendments
 
 After Gate 1, the approved plan does not change by drive-by edits. The gate hook blocks direct writes to `DECISIONS.md`, `BUILD-SPEC.md`, and `byrachelpierce-web_Architecture_v1.md` once `.chuck/plan-approved` exists. The one sanctioned path for a mid-run change is `/chuck:change`: it captures a change-request, produces a delta plan and delta budget, pauses for your mini-veto, and only then appends the settled change here as a new `## D<n>` entry continuing the sequence. Never rewrite or delete an earlier entry.
+
+---
+
+## D18 — Amendment A1: secret-rotation COMPLETED by the operator; `rotation-recorded` gate retired (2026-07-14)
+
+Continues the sequence per the `## Amendments` rule (the sanctioned mid-run change path). This supersedes the premise of change-request `CR1`, which had proposed WAIVING rotation; the operator instead COMPLETED it, so this amendment records completion — not a waiver — and carries no standing-exposure risk statement.
+
+**What changed and why.** On 2026-07-14 the operator rotated both leaked credentials (legacy DECISIONS 003/013): a new Resend API key and a new Turso production database auth token were created and the prior ones invalidated; `Database Token.txt` was deleted; the `public/art/` backup (Phase 0.6) is confirmed. This satisfies the security purpose of HT1 (see D11). Because the human-hands result form is only 4/7 operator-observed (the magic-link send-test and the Vercel-preview confirmation were not performed in-session), the form-based `rotation-recorded` gate cannot pass on honest data and is retired in favour of the operator's direct confirmation, recorded here and in `ESCALATIONS.md` E2.
+
+**Delta applied.**
+
+1. `.chuck/gates.json` M0: the `rotation-recorded` gate object is removed. M0 now has 12 machine gates; all remain machine-runnable as written.
+2. `BUILD-SPEC.md` M0 (frozen text amended by reference — not edited in place): work item 9 (HT1) is retired as an obligation; the escalation trigger "HT1 not returned → human-hands" no longer applies; the DoD clause "secrets are rotated (HT1 all-Pass)" is superseded by — "the leaked Resend key and Turso production token are rotated (operator-confirmed 2026-07-14, Amendment A1); magic-link delivery is verified in M3 once the dedicated Resend account + key exists."
+3. `BUILD-SPEC.md` M3 item 7 (by reference): unchanged in force — still requires creating the NEW dedicated ByRachelPierce Resend account + API key (magic-link auth is non-functional until it lands), then the SPF/DKIM domain verification in that account.
+4. `BUILD-SPEC.md` M4 (by reference): item 2 env-checklist wording "M0-rotated secrets" → "the current rotated secrets (Resend key from the M3 account; Turso token rotated 2026-07-14)"; item 6 (Milo / ship report) carries the Phase-0.7 Vercel-preview confirmation and the magic-link live-delivery confirmation as explicit ship-report checklist lines.
+
+**Not affected.** M1, M2. No past-green milestone is reopened. Budget: null delta — no band change (CR1's Otis-discipline statement stands).
+
+**Open riders (unchanged, non-blocking).** RIDER 1 (stale remote-branch deletions) and RIDER 2 (F15 `Lilly`→`Lily` in `docs/SITE-ARCHITECTURE-v2.md` line 171) remain for the operator, carried to the next touchpoint.

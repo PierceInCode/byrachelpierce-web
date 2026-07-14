@@ -74,12 +74,6 @@
           "expect": "contains:R4"
         },
         {
-          "name": "rotation-recorded",
-          "cmd": "node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT1-result.md 7",
-          "lane": "local",
-          "expect": "contains:HT OK"
-        },
-        {
           "name": "ci-green",
           "cmd": "gh run list --branch chuck/M0 --limit 1 --json conclusion --jq .[0].conclusion",
           "lane": "ci",

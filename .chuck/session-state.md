@@ -2,33 +2,36 @@
 
 milestone: M0
 
-## Position (written 2026-07-07, end of day — session 2b0da7cb)
+## Position (written 2026-07-14 — Amendment A1 applied)
 
-STOPPED CLEAN for the day. Run lock: FREE (released at the E2 stop; verified LOCK FREE at close).
 Mode: continuous. Gate 1 approved; plan frozen at BUILD-SPEC M0–M4.
 
-THE ONE BLOCKING ITEM: CR1 mini-veto. `.chuck/change-requests/CR1.md` awaits the operator's
-approval — it drops the secret-rotation obligation (HT1 + rotation-recorded gate) per the
-operator's explicit in-session waiver ("Delete this issue... I seriously don't care"), keeps
-"create NEW dedicated ByRachelPierce Resend account + key" as an M3 functional prerequisite
-(old key already deleted; magic-link auth is DOWN in dev/previews until it lands), and waives
-Turso token rotation permanently. NOT applied yet — frozen docs untouched, E2 Answer still empty.
+CR1 mini-veto: APPROVED WITH AMENDMENT (2026-07-14). The operator COMPLETED secret rotation
+(NOT waived): both leaked credentials rotated — new Resend API key AND new Turso production
+database auth token; `Database Token.txt` deleted; `public/art/` backup (Phase 0.6) confirmed.
+No standing production-DB exposure risk (Turso token is rotated). Recorded: ESCALATIONS E2
+Answer filled; DECISIONS D18 (Amendment A1) appended; CR1 stamped "APPROVED WITH AMENDMENT";
+HT1-secret-rotation.md annotated "RETIRED / COMPLETED 2026-07-14 by Amendment A1".
 
-## Resume steps (tomorrow, in order)
+Two HT1 items NOT confirmed, carried forward (not gated): magic-link send-test (step 4) ->
+deferred to M3 (needs the dedicated ByRachelPierce Resend account+key; magic-link auth stays
+unverified until then); Vercel-preview confirmation (step 7 / Phase 0.7) -> carried to Milo's
+ship-report at Gate 2. Because the HT1 result form is only 4/7 operator-observed, the
+`rotation-recorded` machine gate was RETIRED — gates.json M0 now has 12 gates (was 13).
 
-1. Operator approves CR1 (or amends it). On approval:
-   a. Append Amendment A1 to DECISIONS.md via SHELL APPEND (spec-guard blocks direct edits);
-   b. Apply the delta: gates.json M0 rotation-recorded gate removed; BUILD-SPEC M0 item 9 /
-      escalation trigger / DoD, M3 item 7, M4 items 2+6 per CR1 Delta plan (amendment flow);
-   c. Fill E2 Answer (waiver, attributed; riders stay open); prettier; commit; push.
-2. Re-acquire run lock (run-lock.sh acquire with project dir + session id), then /chuck:run.
-3. M0 close: all machine gates GREEN on HEAD b693556 — ci-green success on EXACTLY b693556
-   (verified at close of day); dispatch Binkley (fresh context, opus) for the Anxiety Closet
-   against gates.json M0 (post-CR1: 12 gates, no rotation-recorded).
-4. On PASS: merge chuck/M0 into the INTEGRATION BRANCH (write its literal name only in the
-   final merge command once the PASS artifact exists — see hook notes), push it, Otis actuals
-   + re-baseline, Milquetoast milestone report + PROGRESS, close draft PR #13 or retarget.
-5. Continuous mode -> M1. First need: operator's Wix page URL list (M1 item 3).
+## Resume steps (in order, from here)
+
+1. Run prettier + `npm run check` (via test-runner) on chuck/M0.
+2. Commit the amendment on chuck/M0, push, wait for CI success on the exact new tip sha.
+3. Dispatch Binkley (fresh context, opus) for the M0 Anxiety Closet against gates.json M0
+   (12 gates, no rotation-recorded).
+4. On PASS -> close in PIN-ONCE-LAST order: Scribe commits report/PROGRESS/session-state/ledger;
+   push; CI on tip; Binkley's last act verifies CI + re-runs gates + writes the pinned artifact;
+   merge chuck/M0 to the integration branch; Otis actuals + re-baseline.
+5. Continuous mode -> then M1. First need: operator's Wix page URL list (M1 item 3).
+
+Note: the amendment changes ONLY gates.json + docs, so code gates are unaffected — Binkley
+re-runs them fresh regardless.
 
 ## Gate status on b693556 (all executed this session; quotes in PROGRESS/ESCALATIONS)
 
@@ -37,7 +40,7 @@ dep-audit: GREEN after drizzle-orm 0.45.2 CVE bump (was RED: GHSA-gpj5-g38j-94v9
 eol-clean "EOL OK" - push-guard "PUSH-GUARD OK" - restore-roundtrip 3/3 -
 prod-verify "PROD-VERIFY OK" (528 paintings, 0 sentinels, 4 migrations) -
 alias-smoke "SMOKE OK" (4/4) - tag-r4 (R4 @ 2c9f15e pushed) - ci-green success @ b693556.
-rotation-recorded: pending CR1 removal (do NOT wait for HT1 — see CR1).
+rotation-recorded: RETIRED by Amendment A1 (gates.json M0 now 12 gates, was 13).
 
 ## Bill findings disposition
 
@@ -70,3 +73,4 @@ probe spawn) + F7 (pre-existing e2e UntrustedHost log noise) = known-low, carry 
 - Repo is PUBLIC on GitHub (verified 2026-07-07) — sweep-verified no secrets ever in history.
 - .chuck/session-state.md, run.lock, mode are prettier-ignored. Node 24 local / Node 20 CI
   (CI authoritative). test-runner dispatches: pass model sonnet (haiku denied by routing hook).
+</content>
