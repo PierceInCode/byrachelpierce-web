@@ -263,3 +263,11 @@ Records the operator's resolution of escalation **E5** (fourth-cycle gate). The 
 **Decision.** Accepted as a low-risk latent gap. The guard is materially hardened over four cycles (all `.env.local` bypass shapes, the `.env`-layering axis with the complete drizzle-kit env-file set `{.env, .env.local}`, empty-value and duplicate-key edges — closed and gate-probed). M0 passes with this accepted residual.
 
 **Follow-up work item (deferred, non-blocking).** Harden the guard to a FAIL-CLOSED posture: REFUSE the push unless it can positively prove the effective target is a local `file:` DB, resolving `TURSO_DATABASE_URL` case-insensitively across both `.env` and `.env.local` (mirroring win32 `process.env`), and extend `push-guard.mjs` with lowercase/mixed-case cases. Carried as a hardening item for a later maintenance pass; it does not block M0.
+
+---
+
+## D23 — M1 Lighthouse resolves Chrome via the committed Playwright chromium (2026-07-15)
+
+Continues the sequence per the `## Amendments` rule. Records the mechanism by which the M1 `lighthouse` gate obtains a Chrome binary.
+
+M1 Lighthouse resolves Chrome via the committed Playwright chromium because no standalone Chrome is installed on the sole sanctioned dev machine (Windows) — only Microsoft Edge, which `lhci autorun` will not accept, failing "Chrome installation not found." A `scripts/run-lighthouse.mjs` wrapper sets `process.env.CHROME_PATH` from `require('playwright').chromium.executablePath()` (falling back to an ambient `CHROME_PATH` if one is already set, e.g. a CI runner with real Chrome), then invokes `lhci autorun`, forwarding any collect overrides (the `lighthouse:prod` variant's `--collect.*` args). The `lighthouse` and `lighthouse:prod` npm scripts are repointed through the wrapper. This keeps the local `lighthouse` gate hands-free (`bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run lighthouse"` needs no ambient `CHROME_PATH`); `lighthouserc.json` stays a JSON file with its error-level budgets (perf 0.85 / a11y 0.95 / seo 0.95) intact and still passes `.chuck/probes/lighthouse-config-check.mjs`. No new dependency: `playwright` is already present (pulled by `@playwright/test`).

@@ -8,6 +8,7 @@ CLAUDE.md
 OPERATOR-GUIDE.md
 scripts/art-data.json
 coverage/
+.lighthouseci/
 .github/workflows/ci.yml
 .superpowers/
 .chuck/session-state.md

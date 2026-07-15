@@ -5,6 +5,9 @@ node_modules/
 .next/
 out/
 
+# Lighthouse CI generated audit output (LHRs, assertion results, links)
+.lighthouseci/
+
 # Environment variables — NEVER commit these
 .env
 .env.local

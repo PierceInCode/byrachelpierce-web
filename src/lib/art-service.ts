@@ -183,6 +183,20 @@ export async function getAllPaintings(
   return { paintings: rows, total: Number(countResult[0].count) };
 }
 
+/**
+ * Every painting slug in the collection, for sitemap enumeration.
+ * There is no draft/published split in the schema — every row is a live,
+ * public painting page — so this returns all slugs. (The M4 sitemap-vs-db
+ * gate compares this count against the live DB; it must not be hardcoded.)
+ */
+export async function getAllPaintingSlugs(): Promise<string[]> {
+  const rows = await db
+    .select({ slug: paintings.slug })
+    .from(paintings)
+    .orderBy(asc(paintings.slug));
+  return rows.map((r) => r.slug);
+}
+
 export async function getCategoryCards(): Promise<CategoryCardData[]> {
   const results: CategoryCardData[] = [];
 

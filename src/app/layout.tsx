@@ -7,6 +7,7 @@
 import type { Metadata } from 'next';
 import { Playfair_Display, Jura } from 'next/font/google';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -105,6 +106,8 @@ export default function RootLayout({
 
           <Footer />
         </div>
+        {/* Vercel Analytics — production page-view telemetry (M1 / R5). */}
+        <Analytics />
       </body>
     </html>
   );
