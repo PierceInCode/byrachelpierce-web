@@ -74,25 +74,19 @@ console.log(`run-lighthouse: lhci=${lhciBin}`);
 const passthrough = process.argv.slice(2);
 const args = ['autorun', ...passthrough];
 
-// On win32, chrome-launcher's post-audit destroyTmp() can throw
-// "EPERM: Permission denied" while rm-ing Chrome's temp user-data dir — the profile
-// is still momentarily handle-locked after Chrome is killed. The AUDIT completes
-// (all categories are computed); only teardown races, so Lighthouse crashes before
-// LHCI can assert. It is transient: we retry the whole autorun once on a non-zero
-// exit so the gate is hands-free despite the launcher race. (Score failures are
-// deterministic and would fail both attempts — this does not mask a real budget miss.)
-const MAX_ATTEMPTS = 2;
-let status = 1;
-for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-  if (attempt > 1) {
-    console.log(`run-lighthouse: retrying lhci autorun (attempt ${attempt}/${MAX_ATTEMPTS})`);
-  }
-  const result = spawnSync(lhciBin, args, { stdio: 'inherit', env, shell: true });
-  if (result.error) {
-    console.error(`run-lighthouse: failed to launch lhci: ${result.error.message}`);
-    process.exit(1);
-  }
-  status = result.status ?? 1;
-  if (status === 0) break;
+// Run `lhci autorun` EXACTLY ONCE and propagate its real exit code.
+//
+// A whole-autorun retry used to live here to survive chrome-launcher's transient
+// win32 EPERM at post-audit temp cleanup. That transient is now handled at its
+// source by lighthouse-teardown-shim.mjs (loaded via NODE_OPTIONS above), which makes
+// the cleanup EPERM non-fatal so a fully-audited run is never discarded. With the shim
+// in place a retry has no legitimate transient left to cover — its only remaining
+// effect would be to MASK a genuine sub-budget miss on a flaky run (e.g. an
+// accessibility median that dips to the 0.95 floor). We therefore do not retry:
+// autorun runs once and its exit code decides the gate. Score misses fail honestly.
+const result = spawnSync(lhciBin, args, { stdio: 'inherit', env, shell: true });
+if (result.error) {
+  console.error(`run-lighthouse: failed to launch lhci: ${result.error.message}`);
+  process.exit(1);
 }
-process.exit(status);
+process.exit(result.status ?? 1);
