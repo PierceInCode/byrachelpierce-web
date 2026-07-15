@@ -18,3 +18,4 @@ coverage/
 .chuck/probes/*.log
 .chuck/probes/*.json
 .chuck/now
+.chuck/gates/

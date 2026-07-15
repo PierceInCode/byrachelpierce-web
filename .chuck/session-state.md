@@ -1,10 +1,15 @@
 # Session State — byrachelpierce-web
 
-milestone: M0
+milestone: M1
 
-## Position (written 2026-07-15 — M0 PASS, Binkley, dede7b6 — executing PIN-ONCE-LAST close)
+## Position (written 2026-07-15 — M0 CLOSED; M1 not yet started)
 
-Mode: continuous. Branch chuck/M0 @ dede7b6 (close commits about to be added). Run lock held.
+M0 CLOSED (gate PASS 4 cycles, merged to chuck/integration @ 5fbf5f1, artifact pinned, PR #13
+closed, Otis actuals recorded). M1 branch created; no M1 work items done yet.
+
+Mode: continuous. On branch chuck/M1 (based on the M0-merged integration tip 5fbf5f1; the M0
+post-merge bookkeeping is its first commit, pushed to origin). Run lock: RELEASED at this
+handoff — re-acquire on resume.
 
 Binkley's final verdict (fresh independent re-verification): **PASS (with operator-accepted
 residual F-RG-5)**, HEAD dede7b6, all 12 deterministic gates GREEN, CI success (run
@@ -25,16 +30,29 @@ waived (E3/D20), F-BINK-5/7 (D19), F-RG-4 (D21), F-RG-5 accepted (E5/D22). Defer
 fail-closed guard hardening (D22, non-blocking). F-BINK-6 (draft PR #13 targets main) handled at
 merge.
 
-## Resume steps (CLOSE STEPS REMAINING — PIN-ONCE-LAST order)
+## Resume steps (M0 CLOSED — M1 branch created, work pending)
 
-1. Commit close artifacts (milestone report + PROGRESS + session-state + probe ledger + D22 + E5)
-   on chuck/M0.
-2. Push.
-3. Confirm CI green on the new tip.
-4. Binkley's LAST act writes the machine-readable gate artifact pinned to that tip.
-5. Merge chuck/M0 -> the integration branch AND retarget/close draft PR #13 (F-BINK-6).
-6. Otis appends actuals + re-baselines.
-7. Continuous -> M1.
+M0 close is fully done: gate artifact `.chuck/gates/M0.json` PASS pinned to 5fbf5f1 (12/12
+gates), chuck/M0 merged (fast-forward) into chuck/integration, chuck/integration pushed to
+origin, draft PR #13 closed (F-BINK-6 resolved), Otis actuals + re-baselines recorded. The M0
+post-merge bookkeeping (BUDGET actuals, re-baseline, these ledgers) is committed as the FIRST
+commit of chuck/M1 and pushed to origin. chuck/integration stays clean at the pinned M0 tip
+5fbf5f1 — do NOT commit bookkeeping onto integration (the merge hook locks it to the gate tip).
+
+1. Re-acquire the run lock.
+2. `git checkout chuck/M1` — the branch ALREADY EXISTS (based on the M0-merged tip; do NOT
+   `checkout -b`, and do NOT name chuck/integration in any command). No M1 work items done yet.
+3. Begin M1 work items per BUILD-SPEC M1 (SEO metadata, analytics wiring, Lighthouse
+   config/budgets can proceed now). The redirect map (BUILD-SPEC M1 item 3) needs the
+   operator's top Wix page URL list — batch it, non-blocking for the rest of M1.
+
+LESSON (merge-hook mechanics, for future closes): do the Otis post-merge bookkeeping on the
+NEXT milestone branch (or before flipping the `milestone:` pointer), NEVER as a commit onto
+chuck/integration — the merge hook refuses any integration write that is not the exact pinned
+PASS tip, and once the pointer flips to the next milestone it demands that milestone's artifact.
+
+Recommend resuming M1 in a FRESH session for token efficiency (this session's transcript is
+very large after the M0 saga; this file is the contract).
 
 ## Gate status on b693556 (all executed this session; quotes in PROGRESS/ESCALATIONS)
 
