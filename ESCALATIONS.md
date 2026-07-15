@@ -91,3 +91,29 @@ All 12 deterministic gates PASS on `dbc8638`; the other two cycle-1 findings (re
 **Answer (recorded 2026-07-14, operator decision):** Option (a) — AUTHORIZED. Proceed with one more scoped cycle (cycle 4): fix F-RG-3 by making the guard replicate drizzle-kit's full env resolution (load `.env` then `.env.local` with drizzle-kit's precedence/override semantics), with tests for the `.env`-layering shapes and the push-guard gate probe extended to exercise that axis; accept F-RG-4 (raw `npx drizzle-kit push`) as an inherent wrapper limitation, documented in DECISIONS D21. Then re-gate and close M0. This cycle-4 authorization is an explicit operator extension past the §7 three-strike line for this specific bounded fix.
 
 ---
+
+## E5 — gate-fourth-cycle — 2026-07-14 — M0 db:push guard: case-variant .env key prod-write bypass (F-RG-5)
+
+**Type:** `gate-fourth-cycle` (past the section-7 three-strike line, which was already extended once by D21/E4).
+
+**What happened:** The operator-authorized scoped cycle 4 (D21) fixed the F-RG-3 uppercase `.env`-layering gap — verified: the guard now matches real drizzle-kit byte-for-byte across 11 `.env`/`.env.local` combinations (incl. empty-value), the complete auto-load set is confirmed to be exactly `{.env, .env.local}` (no extra env file, no dotenv-expand), and the gate probe mutation-catches the class. All 12 deterministic gates PASS on `dede7b6`; CI green on that exact commit.
+
+BUT the cycle's central charter — CLOSE THE CLASS — is not met. A fresh Snorklewacker refutation, independently reproduced by Binkley (ledger RG4-8), found a **live prod-write bypass of the SAME class on a new axis**: a case-variant `.env` key.
+
+- **F-RG-5 (HIGH, Iron Rule 1):** `db-push-dev.ts:33` `definesUrl` decides `.env` precedence with a CASE-SENSITIVE `hasOwnProperty('TURSO_DATABASE_URL')`, but `drizzle.config.ts:53` reads `process.env.TURSO_DATABASE_URL`, which on **win32 is CASE-INSENSITIVE**. So a sibling `.env` with `turso_database_url=<remote>` (or `Turso_Database_Url=`, `export turso_database_url=`) + `.env.local=file:` makes the guard resolve `file:` → ALLOW and exec `drizzle-kit push`, while real drizzle-kit targets the REMOTE. Reproduced by two independent hermetic real-drizzle-kit executions. Windows is the SOLE sanctioned dev environment (CLAUDE.md), so the bypass exists exactly where the project runs.
+- Reachability class is identical to F-RG-3: no `.env` on disk (only `.env.local`), `.env*` gitignored (cannot be committed/bad-merged from tracked files); requires a developer to manually create a local `.env` with a case-variant remote key. Not exploitable as the repo stands today.
+- The gate suite does NOT catch it: `push-guard.mjs` check (5) uses only uppercase `.env` keys — the gate shares the guard's blind spot, the same structural-blindness pattern that failed cycles 2 and 3.
+
+Cycle-4 reports: `.chuck/reports/M0/milestone-report-regate3.md`, `.chuck/reports/M0/snorklewacker-regate3.md`. Ledger: `.chuck/probes/M0-ledger.md` (RE-GATE CYCLE 4).
+
+**Decision needed (pick one):**
+
+- (a) **Authorize one more scoped cycle (cycle 5)** to close F-RG-5: normalize `TURSO_DATABASE_URL` key resolution case-insensitively in `definesUrl` / `resolveEffectiveUrl` / `resolveLayeredUrl` (mirroring win32 `process.env`), extend `push-guard.mjs` check (5) with lowercase/mixed-case `.env`-key cases, add unit tests. Bounded change: `db-push-dev.ts` + `push-guard.mjs` + tests. Then re-gate and close M0.
+- (b) **Accept F-RG-5 as a low-risk latent gap and pass M0 now.** The guard is materially hardened (all `.env.local` shapes, the uppercase `.env`-layering axis, empty-value, and duplicate-key closed); this residual is Windows-key-casing-only, dev-workflow-only, and not currently exploitable (no `.env` present, gitignored). Record acceptance in DECISIONS with a follow-up work item, write the gate artifact, close M0.
+- (c) Something else / hand off.
+
+**Recommendation (Binkley, no stake in passing):** This is a genuine defect of the same class three prior cycles were spent disarming, on the sanctioned OS, and the fix (case-insensitive key lookup) is small and well-understood. However, the same "one more adjacent vector" pattern has now recurred four cycles running, which is itself a signal — the deeper question for the operator is whether a dotenv-key-parsing wrapper can ever be provably complete, versus a fail-closed posture (REFUSE if ANY parsed key case-folds to `TURSO_DATABASE_URL` with a non-`file:` value, on either file). I surface the finding and both remediation shapes; the strike-4 vs accept-and-move decision is the operator's.
+
+**Answer (recorded 2026-07-15, operator decision):** Option (b) — ACCEPT. F-RG-5 (Windows case-variant `.env` key bypass) is accepted as a low-risk latent gap: the guard is materially hardened (all `.env.local` shapes, the `.env`-layering axis with the complete drizzle-kit env-file set, empty-value and duplicate-key edges closed and gate-probed); this residual is Windows-key-casing-only, dev-workflow-only, and not currently exploitable (no `.env` on disk; `.env*` gitignored). Recorded in DECISIONS **D22** with a deferred fail-closed / case-insensitive hardening follow-up. M0 passes with this accepted residual; the gate artifact is written and M0 closes.
+
+---

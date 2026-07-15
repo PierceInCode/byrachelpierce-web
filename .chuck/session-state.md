@@ -2,57 +2,39 @@
 
 milestone: M0
 
-## Position (written 2026-07-14 — E3 resolved by operator waiver, proceeding to scoped re-gate)
+## Position (written 2026-07-15 — M0 PASS, Binkley, dede7b6 — executing PIN-ONCE-LAST close)
 
-Mode: continuous. Branch chuck/M0, tip 56d48a2 (an E3-answer/D20 commit is about to be added by
-the orchestrator on top of this). Run lock RE-ACQUIRED (held).
+Mode: continuous. Branch chuck/M0 @ dede7b6 (close commits about to be added). Run lock held.
 
-Binkley gated M0 (fresh context, HEAD acd4bbd) -> VERDICT FAIL. All 12 machine gates PASSED,
-but the Anxiety-Closet wave reproduced 4 findings on executed evidence. Full reports:
-`.chuck/reports/M0/` (milestone-report.md + bobbi/ronald-ann/steve/snorklewacker cycle1). Probe
-ledger: `.chuck/probes/M0-ledger.md`. This is gate CYCLE 1 of the 3-strike limit (1 used).
+Binkley's final verdict (fresh independent re-verification): **PASS (with operator-accepted
+residual F-RG-5)**, HEAD dede7b6, all 12 deterministic gates GREEN, CI success (run
+29377564152, headSha==HEAD). Report: `.chuck/reports/M0/milestone-report.md`.
 
-F-BINK-2/3/4 (MAJOR, code) REMEDIATED by Oliver test-first and COMMITTED at ed2aae5: (2) db:push
-guard now resolves last-match TURSO_DATABASE_URL so a duplicate-key .env.local cannot bypass it;
-(3) restoreTables routes column identifiers through assertSafeIdentifier (closes SQLi via dump
-column names); (4) restoreTables throws on a missing dump instead of silent empty-success. Full
-`npm run check` GREEN after remediation (171 tests pass, lint/format/typecheck clean).
+The gate took FOUR cycles:
+- Cycle 1 FAIL: F-BINK-1 (Turso token, later waived), F-BINK-2/3/4 (guard bypass, restore SQLi,
+  silent missing-dump — fixed).
+- Cycle 2 FAIL: F-BINK-2 still bypassable via more shapes -> F-RG-1 (dotenv.parse root fix) +
+  F-RG-2 (probe blind-spot) fixed.
+- Cycle 3 FAIL: F-RG-3 (.env-layering) -> fixed (resolveLayeredUrl matches drizzle-kit; complete
+  env-file set {.env,.env.local} covered).
+- Cycle 4 FAIL: F-RG-5 (win32 case-variant .env key) -> operator ACCEPTED (E5/D22) rather than a
+  5th cycle.
 
-F-BINK-5 (build-tooling licenses MPL-2.0/CC-BY-4.0) + F-BINK-7 (.prettierignore) DISPOSITIONED
-in DECISIONS D19 (operator accepted the licenses 2026-07-14; D10 clarified to govern
-runtime-bundled deps, not build tooling).
+ALL findings now fixed or dispositioned: fixes F-BINK-2/3/4, F-RG-1/2/3; dispositions F-BINK-1
+waived (E3/D20), F-BINK-5/7 (D19), F-RG-4 (D21), F-RG-5 accepted (E5/D22). Deferred follow-up:
+fail-closed guard hardening (D22, non-blocking). F-BINK-6 (draft PR #13 targets main) handled at
+merge.
 
-F-BINK-6 (draft PR #13 targets `main` directly instead of the two-stage flow via the integration
-branch) — PROCESS NOTE, to handle at close: retarget or close PR #13 when M0 merges to the
-integration branch. Non-blocking now.
+## Resume steps (CLOSE STEPS REMAINING — PIN-ONCE-LAST order)
 
-F-BINK-1 (IMPORTANT/credential) -> ESCALATIONS **E3**. RESOLVED 2026-07-14 by operator WAIVER
-(explicit in-session instruction): accept the current Turso production token as-is; do not
-re-raise. ESCALATIONS E3 `**Answer:**` is filled (WAIVED). DECISIONS **D20** records the waiver
-and corrects Amendment A1's Turso claim: the rotation is not independently verifiable (token in
-.env.local issued 2026-03-01, still valid) so A1's "no standing exposure" framing is corrected to
-"accepted as-is, unverified, residual risk waived by operator." Basis: credential never in the
-public GitHub repo (secret-sweep CLEAN across full history); known exposure is local files +
-AI-conversation history only.
-
-CURRENT POSITION: E3 resolved by operator waiver (D20). M0's remaining blocker is therefore
-RESOLVED. Proceeding to the SCOPED RE-GATE of M0 — no longer blocked. Code remediation
-F-BINK-2/3/4 already landed and committed (ed2aae5), full `npm run check` GREEN (171 tests), CI
-green on ed2aae5.
-
-## Resume steps (in order)
-
-1. Orchestrator commits the E3-answer + D20 + these ledger updates on chuck/M0, pushes, confirms
-   CI green on the new tip.
-2. Scoped re-gate M0 (Binkley, per binkley.md §7): verify F-BINK-2/3/4 are actually fixed on the
-   re-gate tip (owner-verifiers re-run the new tests) + F-BINK-1 marked WAIVED per D20/E3 (not
-   re-probed) + one fresh-eyes remediation-diff review + one Snorklewacker refutation that the
-   fixes are real; re-run all 12 deterministic gates; confirm CI green on the re-gate tip. This is
-   the re-attempt of gate cycle 1 (still 1 of the 3-strike limit unless it FAILs again).
-3. On PASS -> close M0 in PIN-ONCE-LAST order (Scribe commits report/PROGRESS/session-state/
-   ledger; push; CI; Binkley last act writes the pinned artifact; merge chuck/M0 to the
-   integration branch AND retarget/close draft PR #13 per F-BINK-6; Otis actuals + re-baseline).
-   Continuous -> then M1.
+1. Commit close artifacts (milestone report + PROGRESS + session-state + probe ledger + D22 + E5)
+   on chuck/M0.
+2. Push.
+3. Confirm CI green on the new tip.
+4. Binkley's LAST act writes the machine-readable gate artifact pinned to that tip.
+5. Merge chuck/M0 -> the integration branch AND retarget/close draft PR #13 (F-BINK-6).
+6. Otis appends actuals + re-baselines.
+7. Continuous -> M1.
 
 ## Gate status on b693556 (all executed this session; quotes in PROGRESS/ESCALATIONS)
 
@@ -77,6 +59,8 @@ probe spawn) + F7 (pre-existing e2e UntrustedHost log noise) = known-low, carry 
 - M2 long pole: START THE MURALS CSV WITH RACHEL (nothing else in the project can overtake this).
 - M3 (later): new Resend account+key, SPF/DKIM domain verification IN THE NEW ACCOUNT,
   BLOB_READ_WRITE_TOKEN into Vercel, migration 0004 ritual, set-admin x3.
+- M0 residual (non-blocking, deferred): fail-closed guard hardening for F-RG-5 win32 case-variant
+  .env key (D22).
 
 ## Hook/environment notes (do not fight; route around)
 

@@ -251,3 +251,15 @@ Records the operator's resolution of escalation **E4** (gate-3-strikes). The ope
 **F-RG-3 (HIGH) — to be fixed (cycle 4).** The `db:push` guard reads only `.env.local`, but `drizzle-kit push` also auto-loads a sibling plain `.env` (before `.env.local`, `override=false`), so a remote URL placed in `.env` would target production while the guard says ALLOW (reproduced hermetically, cycle-3 report `.chuck/reports/M0/snorklewacker-regate2.md`). Fix: the guard replicates drizzle-kit's full env resolution (load `.env` then `.env.local` with drizzle-kit's precedence) so its resolved URL matches drizzle-kit's actual target in the `.env`-present case; tests cover the layering shapes; the `push-guard.mjs` gate probe is extended to exercise the `.env`-layering axis so the gate itself catches this class.
 
 **F-RG-4 (MEDIUM) — ACCEPTED as an inherent limitation.** A raw `npx drizzle-kit push` (bypassing the npm wrapper scripts) is not interceptable by a wrapper guard. The guard's remit is the sanctioned `npm run db:push*` path (D7 disarms those); running the raw binary against production is an out-of-band operator action outside M0's guard scope. Documented, not gated.
+
+---
+
+## D22 — E5 resolution: F-RG-5 accepted as a low-risk latent gap; M0 passes with accepted residual (2026-07-15)
+
+Records the operator's resolution of escalation **E5** (fourth-cycle gate). The operator elected to ACCEPT F-RG-5 rather than authorize a fifth remediation cycle.
+
+**F-RG-5 (HIGH-in-class, accepted).** On win32 (the sole sanctioned dev OS) `process.env` keys are case-insensitive, but the db:push guard's `definesUrl` (`scripts/db-push-dev.ts`) checks the key case-sensitively — so a case-variant `.env` key (e.g. `turso_database_url=<remote>`) could resolve to `file:` in the guard (ALLOW) while real `drizzle-kit push` targets the remote (cycle-4 report `.chuck/reports/M0/snorklewacker-regate3.md`, ledger RG4-8). Reachability is identical to the already-dispositioned F-RG-3/F-RG-4 class: no `.env` on disk (only `.env.local`), `.env*` gitignored, and it requires a developer to hand-create a local `.env` with a case-variant remote key — not exploitable as the repo stands.
+
+**Decision.** Accepted as a low-risk latent gap. The guard is materially hardened over four cycles (all `.env.local` bypass shapes, the `.env`-layering axis with the complete drizzle-kit env-file set `{.env, .env.local}`, empty-value and duplicate-key edges — closed and gate-probed). M0 passes with this accepted residual.
+
+**Follow-up work item (deferred, non-blocking).** Harden the guard to a FAIL-CLOSED posture: REFUSE the push unless it can positively prove the effective target is a local `file:` DB, resolving `TURSO_DATABASE_URL` case-insensitively across both `.env` and `.env.local` (mirroring win32 `process.env`), and extend `push-guard.mjs` with lowercase/mixed-case cases. Carried as a hardening item for a later maintenance pass; it does not block M0.
