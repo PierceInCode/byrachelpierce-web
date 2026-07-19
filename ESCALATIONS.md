@@ -117,3 +117,36 @@ Cycle-4 reports: `.chuck/reports/M0/milestone-report-regate3.md`, `.chuck/report
 **Answer (recorded 2026-07-15, operator decision):** Option (b) — ACCEPT. F-RG-5 (Windows case-variant `.env` key bypass) is accepted as a low-risk latent gap: the guard is materially hardened (all `.env.local` shapes, the `.env`-layering axis with the complete drizzle-kit env-file set, empty-value and duplicate-key edges closed and gate-probed); this residual is Windows-key-casing-only, dev-workflow-only, and not currently exploitable (no `.env` on disk; `.env*` gitignored). Recorded in DECISIONS **D22** with a deferred fail-closed / case-insensitive hardening follow-up. M0 passes with this accepted residual; the gate artifact is written and M0 closes.
 
 ---
+
+## E6 — human-hands — 2026-07-19 — M1 close: Wix→new-site redirect map needs operator-approved URLs (Flag 3)
+
+**Type:** `human-hands`
+
+**What happened:** M1's code is complete and independently re-verified. The search-engine plumbing (sitemap, robots, unique page metadata, analytics) and the Lighthouse budget all pass; the two gate-quality defects found in the first review — the Lighthouse audit was measuring desktop instead of mobile, and a retry path could mask a flaky accessibility score — were both fixed (commit ad97e84) and confirmed fixed by a fresh independent re-gate (PASS, 2026-07-19). The one remaining M1 item is the Wix→new-site 308 redirect map (BUILD-SPEC M1 item 3), which per Invariant 4 cannot be invented — it needs your approval of the source→target URL mappings. Rosebud crawled the live Wix site (2026-07-14) and assembled a candidate map (full detail: `.chuck/reports/M1/rosebud-wix-inventory.md`): ~95 discoverable Wix URLs; 22 map cleanly to new-site routes; 12 classes have no clean equivalent and need your call.
+
+**What happens once you answer:** I build `next.config.ts` redirects() for every approved mapping plus a Playwright test asserting a 308 for each, run the final M1 gate (the redirect diff re-gated + the full deterministic suite + push + CI green), and close M1.
+
+**The 22 CLEAN mappings** — I will apply these as-is unless you object: /murals→/murals · /contact→/contact · /custom-orders→/custom · /about-rachel-pierce→/story · /press→/press · /events→/visit · /category/all-products→/collection · /collection→/collection · /watercolors→/collection/watercolors · and the 12 category galleries (the opaque Wix /copy-of-2019* slugs) → their /collection/<category> equivalents (Abstracts, Beach→beach-coastal, Birds/Flamingos/Wildlife→birds-wildlife, Fish/Manatees/Octopus/Sea Life/Sea Turtles/Seahorses/Shells→sea-life, Florals→florals, Mermaids→mermaids-whimsy, Palm Trees→palm-trees, Line Art→line-art).
+
+**The 12 decisions I need** (my recommendation in bold; reply "apply all recommended" or list only the overrides):
+
+1. /retail-locations → **/visit** (or /)
+2. /social-media → **/** (or /story)
+   3–5. /shop, /online-store, /items (old Wix store) → **/collection** (browse on-site; sales go through Lightspeed) — or redirect straight to the external Lightspeed store
+3. /jewelry (no jewelry on the new site) → **/collection** (or external, or drop)
+4. Landscapes gallery (/copy-of-2019-6, no Landscapes category exists) → **/collection/beach-coastal** (nearest) — confirm
+5. Year archives /2018, /2019, /2020 → **/collection**
+6. Policy pages /privacy-policy, /return-policy, /shipping-policy (no new home; sales now via Lightspeed) → **redirect to / for now** — OR give me external policy URLs — OR I create simple policy pages. These are legal-ish; your call.
+   10–11. /blog and /blog/categories/* (5) → **/press** (nearest editorial home) or /
+7. /post/<slug> — 55 old blog posts with existing SEO value → **blanket → /press** (per-post curation is possible but heavy; recommend blanket now, revisit later)
+
+**Two extras:**
+
+- /bio already 301s to /about-rachel-pierce on Wix; I'll redirect /bio **directly to /story** to avoid a double hop (confirm).
+- Apex vs www: the live Wix site canonicalizes to www.byrachelpierce.com; the new site's canonical is the apex (metadataBase https://byrachelpierce.com). The path redirects work regardless of host; the host (www→apex) canonicalization is a DNS/Vercel-domain step for the M4 cutover — noted, not part of this map.
+
+Fastest path: reply "apply all recommended" and I build + test + close M1. Or list only the overrides.
+
+**Answer (recorded 2026-07-19, operator's in-session decisions):** Redirect map APPROVED. The 22 clean mappings apply as proposed (with identity paths /murals, /contact, /press, /collection getting NO rule — the new site already serves them). Per-decision: (1) /retail-locations → /visit. (2) /social-media → **/ (home)** — operator was unsure ("?"); orchestrator defaulted to home (footer carries social links site-wide); operator may re-point later. (3) /shop, /online-store, /items → **external Lightspeed store** https://store33134078.company.site/ (SHOP_URL). (4) /jewelry → **external Lightspeed store** (operator "Store" = Lightspeed, same as #3). (5) Landscapes gallery (/copy-of-2019-6) → /collection (operator "collection" = top collection page, not the beach-coastal subcategory). (6) year archives /2018,/2019,/2020 → /collection. (7) policy pages /privacy-policy,/return-policy,/shipping-policy → / (home). (8) /blog + /blog/categories/* → /press. (9) 55 /post/* → /press (blanket). Extra: /bio → /story directly (no double hop). Apex↔www host canonicalization deferred to M4 (not part of this path map). All redirects are 308 (permanent). E6 CLOSED — run resumes: build next.config.ts redirects() + Playwright 308 tests (Oliver, TDD) → M1 delta re-gate + full deterministic suite + push + ci-green → write M1 artifact → merge → Otis.
+
+---
