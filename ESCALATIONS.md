@@ -150,3 +150,30 @@ Fastest path: reply "apply all recommended" and I build + test + close M1. Or li
 **Answer (recorded 2026-07-19, operator's in-session decisions):** Redirect map APPROVED. The 22 clean mappings apply as proposed (with identity paths /murals, /contact, /press, /collection getting NO rule — the new site already serves them). Per-decision: (1) /retail-locations → /visit. (2) /social-media → **/ (home)** — operator was unsure ("?"); orchestrator defaulted to home (footer carries social links site-wide); operator may re-point later. (3) /shop, /online-store, /items → **external Lightspeed store** https://store33134078.company.site/ (SHOP_URL). (4) /jewelry → **external Lightspeed store** (operator "Store" = Lightspeed, same as #3). (5) Landscapes gallery (/copy-of-2019-6) → /collection (operator "collection" = top collection page, not the beach-coastal subcategory). (6) year archives /2018,/2019,/2020 → /collection. (7) policy pages /privacy-policy,/return-policy,/shipping-policy → / (home). (8) /blog + /blog/categories/* → /press. (9) 55 /post/* → /press (blanket). Extra: /bio → /story directly (no double hop). Apex↔www host canonicalization deferred to M4 (not part of this path map). All redirects are 308 (permanent). E6 CLOSED — run resumes: build next.config.ts redirects() + Playwright 308 tests (Oliver, TDD) → M1 delta re-gate + full deterministic suite + push + ci-green → write M1 artifact → merge → Otis.
 
 ---
+
+## E7 — human-hands — 2026-07-20 — M2 content loop: Rachel's real mural content (HT2)
+
+**Type:** `human-hands`
+
+**What happened:** M1 is closed and merged (gate PASS, artifact `.chuck/gates/M1.json` pinned to a317cf1, CI green; Otis actuals recorded — 2,611,448 tokens, under the 4.5M–11.0M band, $0 cash). The run advanced to M2. M2's single deliverable is getting Rachel's REAL mural content onto the site: the 14 Mural Selfie Trail murals must carry her true names, descriptions, and years. Per Invariant 3 and the BUILD-SPEC §9 ship-line note, go-live cannot proceed while the trail shows placeholder fiction — so this is the project's calendar long pole, and nothing else in the project can overtake it.
+
+The blocker is content only. `docs/intake/murals.csv` is still EMPTY — all 14 rows blank (real_name, description, year_painted). No agent can supply this (Invariant 3 forbids fabricated names/years rendered as fact). Everything agent-side is already built and verified green: the ingest script (`scripts/ingest-content.ts`), the catalog export (`scripts/export-catalog-csv.ts`), the production backup (`scripts/backup-prod.ts`), and the `mural-content` gate — which correctly FAILs today (14/14 names missing, 0/14 descriptions). The one missing input is Rachel.
+
+**Operator action needed — run the HT2 protocol (`.chuck/human-tests/HT2-content-loop.md`), with Rachel and this machine:**
+
+1. Fill `docs/intake/murals.csv` — all 14 rows: `real_name`, `description` (1–2 sentences in her voice), `year_painted` (leave blank if genuinely unknown — never guessed).
+2. Export + fill the paintings sheet: `npx tsx scripts/export-catalog-csv.ts` with prod creds active (read-only); blank cells mean "no change".
+3. Back up production: `npx tsx scripts/backup-prod.ts` (one JSON per table in `backups/`; paintings = 528 rows).
+4. Dry run: `npx tsx scripts/ingest-content.ts --dry-run` — confirm 14 mural rows planned, ZERO unresolved mural errors (painting size-parse errors are fine).
+5. Apply: `npx tsx scripts/ingest-content.ts --apply` — report matches the dry-run plan.
+6. Re-comment the production creds in `.env.local` (active `TURSO_DATABASE_URL` back to `file:./dev.db`).
+7. Commit the regenerated `src/lib/mural-data.ts`, `docs/intake/murals.csv`, and `docs/intake/ingest-report-*.md` via PR; merge on green CI.
+8. With Rachel, open the live trail (`https://byrachelpierce-web.vercel.app/murals/trail`) and confirm every one of the 14 names/descriptions is hers and true; spot-check 5 paintings against the CSV.
+
+Save the filled form at `.chuck/human-tests/HT2-result.md`, then resume with `/chuck:run`. All-pass clears M2's content gate; any fail becomes a blocked-gate with your notes attached.
+
+**This touches live production (by design, operator-run, never me):** step 5 (`--apply`) writes to the live Turso DB, gated behind the step-3 backup. Steps 3–6 are the only window with prod creds active — re-comment them immediately after.
+
+**Answer:**
+
+---

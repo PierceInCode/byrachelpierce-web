@@ -14,11 +14,15 @@ M2 is the HUMAN-HANDS long pole: the live site needs Rachel's real mural content
 
 Branch: chuck/M2 @ a317cf1 (+ this bookkeeping commit).
 
-## Resume steps
+## RUN STOPPED CLEAN — E7 (human-hands) recorded 2026-07-20, awaiting operator answer
+
+The M2 human-hands blocker is confirmed and escalated: `docs/intake/murals.csv` is EMPTY (14/14 blank), so M2 cannot proceed without Rachel's real content. **ESCALATIONS E7** is written (HT2 content-loop protocol) with an empty `**Answer:**` — the run resumes only after the operator fills it. All M2 agent-side infrastructure is present and green (ingest/export/backup scripts, `mural-content` gate correctly FAILing pre-content). `npm run check` PASS on the bookkeeping tip (206/206 tests, lint/format/typecheck clean, exit 0). Run lock released on the clean stop.
+
+## Resume steps (after the operator answers E7)
 1. Re-acquire the run lock.
-2. Confirm on chuck/M2; HEAD = the M1-close bookkeeping commit.
-3. Read the M2 spec (BUILD-SPEC M2 + Architecture content-loop refs) to confirm the exact human-hands deliverable and the `mural-content` gate shape.
-4. If Rachel's murals content is not yet supplied → the M2 human-hands escalation (HT2) is the blocker; write/confirm the ESCALATIONS entry and stop clean.
+2. Confirm on chuck/M2; HEAD = the E7-stop commit.
+3. Read the operator's HT2 result (`.chuck/human-tests/HT2-result.md`) + E7 `**Answer:**`.
+4. If all-pass: run the M2 gate wave (`mural-content` now PASSes on real content, + full deterministic suite) → close M2 (Binkley LAST ACT → merge → Otis). If any HT2 fail: treat as a blocked-gate with the operator's notes.
 
 ## Carry-forward NEEDS-SENIOR-REVIEW (accumulate to ship report, NONE blocking)
 1. a11y 0.95 zero-margin on matthews-turtle + /murals/trail (pre-existing Header/Footer/EmailSignInForm/MuralMap contrast, not M1-introduced).
