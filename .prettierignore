@@ -8,5 +8,15 @@ CLAUDE.md
 OPERATOR-GUIDE.md
 scripts/art-data.json
 coverage/
+.lighthouseci/
 .github/workflows/ci.yml
 .superpowers/
+.chuck/session-state.md
+.chuck/run.lock
+.chuck/mode
+.chuck/reports/
+.chuck/probes/*.md
+.chuck/probes/*.log
+.chuck/probes/*.json
+.chuck/now
+.chuck/gates/

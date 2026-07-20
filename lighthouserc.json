@@ -1,0 +1,25 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "startServerCommand": "npx next start -p 3200",
+      "startServerReadyPattern": "Ready|started server|Local:",
+      "url": [
+        "http://localhost:3200/",
+        "http://localhost:3200/collection",
+        "http://localhost:3200/collection/painting/matthews-turtle",
+        "http://localhost:3200/murals/trail"
+      ]
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.85, "aggregationMethod": "median" }],
+        "categories:accessibility": ["error", { "minScore": 0.95, "aggregationMethod": "median" }],
+        "categories:seo": ["error", { "minScore": 0.95, "aggregationMethod": "median" }]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

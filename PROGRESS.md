@@ -1,112 +1,61 @@
-# PROGRESS — byrachelpierce-web
+# Progress — byrachelpierce-web takeover (finish R5, ship v1.0.0)
 
-> The agent updates this at the end of EVERY session. The operator verifies it before /clear.
+_Milquetoast's ledger — the single source of truth for "where are we", committed so any fresh session resumes from the last verified step. Jira is off; this file is the whole status surface. The R0–R4 era's progress record is archived verbatim at `PROGRESS-r0-r4.md`._
 
-## ⚠ STOP — read before doing anything else this session
+## Current state
 
-**✅ PRODUCTION MIGRATIONS `0001`+`0002`+`0003` APPLIED 2026-07-06 (agent, operator-authorized — see DECISIONS 035).** The R4 preview deploy failed with `no such column: width_in`, which uncovered that **production had never actually received R1's migration** despite PROGRESS previously claiming it was operator-verified (it was not — the operator confirmed he did not run it). Production Turso (`byrachelpierce-pierceincode…turso.io`, the same DB Vercel Production uses — confirmed) was at pre-R1 schema. With explicit operator authorization to override Iron Rule 1 and "do it correctly," the agent applied `0001` (create `trail_completions`), `0002` (move the 1 sentinel's redemption code into it, delete the sentinel), and `0003` (painting dimension columns), after backing up `trail_progress` + `paintings` to `backups/`, and seeded drizzle's `__drizzle_migrations` tracking (now 4 rows) so future migrations work normally. Verified: `trail_completions` exists (1 completion preserved), 0 sentinels, `trail_progress` 4→3, 528 paintings unchanged, dimension columns present. **This also fixed a latent production bug** — the deployed trail feature had been querying a non-existent table since R1.
+**M1 (R5 code) gate PASS — all 4 BUILD-SPEC items done (SEO, analytics, Lighthouse mobile, Wix redirect map). Closing now: pushing the tip, waiting on CI, then the pass artifact and merge. Next: M2 (real mural content, needs Rachel). Mode continuous.**
 
-**✅ PR #11 MERGED 2026-07-06; production deploy is green and verified serving** on the public alias `byrachelpierce-web.vercel.app` (`/`, `/collection`, `/collection/painting/2019_06_01_single-flamingo` — the page that previously failed the build — and `/murals/trail` all return 200; painting title renders). Local `main` synced to merge commit `2c9f15e`.
+_Prior-state note (2026-07-14, superseded by the PASS above):_ Binkley gated M0 (fresh context, HEAD acd4bbd): all 12 machine gates PASSED but the Anxiety-Closet wave reproduced 4 findings on executed evidence — VERDICT FAIL (cycle 1 of 3-strike limit). F-BINK-2/3/4 (MAJOR, code — db:push guard bypass via duplicate-key env var, restore SQL-injection via unsafe column identifiers, silent-success on a missing dump) were remediated test-first by Oliver and committed at ed2aae5 (pushed; CI running on this tip); `npm run check` is GREEN post-remediation (171 tests pass, lint/format/typecheck clean). F-BINK-5/7 (build-tooling license flags, `.prettierignore`) were dispositioned in DECISIONS D19. F-BINK-6 (draft PR #13 targets `main` instead of the two-stage integration-branch flow) is a non-blocking process note for close. F-BINK-1 (ESCALATION E3, production Turso token in `.env.local` is a JWT issued 2026-03-01, unchanged since 2026-07-04, still authenticating against live prod — contradicting Amendment A1's "rotated 2026-07-14" claim) is now RESOLVED BY OPERATOR WAIVER: the operator instructed acceptance of the current token as-is, not to be re-raised; ESCALATIONS E3 Answer is filled (WAIVED); DECISIONS D20 records the waiver and corrects A1's Turso claim to "accepted as-is, unverified, residual risk waived by operator," on the basis that the credential was never in the public GitHub repo (secret-sweep CLEAN across full history) — known exposure is local files + AI-conversation history only. M0's remaining blocker is therefore resolved; the run is proceeding to the scoped re-gate of the F-BINK-2/3/4 remediation on ed2aae5 (this is the re-attempt of gate cycle 1, still 1 of the 3-strike limit unless it FAILs again). Full reports at `.chuck/reports/M0/`, probe ledger at `.chuck/probes/M0-ledger.md`. Not yet done, plainly: M0 has not closed, and no re-gate has run yet on this tip — that verdict is UNVERIFIED until Binkley's scoped re-gate actually executes. Carried, non-blocking: HT1 magic-link send-test deferred to M3, Vercel-preview confirmation carried to ship-report, E2 riders (branch deletions, F15 typo), M1 Wix URL list, the M2 murals CSV with Rachel (the project's calendar long pole), and the M3 work to stand up the new Resend account.
 
-**Do not start R5 (go-live) until R4's CONTENT is real and applied.** The remaining R4 step is the operator+Rachel content loop:
+_Superseded earlier-today state note:_ **AWAITING GATE 1 (2026-07-07) — twice-refuted and ready for the operator's veto.** The admin-panel delta (D16/D17, new M3, go-live now M4) got its own fresh Snorklewacker: 4 refuted defects (create-form "description" mapped to no schema column — now pinned to `notes`; three stale go-live references in Architecture §7/§8/§9 and OPERATOR-GUIDE Gate 2), 1 flag (M3 `admin-lockout` vacuity — e2e journey named as the load-bearing M3 check), 1 minor recap fix — all resolved in-package. The refuter verified 48/48 gate rows match BUILD-SPEC↔gates.json, migration 0004 completeness, the `authjs.session-token` seam against the installed package, and the D17 count-contract ordering. The re-dispatched Snorklewacker returned 13 findings + 1 UNVERIFIED suspicion; every one is resolved — fixed in the package (new gates `push-guard`, `restore-roundtrip`, `lighthouse-config`, plus a sitemap gate superseded same-day by `sitemap-vs-db` under D17; strengthened `backup-check`/`secret-sweep`/`mural-content` probes; corrected narratives) or recorded in DECISIONS **D15** (VETO POINT: yes — read it). Post-fix validation, this session, verbatim: package checker `PACKAGE OK (6 core docs + gates + architecture verified)`; `npm run check` PASS (lint 0/0, format clean, tsc clean, 18 files / 143 tests); `secret-sweep` → `SWEEP CLEAN` (60,347 history lines, allowlist removed); `backup-check` fixture-tested both ways; `mural-content` → correct pre-content `MURAL GATE FAIL` (14/14 names, 0/14 descriptions). **Exact next step: the operator's Gate 1 approval — the last blocker.** Escalation E1 (`budget-overrun`, planning actuals 1,730,577 vs the 0.3M–0.8M band) was ANSWERED by the operator 2026-07-07: accepted, overrun allowance raised to 200% (`threshold: 200%` in BUDGET.md; bands unchanged). Gate 1 remains: read DECISIONS.md (D15 especially), BUILD-SPEC.md, BUDGET.md, approve via `New-Item -ItemType File .chuck/plan-approved` + `Set-Content .chuck/mode "checkpoint"` (or `"continuous"`), then `/chuck:run` starts M0. Agents never create the marker.
 
-- Run the R4 content ritual against **production**: fill the CSVs, run `export-catalog-csv` (prod) → fill `paintings.csv`, `ingest-content.ts --dry-run` reviewed → `--apply` (after a backup) → redeploy, and confirm **all 14 murals show real names** on the deployed site (Spec §9.2 / Iron Invariant 3 — the trail is a headline feature and may not go live with placeholder fiction).
+Nothing has been built and nothing executes until the marker exists. Standing risks unchanged: secret rotation (HT1, M0) is not deferrable again; the machine's network is a gate-run environment risk (probes are network-dependent — BUILD-SPEC wording now says so honestly); R5 go-live remains hard-blocked behind real mural content (M2), human work with Rachel that has not started.
 
-R4's **code** is complete and gated; R4's **content** is an operator+Rachel loop that runs against production and is not something the agent can do. R5's reading list also requires re-flagging the deferred secret rotation (DECISIONS 013 / Phase 0.1) before go-live.
+## Milestone board
 
-## Milestone status (plan: `docs/FINAL-BUILD-SPEC.md`)
+| Milestone                                                               | Status                                                                   | Gate verdict                            | Checkpoint date |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------- | --------------- |
+| M0 — Takeover baseline: audit closure, hygiene, production verification | PASS — merged to chuck/integration @ 5fbf5f1 (4 gate cycles)             | PASS                                    | —               |
+| M1 — R5 code: SEO, redirects, analytics, Lighthouse                     | gate PASS (cycle 3, all 4 DoD items); closing — artifact + merge pending | PASS (7/7 local; ci-green pending push) | —               |
+| M2 — Content loop completion: real mural content live                   | planned                                                                  | —                                       | —               |
+| M3 — Admin panel: non-developer collection CRUD (added at Gate 1, D16)  | planned                                                                  | —                                       | —               |
+| M4 — Go-live: cutover, smoke, v1.0.0 (was M3 pre-D16)                   | planned                                                                  | —                                       | —               |
 
-- [ ] **Phase 0** (operator) — unblocked per DECISIONS 013 (0.1 and 0.2 deferred/substituted, not gating).
-  - [x] planning PR merged + `planning-docs` tag
-  - [x] harness verified (`test-runner`, `spec-auditor`, `vercel-analyst` agents + hooks present)
-  - [ ] **0.1 secrets rotated (Resend + Turso) — DEFERRED, not blocking, MUST be re-flagged before R5** (DECISIONS 013)
-  - [ ] **0.2 branch protection — UNAVAILABLE on this GitHub plan; substituted by PR-only discipline** (DECISIONS 013)
-  - [ ] 0.6 art folder backed up (operator-owned — confirm when done)
-  - [ ] 0.7 Vercel previews confirmed (operator-owned — confirm when done)
-- [x] R0 process retrofit — `r0-process` — gate Spec §5.2 — **MERGED to `main`** (PRs #3, #4)
-- [x] R1 trail correctness — `r1-trail` — gate Spec §6.2 — **MERGED to `main`** (PR #5, tag `R1`); **production migration was NOT applied at R1 despite the old record — corrected: applied 2026-07-06 (DECISIONS 035)**
-- [x] R2 images & performance — `r2-images` — gate Spec §7.2 — **MERGED to `main`** (PRs #6, #7); real images on Vercel Blob, verified on a preview
-- [x] R3 collection finish — `r3-collection` — gate Spec §8.2 — **MERGED to `main`** (PR #9, tag `R3`); operator Vercel-preview verification **DONE 2026-07-06** (looked good); close-out PR #10 merged
-- [x] **R4 content intake — `r4-content` — gate Spec §9.2 — MERGED (PR #11) + deployed to production 2026-07-06, verified serving.** Production migrated (`0001`–`0003`, DECISIONS 035). Remaining: the operator+Rachel CONTENT loop (fill CSVs → ingest → real mural names live).
-- [ ] R5 go-live — `r5-golive` — gate Spec §10.2 + smoke matrix → tag `v1.0.0`
+## History
 
-## True current state (2026-07-06, R4 merged + deployed)
-
-**R4 (Content Intake, Spec §9, Architecture §7/§4.4/§3.3) code is complete on branch `r4-content` and all gates are green.** Built directly (not via subagent-driven-development this time — smaller, script-heavy milestone); every test suite/build/gate run was delegated to `test-runner`, and a `spec-auditor` whole-branch pass ran before the PR was declared ready. Auditor verdict after the PROGRESS fix below: 0 BLOCKER, 0 MAJOR, 2 MINOR (both addressed or documented). **The two R3 close-out items are now both done** (PR #10 merged; operator's §8.2 preview check passed 2026-07-06), which is what unblocked R4.
-
-Branch commits (off `main` @ `de05f22`):
-
-1. `docs(intake)` — intake formats scaffold (`docs/intake/README.md`, blank `murals.csv`)
-2. `build` — `.prettierrc endOfLine: auto` (DECISIONS 033)
-3. `feat(db)` — dimension columns + migration `0003`
-4. `feat(scripts)` — export + ingest pipeline + tests
-5. `docs` — DECISIONS 031–033
-6. `docs` — this PROGRESS update + `.gitignore` for the pre-fill sheet (spec-auditor MINOR)
-
-### What R4 built (Spec §9.1, all five items)
-
-- **Item 1 — `scripts/export-catalog-csv.ts`**: reads the paintings table and writes `docs/intake/paintings.csv` pre-filled with every slug + current values, so the operator edits instead of retyping 528 rows. Refuses to overwrite an existing sheet without `--force` (protects hand edits). Reads the configured `TURSO_DATABASE_URL`; the authoritative export is operator-run against production (DECISIONS 031).
-- **Item 2 — dimensions migration**: additive nullable `width_in`/`height_in`/`depth_in` (`real`) on `paintings` (`schema.ts` + `drizzle/0003_add_painting_dimensions.sql`, journal/snapshot consistent). Matches Architecture §3.3 verbatim. **Operator applies to production after a backup — never the agent** (§3.4).
-- **Item 3 — `scripts/ingest-content.ts` + `scripts/lib/parse-size.ts`**: reads both CSVs; parses `physical_size` → `width_in`/`height_in` accepting only `24x36` / `24 x 36` / `24" x 36"` / `24in x 36in` (+ decimals) and routing everything else (unicode `×`, feet, cm, 3-D, free text) to the error report — **never guesses** (Iron Invariant 3). Updates `availability`/`location`/`series`/`notes` with blank = no change. `--dry-run` default, `--apply` required to write, every run emits `docs/intake/ingest-report-<date>.md` + a structured log line.
-- **Item 4 — mural ingest path**: rewrites the `name`/`description`/`year` literals in `src/lib/mural-data.ts` from `murals.csv`; the trail UI un-suppresses names/years by data presence (Architecture §4.4 — no render change, guards already exist). Rewrite runs through prettier's API so the regenerated file passes `format:check`; verified prettier-clean against the real 14-mural file.
-- **Item 5 — operator loop**: `docs/intake/README.md` documents both sheet formats, the blank=no-change rule, CSV quoting, and the ritual. Rachel can start filling content now, in parallel — the code is done.
-
-Supporting: hand-rolled quoted CSV reader/writer (`scripts/lib/csv.ts`) and an entrypoint guard (`scripts/lib/entrypoint.ts`, so tests can import script helpers without triggering `main()`). No new dependencies (CSV hand-rolled per Spec §9). Exhaustive tests in `tests/scripts/` (73 tests): size parser (accepted + garbage battery), year parser, CSV round-trip incl. quoted commas/embedded quotes, painting/mural plan builders, `applyPaintingUpdate` against a file DB, and the mural rewrite (prettier-clean assertion).
-
-### R4 gate result (Spec §9.2, this session, `test-runner`-verified, HEAD of `r4-content`)
-
-```
-npm run check                        → lint 0/0, format clean, tsc clean, 143 passed (18 test files)
-npm run test:coverage                → exit 0, thresholds met (80/80). 89.49% stmts / 84.39% branches /
-                                        97.67% funcs / 90.36% lines (scripts covered by targeted tests,
-                                        not added to the numeric gate — DECISIONS 032)
-TURSO_DATABASE_URL=file:./ci.db \
-  npm run db:seed-ci; npm run build  → SSG build succeeds (34 pages), no errors
-npx tsx scripts/ingest-content.ts --dry-run → exit 0, clean plan, 0 unresolved parse errors,
-                                        report written (murals.csv blank, no paintings.csv yet)
-```
-
-### spec-auditor result
-
-**0 BLOCKER, 1 MAJOR, 2 MINOR.**
-
-1. MAJOR — PROGRESS.md was stale (still R3-end + "do not start R4" banner). **Fixed** — this rewrite.
-2. MINOR — `docs/intake/paintings.csv` wasn't gitignored, so a `git add -A` could commit dev-DB data. **Fixed** — added to `.gitignore` (reports + `murals.csv` stay committable per Spec §9.2).
-3. MINOR — `.prettierrc endOfLine: auto` defers real line-ending normalization to R5. **Documented** (DECISIONS 033) — recommended `.gitattributes eol=lf` renormalization as an R5 hygiene item.
-
-Auditor confirmed all five §9.1 items present + correct, all Iron rules pass (no secrets, no image binaries, `package.json`/lockfile unchanged, coverage thresholds untouched, tests hit only temp file DBs, migration additive-only, honesty preserved — never guesses, blank = no change, `murals.csv` is a blank scaffold with zero fabricated content, `applyPaintingUpdate` parameterizes values).
-
-### Known, deliberately deferred (not blockers)
-
-- **`depth_in` stays NULL this release** — `paintings.csv` (§7.2) has no depth column, so the ingest can't populate it. The AR tool (§13, next release) is what needs depth; flagged there (DECISIONS 032).
-- **`photo_filename` is noted, not stored** — no schema/data field for mural photos yet; the ingest lists it in the report rather than dropping it silently. Wiring it up is deferred (DECISIONS 032).
-- **Line-ending normalization** — `endOfLine: auto` makes the gate green cross-platform now; a repo-wide `.gitattributes eol=lf` + renormalization commit is the thorough fix, left for R5 (DECISIONS 033).
-- **Doc nit from R3, still open** — Architecture §5.2.3's parenthetical "expect `Lilly`" vs production's actual `Lily` (DECISIONS 029). Agent can't edit `docs/`; operator to reconcile.
-
-## Exact next step
-
-**R4 is merged (PR #11), production is migrated (`0001`–`0003`), and the production deploy is green + verified serving.** All that remains before R5 is the operator+Rachel **content loop** against production:
-
-1. Operator + Rachel: fill `docs/intake/murals.csv` (14 murals) and, after running `npx tsx scripts/export-catalog-csv.ts` against production, fill `docs/intake/paintings.csv`.
-2. Operator: `ingest-content.ts --dry-run` → review the report → `--apply` (after backup) → redeploy. Verify on production: all 14 murals show real names; spot-check 5 paintings vs the CSV (size, availability). Commit `docs/intake/ingest-report-*.md`.
-3. **R5 (go-live) starts only when mural content is real and applied** (Spec §9.2 ship-line note; Iron Invariant 3). Painting-data completeness is NOT gating (unknown availability renders honestly as nothing). R5 also needs the deferred secret rotation re-flagged (DECISIONS 013 / Phase 0.1).
-
-**How production ops were done this session (reference for R5):** the turso cloud CLI is NOT on this machine's PATH, so backup + migration were done via `@libsql/client` + drizzle's migrator, reading the production creds from `.env.local`'s commented lines (never printed). Production Turso = `byrachelpierce-pierceincode.aws-us-east-1.turso.io` (same DB Vercel Production uses). Anonymous smoke tests must hit the **public alias `byrachelpierce-web.vercel.app`** — the deployment-specific `*-projects.vercel.app` URLs sit behind Vercel Deployment Protection (302 → SSO). See DECISIONS 034 (deploy ordering) + 035 (the R1-migration-gap fix).
-
-Not requested this session, left as-is: deleting the merged `r3-collection` and `r4-content` branches (R0–R2 precedent was to clean up post-merge); the untracked `R3-PLAN.md` scratch file in the repo root.
-
-## Open questions for operator
-
-- None blocking. (When you start R5, re-flag the deferred secret rotation — DECISIONS 013 / Phase 0.1 — before configuring production env vars and the Resend domain.)
-
----
-
-## Prior-milestone recaps (kept for reference)
-
-**R3 (collection finish, Spec §8, Architecture §2/§5/§12) — MERGED (PR #9, tag `R3`).** Made `/collection` + `/collection/[category]` `force-dynamic`; built `/collection?view=all`; fixed the fused `'LillyOther plants'` tag (DECISIONS 029); honest availability display (`src/lib/availability.ts`); design-language empty states; removed the dead "Coming Soon" contact form; added `prefers-reduced-motion`; component tests + the full Playwright e2e suite (CI Playwright job activated). Operator's §8.2 preview verification completed 2026-07-06. Close-out PR #10 merged.
-
-**R2 (images & performance, Spec §7) — MERGED (PRs #6, #7).** `src/lib/art-url.ts` as the sole URL-assembly point; `next.config.ts` Blob `remotePatterns`; 4 render sites migrated to `next/image` + `artUrl()`; `scripts/sync-art-blob.ts`; Playwright image-budget scaffold. Operator uploaded 1056/1056 images to a Vercel Blob store, verified on a preview. Local/CLI Blob access needs a static token or explicit Development OIDC trust (DECISIONS 027) — relevant if R4 ever re-syncs images.
-
-**R1 (trail correctness, Spec §6) — MERGED (PR #5, tag `R1`); production migration was NOT run at R1 (the old "operator-verified" record was mistaken) — corrected 2026-07-06, DECISIONS 035.** `trail_completions` table (retires the `mural_id = 0` sentinel); race-safe completion (`INSERT … ON CONFLICT DO NOTHING RETURNING`); CSPRNG redemption codes; emails gated on `completionInserted`; content honesty (real location names, fabricated description/year removed — the exact suppression R4 now reverses by data presence). `mural-data.ts` has 14 murals; all range checks derive from `MURAL_LOCATIONS.length`.
-
-**R0 (process retrofit) — MERGED (PRs #3, #4).** Tooling gates, CI (`.github/workflows/ci.yml`), branch discipline, coverage thresholds. Phase-0 secret rotation + branch protection deferred/substituted (DECISIONS 013).
+- 2026-07-19 — M1 COMPLETION GATE PASS (Binkley cycle 3, HEAD 4f97179): 7/7 local gates green;
+  all 4 BUILD-SPEC M1 items done incl. the operator-approved (E6) Wix→Vercel redirect map — 38
+  rules ×308, e2e-proven, refutation 5/5 survived. Closing: scribe commit → push → ci-green →
+  artifact → merge. 5 NEEDS-SENIOR-REVIEW carry-forwards (a11y zero-margin, /collection perf
+  0.88, server-start un-retried, redirect-map DECISIONS paper-trail debt, trailing-slash 2-hop
+  chain) — none blocking.
+- 2026-07-19 — M1 flags 1&2 remediated (ad97e84: Lighthouse mobile per D6, numberOfRuns→3
+  median, retry removed) and confirmed by Binkley cycle-2 scoped re-gate PASS (formFactor=mobile
+  ×12, median verified vs @lhci/utils, gate still bites, check 198 tests); no artifact/no merge.
+  Run stopped clean on E6 (human-hands, Wix redirect map). Run lock reclaimed (stale prior
+  holder) then released. 2 NEEDS-SENIOR-REVIEW carry-forwards: a11y zero-margin + thin
+  /collection perf; server-start races un-retried.
+- 2026-07-15 — M0 CLOSED: gate PASS after 4 cycles, merged (ff) to chuck/integration @ 5fbf5f1,
+  artifact `.chuck/gates/M0.json` pinned, PR #13 closed (F-BINK-6), Otis actuals 7.52M in/out
+  ($0 cash, subscription-only), M1–M4 re-baselined. Next: M1.
+- 2026-07-15 — M0 gate PASS after 4 cycles: F-BINK-2/3/4 + F-RG-1/2/3 fixed (test-first);
+  F-BINK-1 waived (E3/D20), F-BINK-5/7 (D19), F-RG-4 (D21), F-RG-5 accepted (E5/D22, fail-closed
+  hardening deferred). All 12 gates green @ dede7b6, CI success. Closing (artifact -> merge ->
+  Otis) -> M1.
+- 2026-07-14 — operator WAIVED F-BINK-1/E3 (accept Turso token as-is, not to be re-raised); DECISIONS D20 records the waiver and corrects A1's Turso claim. M0 unblocked; proceeding to scoped re-gate of the F-BINK-2/3/4 remediation (ed2aae5).
+- 2026-07-14 — M0 gate (Binkley) FAIL: 12 machine gates green, 4 wave findings. F-BINK-2/3/4 (guard bypass, restore SQLi, silent missing-dump) remediated test-first (ed2aae5), check green (171 tests). F-BINK-5/7 dispositioned (D19). F-BINK-1 → E3 (human-hands): live Turso token predates the claimed rotation — operator must revoke old + confirm new. Run stopped clean on E3.
+- 2026-07-14 — operator COMPLETED secret rotation (both keys); CR1 approved-with-amendment; Amendment A1 (DECISIONS D18) applied — rotation-recorded gate retired (M0 now 12 gates), E2 answered, HT1 retired; magic-link verification deferred to M3, Vercel-preview to ship-report. Resuming: commit+push+gate M0.
+- 2026-07-07 — operator note on E2 (ADDENDUM): the dedicated byrachelpierce.com Resend account is BLOCKED until the site is migrated off Wix (Resend↔Wix are incompatible — both contend for the domain's DNS/DKIM). Item to resolve next session: stand up an interim Resend account on a non-byrachelpierce.com domain with its own API key, wire all magic-link code against the real Resend API (env-driven key + from-address) so the go-live change is a key swap only; real dedicated account + domain verification happen during the M4 Wix cutover.
+- 2026-07-07 — operator note on E2: the leaked Resend key is already deleted; rotation now means creating a NEW dedicated Resend account for ByRachelPierce + a new API key under it. M3's domain verification and M4's env checklist must use the new account. Magic-link email is down in dev/previews until the new key lands (tests unaffected — resend mocked).
+- 2026-07-07 — M0 built and remediated (three feature/fix commits 781f894, d4089a3, a788cf1, 102a0b9); Bill's stress found a red dep-audit gate (drizzle-orm CVE GHSA-gpj5-g38j-94v9 HIGH) plus restore-atomicity and snapshot-overwrite hazards, all remediated same-session; run stopped clean on E2 (HT1 rotation + riders).
+- 2026-07-07 — delta refutation completed and resolved: fresh Snorklewacker over the admin-panel delta returned 4 REFUTED (Δ1 create-field/`notes` mapping; Δ2–Δ4 stale M3→M4 references in Architecture §7/§8/§9 + OPERATOR-GUIDE Gate 2) + 1 NEEDS-SENIOR-REVIEW (Δ5 M3 lockout vacuity, resolved by naming the e2e journey load-bearing in BUILD-SPEC) + 1 minor (PROGRESS recap). All fixed in-package. STANDS: 48/48 gate rows 1:1, 0004 complete, cookie seam verified, budget math consistent, D17 ordering holds.
+- 2026-07-07 — scope added at Gate 1 (operator): admin panel for non-developer painting CRUD, pre-cutover — new M3, go-live renumbered M4. Intake settled: full CRUD incl. create with pre-processed uploads; Matthew/Rachel/Laciey via magic-link + is_admin; soft-delete. Package delta authored (SCOPE, Architecture §11, BUILD-SPEC M3/M4, gates.json, probes admin-schema/admin-lockout/sitemap-vs-db, HT4, D16/D17, BUDGET M3 band 1.0M–3.0M); sitemap-count.mjs superseded and removed (D17). E1 answered: allowance 200%.
+- 2026-07-07 — plan refutation completed and resolved: fresh Snorklewacker (opus, max effort) returned 13 findings + 1 UNVERIFIED; dispositions in DECISIONS D15. Package hardened: 4 new gates (push-guard, restore-roundtrip, lighthouse-config, sitemap-prod), 3 probes strengthened (backup-check content fidelity, secret-sweep allowlist removed, mural-content deployed-description assertion), narratives corrected (leak-not-in-history, L7/L8 verified-not-pending, F17→M1, Node 20-vs-24 policy, §5.2 citation). Re-validated: `PACKAGE OK`, `npm run check` green (18 files / 143 tests), sweep `SWEEP CLEAN`. Awaiting Gate 1.
+- 2026-07-07 — session paused for operator reboot mid-refutation; package committed on `chuck/plan`; Snorklewacker refutation must be re-dispatched on resume (it had not returned findings).
+- 2026-07-07 — self-review complete: package-check `PACKAGE OK`; full `npm run check` green with package files present; HT gates hardened (strict `ht-result-check.mjs` probe replaced grep, which passed on unfilled forms); prod-verify and alias-smoke probes executed live (both OK).
+- 2026-07-06 — planning package assembled on branch `chuck/plan`; awaiting Gate 1 veto (read DECISIONS.md, BUILD-SPEC.md, BUDGET.md; approve via `.chuck/plan-approved` + `.chuck/mode`).
+- 2026-07-06 — audit pendings closed late-session: `prod-verify` VERIFIED (4 migrations, 528 paintings, 0 sentinels), alias smoke VERIFIED (4/4 routes 200); only the Wix page inventory pends (operator supplies it at M1).
+- 2026-07-06 — legacy ledgers archived: `DECISIONS.md` → `DECISIONS-r0-r4.md`, `PROGRESS.md` → `PROGRESS-r0-r4.md` (git mv, content untouched; DECISIONS D3).
+- 2026-07-06 — takeover audit executed (`TAKEOVER-AUDIT-2026-07-06.md`): suites green on `main` @ `33f9f4f`; local `main` fast-forwarded 12 commits to origin; prod-DB re-verification pending on network (M0 gate).
+- 2026-07-06 — intake settlements recorded (SCOPE.md): proprietary license, approval-required deps, Jira off, in-session notifications, checkpoint mode preference.

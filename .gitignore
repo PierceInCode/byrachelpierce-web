@@ -5,6 +5,9 @@ node_modules/
 .next/
 out/
 
+# Lighthouse CI generated audit output (LHRs, assertion results, links)
+.lighthouseci/
+
 # Environment variables — NEVER commit these
 .env
 .env.local
@@ -57,3 +60,4 @@ test-results/
 # Claude Code local (per-machine) settings — the shared harness IS committed
 .claude/settings.local.json
 .env*
+byrachelpierce-web.lnk

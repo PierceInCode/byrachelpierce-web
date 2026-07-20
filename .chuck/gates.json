@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "project": "byrachelpierce-web",
+  "integration_branch": "chuck/integration",
+  "milestones": [
+    {
+      "id": "M0",
+      "title": "Takeover baseline: audit closure, hygiene debts, production verification",
+      "gates": [
+        {
+          "name": "check",
+          "cmd": "npm run check",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "coverage",
+          "cmd": "npm run test:coverage",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "build-seeded",
+          "cmd": "bash -c \"export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build\"",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "e2e",
+          "cmd": "npm run e2e",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "dep-audit",
+          "cmd": "npm audit --omit=dev --audit-level=high",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "eol-clean",
+          "cmd": "node .chuck/probes/eol-check.mjs",
+          "lane": "local",
+          "expect": "contains:EOL OK"
+        },
+        {
+          "name": "push-guard",
+          "cmd": "node .chuck/probes/push-guard.mjs",
+          "lane": "local",
+          "expect": "contains:PUSH-GUARD OK"
+        },
+        {
+          "name": "restore-roundtrip",
+          "cmd": "npx vitest run tests/backup-restore.roundtrip.test.ts",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "prod-verify",
+          "cmd": "node .chuck/probes/prod-verify.mjs",
+          "lane": "local",
+          "expect": "contains:PROD-VERIFY OK"
+        },
+        {
+          "name": "alias-smoke",
+          "cmd": "node .chuck/probes/alias-smoke.mjs",
+          "lane": "local",
+          "expect": "contains:SMOKE OK"
+        },
+        {
+          "name": "tag-r4",
+          "cmd": "git tag -l R4",
+          "lane": "local",
+          "expect": "contains:R4"
+        },
+        {
+          "name": "ci-green",
+          "cmd": "gh run list --branch chuck/M0 --limit 1 --json conclusion --jq .[0].conclusion",
+          "lane": "ci",
+          "expect": "contains:success"
+        }
+      ]
+    },
+    {
+      "id": "M1",
+      "title": "R5 code: SEO, redirects, analytics, Lighthouse",
+      "gates": [
+        {
+          "name": "check",
+          "cmd": "npm run check",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "coverage",
+          "cmd": "npm run test:coverage",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "build-seeded",
+          "cmd": "bash -c \"export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build\"",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "e2e",
+          "cmd": "npm run e2e",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "lighthouse-config",
+          "cmd": "node .chuck/probes/lighthouse-config-check.mjs",
+          "lane": "local",
+          "expect": "contains:LHCI CONFIG OK"
+        },
+        {
+          "name": "lighthouse",
+          "cmd": "bash -c \"export TURSO_DATABASE_URL=file:./ci.db && npm run lighthouse\"",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "dep-audit",
+          "cmd": "npm audit --omit=dev --audit-level=high",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "ci-green",
+          "cmd": "gh run list --branch chuck/M1 --limit 1 --json conclusion --jq .[0].conclusion",
+          "lane": "ci",
+          "expect": "contains:success"
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "title": "Content loop completion: real mural content live",
+      "gates": [
+        {
+          "name": "check",
+          "cmd": "npm run check",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "e2e",
+          "cmd": "npm run e2e",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "mural-content",
+          "cmd": "npx tsx .chuck/probes/mural-content.ts",
+          "lane": "local",
+          "expect": "contains:MURAL GATE OK"
+        },
+        {
+          "name": "ingest-report",
+          "cmd": "bash -c \"ls docs/intake/ingest-report-*.md\"",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "backup-before-apply",
+          "cmd": "node .chuck/probes/backup-check.mjs",
+          "lane": "local",
+          "expect": "contains:BACKUP OK"
+        },
+        {
+          "name": "content-loop-recorded",
+          "cmd": "node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT2-result.md 8",
+          "lane": "local",
+          "expect": "contains:HT OK"
+        },
+        {
+          "name": "ci-green",
+          "cmd": "gh run list --branch main --limit 1 --json conclusion --jq .[0].conclusion",
+          "lane": "ci",
+          "expect": "contains:success"
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "title": "Admin panel: non-developer collection CRUD",
+      "gates": [
+        {
+          "name": "check",
+          "cmd": "npm run check",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "coverage",
+          "cmd": "npm run test:coverage",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "build-seeded",
+          "cmd": "bash -c \"export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build\"",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "e2e",
+          "cmd": "npm run e2e",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "dep-audit",
+          "cmd": "npm audit --omit=dev --audit-level=high",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "admin-schema",
+          "cmd": "node .chuck/probes/admin-schema.mjs",
+          "lane": "local",
+          "expect": "contains:ADMIN SCHEMA OK"
+        },
+        {
+          "name": "admin-lockout",
+          "cmd": "node .chuck/probes/admin-lockout.mjs",
+          "lane": "local",
+          "expect": "contains:LOCKOUT OK"
+        },
+        {
+          "name": "ci-green",
+          "cmd": "gh run list --branch chuck/M3 --limit 1 --json conclusion --jq .[0].conclusion",
+          "lane": "ci",
+          "expect": "contains:success"
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "title": "Go-live: cutover, smoke, v1.0.0",
+      "gates": [
+        {
+          "name": "check",
+          "cmd": "npm run check",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "e2e",
+          "cmd": "npm run e2e",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "domain-live",
+          "cmd": "node .chuck/probes/domain-live.mjs",
+          "lane": "local",
+          "expect": "contains:DOMAIN OK"
+        },
+        {
+          "name": "sitemap-vs-db",
+          "cmd": "node .chuck/probes/sitemap-vs-db.mjs",
+          "lane": "local",
+          "expect": "contains:SITEMAP-DB OK"
+        },
+        {
+          "name": "admin-lockout-prod",
+          "cmd": "bash -c \"ADMIN_BASE_URL=https://byrachelpierce.com node .chuck/probes/admin-lockout.mjs\"",
+          "lane": "local",
+          "expect": "contains:LOCKOUT OK"
+        },
+        {
+          "name": "lighthouse-config",
+          "cmd": "node .chuck/probes/lighthouse-config-check.mjs",
+          "lane": "local",
+          "expect": "contains:LHCI CONFIG OK"
+        },
+        {
+          "name": "lighthouse-prod",
+          "cmd": "npm run lighthouse:prod",
+          "lane": "local",
+          "expect": "exit0"
+        },
+        {
+          "name": "secret-sweep",
+          "cmd": "node .chuck/probes/secret-sweep.mjs",
+          "lane": "local",
+          "expect": "contains:SWEEP CLEAN"
+        },
+        {
+          "name": "admin-qc-recorded",
+          "cmd": "node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT4-result.md 10",
+          "lane": "local",
+          "expect": "contains:HT OK"
+        },
+        {
+          "name": "smoke-matrix-recorded",
+          "cmd": "node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT3-result.md 12",
+          "lane": "local",
+          "expect": "contains:HT OK"
+        },
+        {
+          "name": "v1-tag",
+          "cmd": "git tag -l v1.0.0",
+          "lane": "local",
+          "expect": "contains:v1.0.0"
+        },
+        {
+          "name": "ci-green",
+          "cmd": "gh run list --branch main --limit 1 --json conclusion --jq .[0].conclusion",
+          "lane": "ci",
+          "expect": "contains:success"
+        }
+      ]
+    }
+  ]
+}
