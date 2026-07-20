@@ -4,7 +4,7 @@ _Milquetoast's ledger — the single source of truth for "where are we", committ
 
 ## Current state
 
-**M1 (R5 code) gate PASS — all 4 BUILD-SPEC items done (SEO, analytics, Lighthouse mobile, Wix redirect map). Closing now: pushing the tip, waiting on CI, then the pass artifact and merge. Next: M2 (real mural content, needs Rachel). Mode continuous.**
+**M1 (R5 code) CLOSED — gate PASS, artifact pinned, merged (fast-forward) to chuck/integration @ a317cf1 (pushed). All 4 BUILD-SPEC items done (SEO, analytics, Lighthouse mobile, Wix redirect map). Otis M1 actuals recorded (2.61M in/out, under band, $0 cash) + M3/M4 re-baselined. Next: M2 (real mural content, human-hands long pole — needs Rachel). Mode continuous.**
 
 _Prior-state note (2026-07-14, superseded by the PASS above):_ Binkley gated M0 (fresh context, HEAD acd4bbd): all 12 machine gates PASSED but the Anxiety-Closet wave reproduced 4 findings on executed evidence — VERDICT FAIL (cycle 1 of 3-strike limit). F-BINK-2/3/4 (MAJOR, code — db:push guard bypass via duplicate-key env var, restore SQL-injection via unsafe column identifiers, silent-success on a missing dump) were remediated test-first by Oliver and committed at ed2aae5 (pushed; CI running on this tip); `npm run check` is GREEN post-remediation (171 tests pass, lint/format/typecheck clean). F-BINK-5/7 (build-tooling license flags, `.prettierignore`) were dispositioned in DECISIONS D19. F-BINK-6 (draft PR #13 targets `main` instead of the two-stage integration-branch flow) is a non-blocking process note for close. F-BINK-1 (ESCALATION E3, production Turso token in `.env.local` is a JWT issued 2026-03-01, unchanged since 2026-07-04, still authenticating against live prod — contradicting Amendment A1's "rotated 2026-07-14" claim) is now RESOLVED BY OPERATOR WAIVER: the operator instructed acceptance of the current token as-is, not to be re-raised; ESCALATIONS E3 Answer is filled (WAIVED); DECISIONS D20 records the waiver and corrects A1's Turso claim to "accepted as-is, unverified, residual risk waived by operator," on the basis that the credential was never in the public GitHub repo (secret-sweep CLEAN across full history) — known exposure is local files + AI-conversation history only. M0's remaining blocker is therefore resolved; the run is proceeding to the scoped re-gate of the F-BINK-2/3/4 remediation on ed2aae5 (this is the re-attempt of gate cycle 1, still 1 of the 3-strike limit unless it FAILs again). Full reports at `.chuck/reports/M0/`, probe ledger at `.chuck/probes/M0-ledger.md`. Not yet done, plainly: M0 has not closed, and no re-gate has run yet on this tip — that verdict is UNVERIFIED until Binkley's scoped re-gate actually executes. Carried, non-blocking: HT1 magic-link send-test deferred to M3, Vercel-preview confirmation carried to ship-report, E2 riders (branch deletions, F15 typo), M1 Wix URL list, the M2 murals CSV with Rachel (the project's calendar long pole), and the M3 work to stand up the new Resend account.
 
@@ -14,16 +14,17 @@ Nothing has been built and nothing executes until the marker exists. Standing ri
 
 ## Milestone board
 
-| Milestone                                                               | Status                                                                   | Gate verdict                            | Checkpoint date |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------- | --------------- |
-| M0 — Takeover baseline: audit closure, hygiene, production verification | PASS — merged to chuck/integration @ 5fbf5f1 (4 gate cycles)             | PASS                                    | —               |
-| M1 — R5 code: SEO, redirects, analytics, Lighthouse                     | gate PASS (cycle 3, all 4 DoD items); closing — artifact + merge pending | PASS (7/7 local; ci-green pending push) | —               |
-| M2 — Content loop completion: real mural content live                   | planned                                                                  | —                                       | —               |
-| M3 — Admin panel: non-developer collection CRUD (added at Gate 1, D16)  | planned                                                                  | —                                       | —               |
-| M4 — Go-live: cutover, smoke, v1.0.0 (was M3 pre-D16)                   | planned                                                                  | —                                       | —               |
+| Milestone                                                               | Status                                                        | Gate verdict                    | Checkpoint date |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------- | --------------- |
+| M0 — Takeover baseline: audit closure, hygiene, production verification | PASS — merged to chuck/integration @ 5fbf5f1 (4 gate cycles)  | PASS                            | —               |
+| M1 — R5 code: SEO, redirects, analytics, Lighthouse                     | PASS — merged to chuck/integration @ a317cf1; artifact pinned | PASS (8/8; ci-green on a317cf1) | 2026-07-20      |
+| M2 — Content loop completion: real mural content live                   | in progress — human-hands (murals CSV with Rachel)            | —                               | —               |
+| M3 — Admin panel: non-developer collection CRUD (added at Gate 1, D16)  | planned                                                       | —                               | —               |
+| M4 — Go-live: cutover, smoke, v1.0.0 (was M3 pre-D16)                   | planned                                                       | —                               | —               |
 
 ## History
 
+- 2026-07-20 — M1 CLOSED: Binkley LAST ACT PASS (CI green on a317cf1, 8/8 gates re-run green, artifact .chuck/gates/M1.json pinned to a317cf1). Merged (ff) to chuck/integration @ a317cf1 (pushed). Otis M1 actuals 2,611,448 in/out ($0 cash, subscription-only, UNDER 4.5M–11.0M band); M3 re-baselined 7.0M–18.0M→5.0M–14.0M, M4 2.5M–7.0M→2.0M–5.5M. 5 NEEDS-SENIOR-REVIEW carry-forwards (all non-blocking). Next: M2 (real mural content — human-hands, needs Rachel).
 - 2026-07-19 — M1 COMPLETION GATE PASS (Binkley cycle 3, HEAD 4f97179): 7/7 local gates green;
   all 4 BUILD-SPEC M1 items done incl. the operator-approved (E6) Wix→Vercel redirect map — 38
   rules ×308, e2e-proven, refutation 5/5 survived. Closing: scribe commit → push → ci-green →
