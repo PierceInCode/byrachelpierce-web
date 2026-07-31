@@ -4,9 +4,19 @@ on:
     branches: [main]
   pull_request:
 
+# One live run per ref: the self-hosted runner executes one job at a time, so a
+# superseded push must cancel its predecessor.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Self-hosted runner `gnome` (Pi 5, Debian, ARM64) — zero hosted-minute
+    # burn. Playwright's OS deps are pre-installed on the host, so the browser
+    # install below runs WITHOUT `--with-deps` (that flag invokes sudo apt-get,
+    # which cannot run under the runner service).
+    runs-on: [self-hosted, linux, ARM64]
     env:
       TURSO_DATABASE_URL: "file:./ci.db"
       AUTH_SECRET: "ci-only-not-a-real-secret"
@@ -14,8 +24,8 @@ jobs:
       EMAIL_FROM: "ci@example.invalid"
       GALLERY_EMAIL: "ci-gallery@example.invalid"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
@@ -26,8 +36,8 @@ jobs:
       - run: npm run db:seed-ci          # creates + seeds ci.db from tests/fixtures
       - run: npm run test:coverage
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: npm run e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: failure()
         with: { name: playwright-report, path: playwright-report/ }
