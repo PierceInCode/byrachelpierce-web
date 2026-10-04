@@ -38,5 +38,5 @@
 
 ## Return instructions
 
-1. Save this file with the form filled in at `.chuck/human-tests/HT3-result.md`.
+1. Save this file with the form filled in at `runbooks/HT3-result.md`.
 2. Resume with `/chuck:run`. All-Pass lifts the gate and M4 proceeds to `v1.0.0` + the ship report; any Fail becomes a blocked-gate — include whether you rolled DNS back in Notes.

@@ -158,7 +158,7 @@ turso db shell byrachelpierce "SELECT u.email, c.redemption_code, c.completed_at
 
 # Chuck takeover addendum (2026-07-06)
 
-Everything above is the original R0–R5 operator guide and remains valid — M0–M4 of the takeover run wrap it rather than replace it (`BUILD-SPEC.md` maps the milestones; §R4/§R5 above are now protocols HT2/HT3 under `.chuck/human-tests/`, and M3's admin panel adds HT4). This addendum is the Chuck-run operating manual: your two gates, checkpoints, escalations, and the credential steps that are yours alone.
+Everything above is the original R0–R5 operator guide and remains valid — M0–M4 of the takeover run wrap it rather than replace it (`BUILD-SPEC.md` maps the milestones; §R4/§R5 above are now protocols HT2/HT3 under `runbooks/`, and M3's admin panel adds HT4). This addendum is the Chuck-run operating manual: your two gates, checkpoints, escalations, and the credential steps that are yours alone.
 
 ## Gate 1 — approve the plan
 
@@ -195,7 +195,7 @@ In checkpoint mode the run pauses after each milestone (M0 → M1 → M2 → M3 
 
 The run stops and asks you only when it genuinely cannot proceed; entries appear in `ESCALATIONS.md` and the run stays paused until you fill the entry's `**Answer:**` line, then resume with `/chuck:run`. The six types and your bounded action:
 
-- **human-hands-needed** — run the named protocol (HT1 rotation, HT2 content loop, HT3 cutover) on your own schedule; return the result form to `.chuck/human-tests/HT<n>-result.md`.
+- **human-hands-needed** — run the named protocol (HT1 rotation, HT2 content loop, HT3 cutover) on your own schedule; return the result form to `runbooks/HT<n>-result.md`.
 - **irreversible-op** — anything touching production data or DNS beyond the approved rituals; you give explicit go-ahead or refuse.
 - **blocked-gate / gate-3-strikes** — a gate stayed red through remediation; you adjudicate: accept as known gap, re-scope, or direct a fix.
 - **budget-overrun** — actuals crossed BUDGET.md's threshold; raise it, approve the spend, or cut scope.
@@ -204,7 +204,7 @@ The run stops and asks you only when it genuinely cannot proceed; entries appear
 
 ## Human-hands test protocols
 
-Four are pre-written in `.chuck/human-tests/`: **HT1** (M0 — secret rotation + Phase-0 confirmations), **HT2** (M2 — the content loop with Rachel), **HT4** (M4, before any DNS step — admin-panel acceptance + Laciey's collection QC), **HT3** (M4 — DNS cutover + smoke matrix; runs only after HT4 is all-Pass). Each is numbered steps a non-engineer could follow, with a result form; save the filled form at the path the protocol names and resume with `/chuck:run`. Batch them on your schedule — the run waits.
+Four are pre-written in `runbooks/`: **HT1** (M0 — secret rotation + Phase-0 confirmations), **HT2** (M2 — the content loop with Rachel), **HT4** (M4, before any DNS step — admin-panel acceptance + Laciey's collection QC), **HT3** (M4 — DNS cutover + smoke matrix; runs only after HT4 is all-Pass). Each is numbered steps a non-engineer could follow, with a result form; save the filled form at the path the protocol names and resume with `/chuck:run`. Batch them on your schedule — the run waits.
 
 ## Credentials
 

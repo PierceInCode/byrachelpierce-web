@@ -34,5 +34,5 @@
 
 ## Return instructions
 
-1. Save this file with the form filled in at `.chuck/human-tests/HT4-result.md`.
+1. Save this file with the form filled in at `runbooks/HT4-result.md`.
 2. Resume with `/chuck:run`. All-Pass clears the gate; any Fail becomes a blocked-gate with your notes attached. The DNS cutover (HT3) does not start until this form is all-Pass.

@@ -8,7 +8,7 @@
 
 1. With Rachel, fill `docs/intake/murals.csv` — all 14 rows: `real_name`, `description` (1–2 sentences, her voice), `year_painted` (blank if unknown — never guessed) — expected: 14 complete rows.
 2. Run `npx tsx scripts/export-catalog-csv.ts` with production creds active (read-only) and fill `docs/intake/paintings.csv` as far as records allow — expected: pre-filled 528-row sheet; blank cells mean "no change".
-3. Backup: `npx tsx scripts/backup-prod.ts` — expected: one `<table>-YYYY-MM-DD.json` per app table appears in `backups/`, each parsing as a JSON array, paintings with all 528 rows. (`node .chuck/probes/backup-check.mjs` enforces exactly this at the gate — row counts are the bar, not "looks non-trivial".)
+3. Backup: `npx tsx scripts/backup-prod.ts` — expected: one `<table>-YYYY-MM-DD.json` per app table appears in `backups/`, each parsing as a JSON array, paintings with all 528 rows. (`node scripts/probes/backup-check.mjs` enforces exactly this at the gate — row counts are the bar, not "looks non-trivial".)
 4. Dry run: `npx tsx scripts/ingest-content.ts --dry-run` → read the whole report — expected: 14 mural rows planned, ZERO unresolved mural errors (painting size-parse errors are fine — those fields stay unwritten).
 5. Apply: `npx tsx scripts/ingest-content.ts --apply` — expected: report matches the dry-run plan.
 6. Re-comment the production creds in `.env.local` — expected: active `TURSO_DATABASE_URL` is `file:./dev.db` again.
@@ -30,5 +30,5 @@
 
 ## Return instructions
 
-1. Save this file with the form filled in at `.chuck/human-tests/HT2-result.md`.
+1. Save this file with the form filled in at `runbooks/HT2-result.md`.
 2. Resume with `/chuck:run`. All-Pass clears the escalation; any Fail becomes a blocked-gate with your notes attached.

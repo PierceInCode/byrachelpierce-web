@@ -6,7 +6,7 @@
  * WHAT IT WRITES
  *   One file per table: backups/<file>-<YYYY-MM-DD>.json, each a JSON array of
  *   row objects (column name → value). This is the exact shape the
- *   `.chuck/probes/backup-check.mjs` gate reads. Ten tables are dumped:
+ *   `scripts/probes/backup-check.mjs` gate reads. Ten tables are dumped:
  *   tag_categories, users, tags, paintings, accounts, sessions,
  *   verification_tokens, painting_tags, trail_progress, trail_completions.
  *   (The verification_tokens dump comes from the camelCase `verificationTokens`
@@ -22,7 +22,7 @@
  * READ-ONLY
  *   The backup path issues SELECT only. It never writes the source DB and never
  *   prints a credential. Production credentials are read from the COMMENTED
- *   lines of `.env.local` (same pattern as `.chuck/probes/prod-verify.mjs`) and
+ *   lines of `.env.local` (same pattern as `scripts/probes/prod-verify.mjs`) and
  *   used only to open the client.
  *
  * ── RESTORE PROCEDURE ──────────────────────────────────────────────────────

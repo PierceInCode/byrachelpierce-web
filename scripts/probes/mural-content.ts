@@ -6,7 +6,7 @@
 // (normalized to survive HTML entity escaping — refutation R7, supersedes D14(b)'s
 // names-only deployed check). "Real" (vs plausible fiction) is attested by the
 // operator in HT2; this probe proves presence and deployment, which a machine can.
-// Run with: npx tsx .chuck/probes/mural-content.ts
+// Run with: npx tsx scripts/probes/mural-content.ts
 import { MURAL_LOCATIONS } from '../../src/lib/mural-data';
 
 const BASE = process.env.SMOKE_BASE_URL || 'https://byrachelpierce-web.vercel.app';

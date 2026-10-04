@@ -13,7 +13,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 
 ## Invariants
 
-1. **The production database is live and holds real data.** Production writes happen only through two sanctioned channels: (a) the operator-authorized, backup-first, additive-only ritual with expected-count verification — schema changes, bulk operations, and admin-flag flips live here; and (b) from M3 on, **row-level painting/tag mutations through the authenticated admin panel** (admin-role DB sessions only, soft-delete only, per Architecture v1 §11 and DECISIONS D17). Destructive/raw SQL at production, hard deletes, or ritual counts that don't match remain an immediate `irreversible-op`/`blocked-gate` escalation. Tests and CI touch `file:` databases only. Agent-runnable production access is read-only probes (`.chuck/probes/`, SELECT/PRAGMA, no cred output) per DECISIONS D8 — agents never write production through the panel or otherwise.
+1. **The production database is live and holds real data.** Production writes happen only through two sanctioned channels: (a) the operator-authorized, backup-first, additive-only ritual with expected-count verification — schema changes, bulk operations, and admin-flag flips live here; and (b) from M3 on, **row-level painting/tag mutations through the authenticated admin panel** (admin-role DB sessions only, soft-delete only, per Architecture v1 §11 and DECISIONS D17). Destructive/raw SQL at production, hard deletes, or ritual counts that don't match remain an immediate `irreversible-op`/`blocked-gate` escalation. Tests and CI touch `file:` databases only. Agent-runnable production access is read-only probes (`scripts/probes/`, SELECT/PRAGMA, no cred output) per DECISIONS D8 — agents never write production through the panel or otherwise.
 2. **`main` is the deploy branch and moves only by PR on green CI** (branch protection is unavailable on this GitHub plan; PR-only discipline substitutes and has held for PRs #2–#12). Chuck work branches `chuck/M<n>` merge to `chuck/integration` only with a PASS gate artifact on the exact HEAD; `chuck/integration` reaches `main` by operator-merged PR at each checkpoint (DECISIONS D4).
 3. **No secret ever enters the repo, logs, or agent output.** Tests send no real email (`resend` mocked; key absent in CI). The two historically leaked credentials are rotated in M0 (protocol HT1) — the leak predates this repo (an executed all-branch sweep found zero secret-shaped strings in history, 2026-07-07); rotation is owed because the values were exposed outside git. The M4 history sweep fails on ANY secret-shaped string, no allowlist. `BLOB_READ_WRITE_TOKEN` lives only in the Vercel dashboard (M3 operator step), never in `.env.local` or agent context.
 4. **Public content is honest.** Nothing fabricated renders as fact; unknown availability renders as nothing; ingest never guesses (unparseable input routes to the error report); the trail does not go live with placeholder fiction — M4 (go-live) is hard-blocked on M2's mural-content gate. The admin panel inherits the rule: numeric dimensions blank = unknown, never guessed.
@@ -23,7 +23,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 
 ## Testing strategy
 
-- **Test layers:** unit + integration (Vitest, per-test `file:` libSQL DBs, mocked `@/auth` and `resend`), component (@testing-library/react, happy-dom), journey-level E2E (Playwright chromium against a built-and-started seeded site), plus deployed-state production probes (`.chuck/probes/`) — the probes are network-dependent, not deterministic: a persistent outage is a `blocked-gate` escalation with the outage evidence, never a silently-skipped gate. Gate `lane` names where the command executes (`local` = this machine, `ci` = GitHub Actions); network-touching probes are `local`-lane commands.
+- **Test layers:** unit + integration (Vitest, per-test `file:` libSQL DBs, mocked `@/auth` and `resend`), component (@testing-library/react, happy-dom), journey-level E2E (Playwright chromium against a built-and-started seeded site), plus deployed-state production probes (`scripts/probes/`) — the probes are network-dependent, not deterministic: a persistent outage is a `blocked-gate` escalation with the outage evidence, never a silently-skipped gate. Gate `lane` names where the command executes (`local` = this machine, `ci` = GitHub Actions); network-touching probes are `local`-lane commands.
 - **Journey-level E2E:** the critical paths stay covered on the real interface — collection browse/filter/paginate/search, painting page render, trail signed-out state, image request-weight budgets; M1 adds redirect (308) journeys and metadata-uniqueness assertions; M3 adds admin journeys authenticated by a seeded DB session (`db:seed-ci` admin user + session row, Playwright sets the `authjs.session-token` cookie — Architecture v1 §11): anonymous/non-admin 404 on `/admin`, edit-visible-publicly, archive/restore including sitemap exclusion. The create/upload journey is unit-tested with `@vercel/blob` mocked plus a real-upload HT4 row — e2e never fakes a Blob upload as passed.
 - **Dependency policy (standing gate):** proprietary product over permissive-licensed deps (MIT/Apache-2.0/BSD/ISC — Steve reviews the tree in M0); lockfile in sync (`npm ci` fails otherwise); vulnerability audit `npm audit --omit=dev --audit-level=high` fails the gate on known-vulnerable production deps. New dependency = escalation (Invariant 7).
 - **Dev-secrets protocol:** `.gitignore` already covers `.env*`, `*.db`, `public/art/`, `docs/intake/paintings.csv`; M0 adds `byrachelpierce-web.lnk`. Secrets live in `.env.local` (active dev values) and the Vercel dashboard, nowhere else.
@@ -70,13 +70,13 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 | build-seeded      | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build"` | exit0                   |
 | e2e               | local | `npm run e2e`                                                                             | exit0                   |
 | dep-audit         | local | `npm audit --omit=dev --audit-level=high`                                                 | exit0                   |
-| eol-clean         | local | `node .chuck/probes/eol-check.mjs`                                                        | contains:EOL OK         |
-| push-guard        | local | `node .chuck/probes/push-guard.mjs`                                                       | contains:PUSH-GUARD OK  |
+| eol-clean         | local | `node scripts/probes/eol-check.mjs`                                                       | contains:EOL OK         |
+| push-guard        | local | `node scripts/probes/push-guard.mjs`                                                      | contains:PUSH-GUARD OK  |
 | restore-roundtrip | local | `npx vitest run tests/backup-restore.roundtrip.test.ts`                                   | exit0                   |
-| prod-verify       | local | `node .chuck/probes/prod-verify.mjs`                                                      | contains:PROD-VERIFY OK |
-| alias-smoke       | local | `node .chuck/probes/alias-smoke.mjs`                                                      | contains:SMOKE OK       |
+| prod-verify       | local | `node scripts/probes/prod-verify.mjs`                                                     | contains:PROD-VERIFY OK |
+| alias-smoke       | local | `node scripts/probes/alias-smoke.mjs`                                                     | contains:SMOKE OK       |
 | tag-r4            | local | `git tag -l R4`                                                                           | contains:R4             |
-| rotation-recorded | local | `node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT1-result.md 7`               | contains:HT OK          |
+| rotation-recorded | local | `node scripts/probes/ht-result-check.mjs runbooks/HT1-result.md 7`                        | contains:HT OK          |
 | ci-green          | ci    | `gh run list --branch chuck/M0 --limit 1 --json conclusion --jq .[0].conclusion`          | contains:success        |
 
 ### Escalation triggers
@@ -107,7 +107,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 3. Redirect map: operator supplies the top Wix page URLs (10-minute task — request at the M0 checkpoint; if unavailable, Rosebud — Chuck's standing-crew researcher, present in every run alongside Oliver/Bill/Hodge-Podge and distinct from D9's Closet-specialist roster (DECISIONS D15-R5) — inventories the live Wix site and the operator approves the list). Implement `next.config.ts` `redirects()`; Playwright asserts 308s per mapped URL.
 4. `@vercel/analytics` in the root layout (sanctioned dependency).
 5. Lighthouse budgets: add `@lhci/cli` (devDependency, sanctioned; DECISIONS D6); assertion config committed at `lighthouserc.json` with **error-level** assertions `categories:performance` minScore 0.85, `categories:accessibility` minScore 0.95, `categories:seo` minScore 0.95 — the `lighthouse-config` gate (`lighthouse-config-check.mjs`) fails unless the config actually asserts, because an LHCI run that only collects exits 0 regardless of score (refutation R13). `npm run lighthouse` runs it against the seeded local build for `/`, `/collection`, the painting page `/collection/painting/matthews-turtle` (first fixture slug), `/murals/trail`; `npm run lighthouse:prod` runs the same assertions against `https://byrachelpierce.com` (used in M4). `/admin` (M3) is exempt from Lighthouse budgets and excluded from the audited URL list.
-6. `.chuck/probes/mural-content.ts` finalized (it ships with the package; M1 adds its e2e-adjacent test) so M2's gate is proven runnable before M2 starts.
+6. `scripts/probes/mural-content.ts` finalized (it ships with the package; M1 adds its e2e-adjacent test) so M2's gate is proven runnable before M2 starts.
 
 ### Acceptance gates
 
@@ -117,7 +117,7 @@ _The self-contained contract for this run. Behavior authority: `docs/SITE-ARCHIT
 | coverage          | local | `npm run test:coverage`                                                                   | exit0                   |
 | build-seeded      | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build"` | exit0                   |
 | e2e               | local | `npm run e2e`                                                                             | exit0                   |
-| lighthouse-config | local | `node .chuck/probes/lighthouse-config-check.mjs`                                          | contains:LHCI CONFIG OK |
+| lighthouse-config | local | `node scripts/probes/lighthouse-config-check.mjs`                                         | contains:LHCI CONFIG OK |
 | lighthouse        | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run lighthouse"`                  | exit0                   |
 | dep-audit         | local | `npm audit --omit=dev --audit-level=high`                                                 | exit0                   |
 | ci-green          | ci    | `gh run list --branch chuck/M1 --limit 1 --json conclusion --jq .[0].conclusion`          | contains:success        |
@@ -141,7 +141,7 @@ _This milestone is mostly human work (legacy Spec §9.2's ship-line condition). 
 ### Reading list
 
 - Architecture §7 (content model + intake), §4.4 (honesty rule); `docs/intake/README.md`.
-- `OPERATOR-GUIDE.md` §R4 ritual + Chuck addendum; protocol `.chuck/human-tests/HT2-content-loop.md`.
+- `OPERATOR-GUIDE.md` §R4 ritual + Chuck addendum; protocol `runbooks/HT2-content-loop.md`.
 - `scripts/ingest-content.ts`, `scripts/export-catalog-csv.ts`, `scripts/backup-prod.ts` (M0).
 
 ### Work items
@@ -157,10 +157,10 @@ _This milestone is mostly human work (legacy Spec §9.2's ship-line condition). 
 | --------------------- | ----- | ---------------------------------------------------------------------------- | ---------------------- |
 | check                 | local | `npm run check`                                                              | exit0                  |
 | e2e                   | local | `npm run e2e`                                                                | exit0                  |
-| mural-content         | local | `npx tsx .chuck/probes/mural-content.ts`                                     | contains:MURAL GATE OK |
+| mural-content         | local | `npx tsx scripts/probes/mural-content.ts`                                    | contains:MURAL GATE OK |
 | ingest-report         | local | `bash -c "ls docs/intake/ingest-report-*.md"`                                | exit0                  |
-| backup-before-apply   | local | `node .chuck/probes/backup-check.mjs`                                        | contains:BACKUP OK     |
-| content-loop-recorded | local | `node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT2-result.md 8`  | contains:HT OK         |
+| backup-before-apply   | local | `node scripts/probes/backup-check.mjs`                                       | contains:BACKUP OK     |
+| content-loop-recorded | local | `node scripts/probes/ht-result-check.mjs runbooks/HT2-result.md 8`           | contains:HT OK         |
 | ci-green              | ci    | `gh run list --branch main --limit 1 --json conclusion --jq .[0].conclusion` | contains:success       |
 
 ### Escalation triggers
@@ -204,8 +204,8 @@ _New scope, operator-directed 2026-07-07: the ops manager (Laciey) must be able 
 | build-seeded  | local | `bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run db:seed-ci && npm run build"` | exit0                    |
 | e2e           | local | `npm run e2e`                                                                             | exit0                    |
 | dep-audit     | local | `npm audit --omit=dev --audit-level=high`                                                 | exit0                    |
-| admin-schema  | local | `node .chuck/probes/admin-schema.mjs`                                                     | contains:ADMIN SCHEMA OK |
-| admin-lockout | local | `node .chuck/probes/admin-lockout.mjs`                                                    | contains:LOCKOUT OK      |
+| admin-schema  | local | `node scripts/probes/admin-schema.mjs`                                                    | contains:ADMIN SCHEMA OK |
+| admin-lockout | local | `node scripts/probes/admin-lockout.mjs`                                                   | contains:LOCKOUT OK      |
 | ci-green      | ci    | `gh run list --branch chuck/M3 --limit 1 --json conclusion --jq .[0].conclusion`          | contains:success         |
 
 _Gate note (refutation Δ5): at M3 gate-time the deployed alias does not yet carry the panel (the checkpoint merge deploys it), so `admin-lockout` passes vacuously there — the **load-bearing M3-time lockout proof is the e2e anonymous-404 journey** against the built panel; the probe is belt-and-suspenders that becomes load-bearing at the M3 checkpoint deploy and at M4 (`admin-lockout-prod`)._
@@ -229,12 +229,12 @@ _Operator-heavy by design; the agent prepares checklists and verifies outcomes, 
 
 ### Reading list
 
-- `OPERATOR-GUIDE.md` §R5 runbook end-to-end (the operator reads it BEFORE starting) + Chuck addendum; protocol `.chuck/human-tests/HT3-cutover-smoke.md`.
+- `OPERATOR-GUIDE.md` §R5 runbook end-to-end (the operator reads it BEFORE starting) + Chuck addendum; protocol `runbooks/HT3-cutover-smoke.md`.
 - Spec §10.1 item 5 (env checklist), §10.2 (gate), §14 (Definition of Done); Architecture §8 (email cutover).
 
 ### Work items
 
-1. **Operator + ops manager (HT4) — BEFORE any DNS step:** Laciey's QC pass of the whole site through the admin panel on the deployed alias (all three admins sign in; edit/archive/create exercised for real, including one real image upload; collection QC'd) — protocol `.chuck/human-tests/HT4-admin-qc.md`. Cutover is hard-blocked on the returned all-Pass form.
+1. **Operator + ops manager (HT4) — BEFORE any DNS step:** Laciey's QC pass of the whole site through the admin panel on the deployed alias (all three admins sign in; edit/archive/create exercised for real, including one real image upload; collection QC'd) — protocol `runbooks/HT4-admin-qc.md`. Cutover is hard-blocked on the returned all-Pass form.
 2. **Operator:** Vercel production env checklist — all §4.5 production values with the M0-rotated secrets, strong `AUTH_SECRET`, Blob token (`BLOB_READ_WRITE_TOKEN` confirmed present since M3), `EMAIL_FROM` on the verified domain, real `GALLERY_EMAIL`, `NEXTAUTH_URL=https://byrachelpierce.com`.
 3. **Operator:** confirm Resend domain verification is still green (SPF + DKIM were verified in M3 for the admin magic-links; nothing to re-do unless DNS host changed).
 4. **Operator (HT3):** DNS cutover per runbook — TTL 300 a day ahead → point apex + www at Vercel → cert + www-redirect verification → execute the smoke matrix (every nav link; trail magic-link round trip on a phone to a non-owner inbox; collection filter journey; painting page; 3 Wix-redirect spot checks; `/admin` reachable for an admin over the real domain) and return the form.
@@ -243,20 +243,20 @@ _Operator-heavy by design; the agent prepares checklists and verifies outcomes, 
 
 ### Acceptance gates
 
-| Name                  | Lane  | Command                                                                                    | Expected                |
-| --------------------- | ----- | ------------------------------------------------------------------------------------------ | ----------------------- |
-| check                 | local | `npm run check`                                                                            | exit0                   |
-| e2e                   | local | `npm run e2e`                                                                              | exit0                   |
-| domain-live           | local | `node .chuck/probes/domain-live.mjs`                                                       | contains:DOMAIN OK      |
-| sitemap-vs-db         | local | `node .chuck/probes/sitemap-vs-db.mjs`                                                     | contains:SITEMAP-DB OK  |
-| admin-lockout-prod    | local | `bash -c "ADMIN_BASE_URL=https://byrachelpierce.com node .chuck/probes/admin-lockout.mjs"` | contains:LOCKOUT OK     |
-| lighthouse-config     | local | `node .chuck/probes/lighthouse-config-check.mjs`                                           | contains:LHCI CONFIG OK |
-| lighthouse-prod       | local | `npm run lighthouse:prod`                                                                  | exit0                   |
-| secret-sweep          | local | `node .chuck/probes/secret-sweep.mjs`                                                      | contains:SWEEP CLEAN    |
-| admin-qc-recorded     | local | `node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT4-result.md 10`               | contains:HT OK          |
-| smoke-matrix-recorded | local | `node .chuck/probes/ht-result-check.mjs .chuck/human-tests/HT3-result.md 12`               | contains:HT OK          |
-| v1-tag                | local | `git tag -l v1.0.0`                                                                        | contains:v1.0.0         |
-| ci-green              | ci    | `gh run list --branch main --limit 1 --json conclusion --jq .[0].conclusion`               | contains:success        |
+| Name                  | Lane  | Command                                                                                     | Expected                |
+| --------------------- | ----- | ------------------------------------------------------------------------------------------- | ----------------------- |
+| check                 | local | `npm run check`                                                                             | exit0                   |
+| e2e                   | local | `npm run e2e`                                                                               | exit0                   |
+| domain-live           | local | `node scripts/probes/domain-live.mjs`                                                       | contains:DOMAIN OK      |
+| sitemap-vs-db         | local | `node scripts/probes/sitemap-vs-db.mjs`                                                     | contains:SITEMAP-DB OK  |
+| admin-lockout-prod    | local | `bash -c "ADMIN_BASE_URL=https://byrachelpierce.com node scripts/probes/admin-lockout.mjs"` | contains:LOCKOUT OK     |
+| lighthouse-config     | local | `node scripts/probes/lighthouse-config-check.mjs`                                           | contains:LHCI CONFIG OK |
+| lighthouse-prod       | local | `npm run lighthouse:prod`                                                                   | exit0                   |
+| secret-sweep          | local | `node scripts/probes/secret-sweep.mjs`                                                      | contains:SWEEP CLEAN    |
+| admin-qc-recorded     | local | `node scripts/probes/ht-result-check.mjs runbooks/HT4-result.md 10`                         | contains:HT OK          |
+| smoke-matrix-recorded | local | `node scripts/probes/ht-result-check.mjs runbooks/HT3-result.md 12`                         | contains:HT OK          |
+| v1-tag                | local | `git tag -l v1.0.0`                                                                         | contains:v1.0.0         |
+| ci-green              | ci    | `gh run list --branch main --limit 1 --json conclusion --jq .[0].conclusion`                | contains:success        |
 
 ### Escalation triggers
 

@@ -1,5 +1,5 @@
 // Gate helper for human-hands result forms: usage
-//   node .chuck/probes/ht-result-check.mjs <result-file> <expected-row-count>
+//   node scripts/probes/ht-result-check.mjs <result-file> <expected-row-count>
 // Passes only when the form has exactly the expected number of filled "| Pass |"
 // cells and zero "| Fail |" cells — an unfilled form (header-only "Pass/Fail")
 // or any failed step does not pass. Cell matching is case-insensitive.

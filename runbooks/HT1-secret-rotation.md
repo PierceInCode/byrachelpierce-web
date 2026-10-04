@@ -30,5 +30,5 @@
 
 ## Return instructions
 
-1. Save this file with the form filled in at `.chuck/human-tests/HT1-result.md`.
+1. Save this file with the form filled in at `runbooks/HT1-result.md`.
 2. Resume with `/chuck:run`. All-Pass clears the escalation; any Fail becomes a blocked-gate with your notes attached.

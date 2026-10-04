@@ -6,7 +6,7 @@ import path from 'node:path';
 import { MURAL_LOCATIONS } from '@/lib/mural-data';
 
 /**
- * ITEM 6 (M1): prove the M2 gate probe `.chuck/probes/mural-content.ts` is
+ * ITEM 6 (M1): prove the M2 gate probe `scripts/probes/mural-content.ts` is
  * runnable against the fixture BEFORE M2 lands, WITHOUT modifying its contract.
  *
  * The probe has two halves:
@@ -26,7 +26,7 @@ import { MURAL_LOCATIONS } from '@/lib/mural-data';
 const require = createRequire(import.meta.url);
 const tsxCli = require.resolve('tsx/cli');
 const repoRoot = path.resolve(fileURLToPath(import.meta.url), '../../..');
-const probePath = path.join(repoRoot, '.chuck', 'probes', 'mural-content.ts');
+const probePath = path.join(repoRoot, 'scripts', 'probes', 'mural-content.ts');
 
 function runProbe(baseUrl: string) {
   return spawnSync(process.execPath, [tsxCli, probePath], {

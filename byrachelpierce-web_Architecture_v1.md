@@ -67,7 +67,7 @@ Migrations: `drizzle/0000`–`0003`, journal-tracked; production has `__drizzle_
 
 - The Turso cloud CLI is **not installed** on the dev machine; all production DB access goes through `@libsql/client` (+ drizzle migrator for migrations), reading creds from `.env.local`'s commented lines without ever printing them.
 - **Backups:** `scripts/backup-prod.ts` (M0) dumps **all app tables** as dated JSON into `backups/` — one `backups/<table>-<YYYY-MM-DD>.json` per table, each a JSON array of row objects; `backup-check.mjs` gates that shape and the paintings row count (528). Its restore procedure is documented in the script header and proven by the M0 `restore-roundtrip` gate (`tests/backup-restore.roundtrip.test.ts`, local `file:` DBs only). Backup-first is a recorded protocol step before any production write.
-- **Read-only verification probes** (`.chuck/probes/`) are sanctioned agent-runnable production access: SELECT/PRAGMA only, zero writes, no cred output (DECISIONS D8). Anything that writes production remains operator-authorized, backup-first, additive-only.
+- **Read-only verification probes** (`scripts/probes/`) are sanctioned agent-runnable production access: SELECT/PRAGMA only, zero writes, no cred output (DECISIONS D8). Anything that writes production remains operator-authorized, backup-first, additive-only.
 - Anonymous HTTP smoke tests target `https://byrachelpierce-web.vercel.app` (pre-cutover) and `https://byrachelpierce.com` (post-cutover).
 
 ## 7. Content honesty (Iron Invariant — Architecture §4.4, §5.3, §7)

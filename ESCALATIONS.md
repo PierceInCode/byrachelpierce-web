@@ -34,7 +34,7 @@ Accept and widen bands to allow for 200% overage.
 
 **What happened:** M0's machine work is COMPLETE on chuck/M0 @ 102a0b9. Gates already executed green this session (quote): check/coverage/build-seeded/e2e green via Bill (coverage 90.36% lines / 97.67% funcs; build 34/34; e2e 12 passed); dep-audit exit 0 AFTER drizzle-orm 0.45.2 CVE bump (was red: GHSA-gpj5-g38j-94v9 HIGH); eol-clean "EOL OK"; push-guard "PUSH-GUARD OK"; restore-roundtrip 3/3; prod-verify "PROD-VERIFY OK" (528 paintings, 0 sentinels, 4 migrations); alias-smoke "SMOKE OK" (4/4 routes 200); tag-r4 (R4 @ 2c9f15e pushed). Pending: ci-green on 102a0b9 (running, PR #13 draft), rotation-recorded (THIS escalation), then Binkley's full gate.
 
-The operator action: run protocol `.chuck/human-tests/HT1-secret-rotation.md` (rotate the leaked Resend key + Turso token, update .env.local, confirm dev + magic-link, delete Database Token.txt if present, confirm art backup 0.6 + Vercel previews 0.7), save the filled form at `.chuck/human-tests/HT1-result.md`, resume with /chuck:run. Rotation is contractually not deferrable again (D11).
+The operator action: run protocol `runbooks/HT1-secret-rotation.md` (rotate the leaked Resend key + Turso token, update .env.local, confirm dev + magic-link, delete Database Token.txt if present, confirm art backup 0.6 + Vercel previews 0.7), save the filled form at `runbooks/HT1-result.md`, resume with /chuck:run. Rotation is contractually not deferrable again (D11).
 
 RIDER 1 (operator approval requested in your Answer): remote-branch deletion list per audit §2/F11 — merged-and-stale: r3-collection, r4-content, docs/r3-close-out, docs/r4-close-out, final-product-planning; closed-unmerged: vercel/react-server-components-cve-vu-y3bp7s. Approve deletion (all/some/none) in the Answer; deletion happens after your answer.
 
@@ -104,7 +104,7 @@ BUT the cycle's central charter — CLOSE THE CLASS — is not met. A fresh Snor
 - Reachability class is identical to F-RG-3: no `.env` on disk (only `.env.local`), `.env*` gitignored (cannot be committed/bad-merged from tracked files); requires a developer to manually create a local `.env` with a case-variant remote key. Not exploitable as the repo stands today.
 - The gate suite does NOT catch it: `push-guard.mjs` check (5) uses only uppercase `.env` keys — the gate shares the guard's blind spot, the same structural-blindness pattern that failed cycles 2 and 3.
 
-Cycle-4 reports: `.chuck/reports/M0/milestone-report-regate3.md`, `.chuck/reports/M0/snorklewacker-regate3.md`. Ledger: `.chuck/probes/M0-ledger.md` (RE-GATE CYCLE 4).
+Cycle-4 reports: `.chuck/reports/M0/milestone-report-regate3.md`, `.chuck/reports/M0/snorklewacker-regate3.md`. Ledger: `.chuck/probes/M0-ledger.md (deleted 2026-10-04)` (RE-GATE CYCLE 4).
 
 **Decision needed (pick one):**
 
@@ -159,7 +159,7 @@ Fastest path: reply "apply all recommended" and I build + test + close M1. Or li
 
 The blocker is content only. `docs/intake/murals.csv` is still EMPTY — all 14 rows blank (real_name, description, year_painted). No agent can supply this (Invariant 3 forbids fabricated names/years rendered as fact). Everything agent-side is already built and verified green: the ingest script (`scripts/ingest-content.ts`), the catalog export (`scripts/export-catalog-csv.ts`), the production backup (`scripts/backup-prod.ts`), and the `mural-content` gate — which correctly FAILs today (14/14 names missing, 0/14 descriptions). The one missing input is Rachel.
 
-**Operator action needed — run the HT2 protocol (`.chuck/human-tests/HT2-content-loop.md`), with Rachel and this machine:**
+**Operator action needed — run the HT2 protocol (`runbooks/HT2-content-loop.md`), with Rachel and this machine:**
 
 1. Fill `docs/intake/murals.csv` — all 14 rows: `real_name`, `description` (1–2 sentences in her voice), `year_painted` (leave blank if genuinely unknown — never guessed).
 2. Export + fill the paintings sheet: `npx tsx scripts/export-catalog-csv.ts` with prod creds active (read-only); blank cells mean "no change".
@@ -170,7 +170,7 @@ The blocker is content only. `docs/intake/murals.csv` is still EMPTY — all 14 
 7. Commit the regenerated `src/lib/mural-data.ts`, `docs/intake/murals.csv`, and `docs/intake/ingest-report-*.md` via PR; merge on green CI.
 8. With Rachel, open the live trail (`https://byrachelpierce-web.vercel.app/murals/trail`) and confirm every one of the 14 names/descriptions is hers and true; spot-check 5 paintings against the CSV.
 
-Save the filled form at `.chuck/human-tests/HT2-result.md`, then resume with `/chuck:run`. All-pass clears M2's content gate; any fail becomes a blocked-gate with your notes attached.
+Save the filled form at `runbooks/HT2-result.md`, then resume with `/chuck:run`. All-pass clears M2's content gate; any fail becomes a blocked-gate with your notes attached.
 
 **This touches live production (by design, operator-run, never me):** step 5 (`--apply`) writes to the live Turso DB, gated behind the step-3 backup. Steps 3–6 are the only window with prod creds active — re-comment them immediately after.
 
