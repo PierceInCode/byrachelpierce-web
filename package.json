@@ -17,6 +17,8 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate-art": "tsx scripts/migrate-art-data.ts",
     "db:seed-ci": "tsx scripts/seed-ci.ts",
+    "mosaic:coast": "tsx scripts/mosaic/build-coast.ts",
+    "mosaic:build": "tsx scripts/mosaic/build-mosaic.ts",
     "e2e": "playwright test",
     "lighthouse": "npm run db:seed-ci && npm run build && node scripts/run-lighthouse.mjs",
     "lighthouse:prod": "node scripts/run-lighthouse.mjs --collect.startServerCommand= --collect.url=https://byrachelpierce.com/ --collect.url=https://byrachelpierce.com/collection --collect.url=https://byrachelpierce.com/collection/painting/matthews-turtle --collect.url=https://byrachelpierce.com/murals/trail"

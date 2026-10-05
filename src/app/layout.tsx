@@ -1,15 +1,18 @@
 /**
- * Root Layout — wraps every page with fonts, metadata, Header, and Footer.
+ * Root Layout — wraps every page with fonts, metadata and analytics.
  * Google Fonts are loaded via next/font/google for zero-CLS font loading.
  * This is a Server Component.
+ *
+ * The Header and Footer are NOT here: the home page is the full-screen
+ * mosaic and draws its own chrome. Every other page gets them from
+ * src/app/(site)/layout.tsx.
  */
 
 import type { Metadata } from 'next';
 import { Playfair_Display, Jura } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { artUrl } from '@/lib/art-url';
 
 // ── Google Font Loading ──────────────────────────────────────────────────────────────
 // next/font/google injects optimized, self-hosted font CSS with no CLS.
@@ -39,6 +42,15 @@ export const metadata: Metadata = {
   description:
     'Original paintings, prints, and murals by Rachel Pierce. Visit our gallery on Sanibel Island, Florida.',
   metadataBase: new URL('https://byrachelpierce.com'),
+  // The tab icon is the blue crab the Wix site used. Image binaries stay out of
+  // git (they live with the artwork), so there is no favicon.ico in the repo.
+  icons: {
+    icon: [
+      { url: artUrl('site/icon-32.png'), sizes: '32x32', type: 'image/png' },
+      { url: artUrl('site/icon-192.png'), sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: artUrl('site/apple-icon-180.png'), sizes: '180x180', type: 'image/png' }],
+  },
   openGraph: {
     siteName: 'by Rachel Pierce',
     locale: 'en_US',
@@ -86,26 +98,7 @@ export default function RootLayout({
           fontFamily: 'var(--font-body)',
         }}
       >
-        {/*
-         * The header is fixed/sticky, so pages need top padding.
-         * The 68px offset matches the header height set in Header.tsx.
-         */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: '100dvh',
-          }}
-        >
-          <Header />
-
-          {/* Page content — pushed below the fixed 68px header */}
-          <main id="main-content" style={{ flex: 1, paddingTop: '68px' }} tabIndex={-1}>
-            {children}
-          </main>
-
-          <Footer />
-        </div>
+        {children}
         {/* Vercel Analytics — production page-view telemetry (M1 / R5). */}
         <Analytics />
       </body>

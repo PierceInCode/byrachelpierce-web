@@ -11,3 +11,6 @@ coverage/
 .lighthouseci/
 .github/workflows/ci.yml
 .superpowers/
+src/lib/mosaic/coast.ts
+src/lib/mosaic/layout.json
+scripts/mosaic/source/

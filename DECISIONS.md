@@ -271,3 +271,38 @@ Records the operator's resolution of escalation **E5** (fourth-cycle gate). The 
 Continues the sequence per the `## Amendments` rule. Records the mechanism by which the M1 `lighthouse` gate obtains a Chrome binary.
 
 M1 Lighthouse resolves Chrome via the committed Playwright chromium because no standalone Chrome is installed on the sole sanctioned dev machine (Windows) — only Microsoft Edge, which `lhci autorun` will not accept, failing "Chrome installation not found." A `scripts/run-lighthouse.mjs` wrapper sets `process.env.CHROME_PATH` from `require('playwright').chromium.executablePath()` (falling back to an ambient `CHROME_PATH` if one is already set, e.g. a CI runner with real Chrome), then invokes `lhci autorun`, forwarding any collect overrides (the `lighthouse:prod` variant's `--collect.*` args). The `lighthouse` and `lighthouse:prod` npm scripts are repointed through the wrapper. This keeps the local `lighthouse` gate hands-free (`bash -c "export TURSO_DATABASE_URL=file:./ci.db && npm run lighthouse"` needs no ambient `CHROME_PATH`); `lighthouserc.json` stays a JSON file with its error-level budgets (perf 0.85 / a11y 0.95 / seo 0.95) intact and still passes `scripts/probes/lighthouse-config-check.mjs`. No new dependency: `playwright` is already present (pulled by `@playwright/test`).
+
+---
+
+## D24 — The home page becomes the island mosaic; every other page moves under `(site)/` unchanged (2026-10-04)
+
+**Operator direction.** After reviewing design options outside the repo, the operator and Rachel chose the "island mosaic": every painting in the catalogue is one tile, the tiles are laid out in the shape of Sanibel on its real coastline, and the visitor moves around it like a map. The operator directed that it be brought into `development` as the page the site moves forward from, with permission to change any file, and ruled that the other pages stay as they are for now and are restyled to the new design later.
+
+**What changed.**
+
+- `src/app/page.tsx` is now the mosaic (`src/components/mosaic/`: `IslandMosaic.tsx` renders the markup once, `engine.ts` runs the canvas and all interaction, `mosaic.css` is scoped under `.mosaic`). The old home page is gone.
+- The home page is full screen, so the shared header and footer moved out of `src/app/layout.tsx` into `src/app/(site)/layout.tsx`, and `ar`, `collection`, `contact`, `custom`, `murals`, `press`, `story`, `visit` moved into `src/app/(site)/`. A route group does not change URLs; those pages render exactly as before.
+- `src/lib/mosaic/` holds the data: `coast.ts` (generated outline), `layout.json` (generated tile layout), `geo.ts` (latitude/longitude to map position), `places.ts`, `content.ts` (panel copy and links), `tween.ts` (a small animation helper).
+
+**Choices made, and why.**
+
+1. **This supersedes the design language in Architecture §12 for the home page only.** `docs/` is not edited (rule 8); this entry is the record. The rest of the site still follows §12 until it is restyled.
+2. **No new dependency (rule 7).** The prototype used GSAP; the port uses `tween.ts` instead. `sharp` is used by the build script only and is already installed with Next.js; it is imported dynamically and not added to `package.json`.
+3. **Fonts.** The mosaic uses Boska and Switzer, loaded by `<link>` from Fontshare's CDN on the home page only. This is a new third-party request at runtime. Self-hosting them is the alternative if the operator prefers; the other pages keep their existing fonts.
+4. **The coastline is the operator's own artwork** (`scripts/mosaic/source/SanibelCapSil.svg`, copied from the SanibelTides project). `npm run mosaic:coast` flattens it into `coast.ts`. No OpenStreetMap data is used on this page.
+5. **The layout is built from `scripts/art-data.json`, not the database** (`npm run mosaic:build`), so building it never touches Turso. Consequence: a painting added, removed or re-slugged in the database does not appear on the map until the catalogue file is updated and the script re-run. `tests/mosaic/layout.test.ts` checks the layout against the catalogue file, not against production.
+6. **Where a tile sits.** Paintings whose title names a subject are placed where that subject lives (15 lighthouse paintings at the point, 14 mangrove/SCCF by SCCF, 72 birds by the refuge, 62 turtles and shells along the Gulf shore); the other 365 are ordered by colour from west to east. This uses title keywords, not the catalogue's tags. It is a visual arrangement and makes no claim about a painting.
+7. **Images stay out of git (rule 5).** The tile atlas is written to `public/art/mosaic/atlas.jpg`; Rachel's photographs and the logo are in `public/art/site/`. All are referenced through `artUrl()`. `scripts/sync-art-blob.ts` now includes the `mosaic` and `site` folders. **Until the operator runs that upload, a deployed build shows plain-colour tiles and no photograph or logo.**
+8. **Touch targets.** `globals.css` gives every button and link a 44px minimum. Inside `.mosaic` that floor is lifted, because seven tabs cannot fit a phone at 44px each. The tab row is measured to fit from 320px wide.
+9. **`devIndicators: false` in `next.config.ts`.** Next's development badge covered the panel's links on a phone. Development only; no effect on a build.
+10. **`window.__mosaic`** is a small handle the engine publishes (camera, `flyTo`, `toScreen`, the layout). The e2e spec uses it to find a tile on screen. It exposes nothing private.
+11. **Muted panel text is `#587179`,** one step darker than the prototype's `#5d7680`, which measured 4.49:1 on the panel against the 4.5:1 minimum (found by the Lighthouse run).
+12. **Tab icon.** The site had none. The root layout now declares the blue-crab icon the Wix site uses, at 32px and 192px plus a 180px Apple touch icon, made from the image Wix serves (the Wix site has no `.ico` file). Because images stay out of git (rule 5), the three files are in `public/art/site/` and referenced through `artUrl()`; there is no `favicon.ico` in the repo. They go to Blob with the rest of that folder.
+
+**Open items for the operator (none of these is decided here).**
+
+- **The Contact tab's form is not connected.** Submitting it sends nothing and shows "This is a preview, so the form is not connected yet and nothing was sent." The site removed a dead contact form once already (Spec §8.1.4), so before this goes live the form must either be wired to send (the repo already has Resend) or be replaced with the direct contact details. `tests/e2e/home-mosaic.spec.ts` pins the current honest behaviour.
+- **Unconfirmed copy (rule 3).** The Giving tab's six causes and their descriptions, and the About tab's paragraphs, were drafted from public sources and have not been confirmed by Rachel. They need her review before launch.
+- **YouTube link.** The mosaic links to `youtube.com/channel/UCS-vpysj6A7F5DRqcEcCu-A`, which differs from `SOCIAL.youtube` in `src/lib/constants.ts`. One of them is wrong or out of date.
+- **Deferred by the operator:** a copyright line on phone-width screens (wide screens have one); swapping the logo for a vector version when one is found; restyling the other pages.
+- **Short laptop screens.** On the Murals and Giving tabs the photograph is shown only when at least 240px is free above the panel. At 1280x720 there is not, so it is hidden there. Carried over from the approved prototype unchanged.

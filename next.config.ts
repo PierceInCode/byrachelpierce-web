@@ -76,6 +76,10 @@ const nextConfig: NextConfig = {
   },
   // Strict mode for catching React issues early
   reactStrictMode: true,
+  // The home page is a full-screen map with its panel in the bottom-left
+  // corner, exactly where the dev-tools badge sits; it covers the panel's links
+  // on a phone-sized screen, so it is switched off. Build errors still show.
+  devIndicators: false,
   // Wix → new-site 308 redirects (M1 item 3). Single source of truth is
   // redirectRules above.
   async redirects() {

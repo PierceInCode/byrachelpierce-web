@@ -40,15 +40,15 @@ beforeAll(async () => {
 
   const staticModules: { page: string; path: string }[] = [
     { page: '/', path: '@/app/page' },
-    { page: '/collection', path: '@/app/collection/page' },
-    { page: '/murals', path: '@/app/murals/page' },
-    { page: '/murals/trail', path: '@/app/murals/trail/page' },
-    { page: '/ar', path: '@/app/ar/page' },
-    { page: '/contact', path: '@/app/contact/page' },
-    { page: '/custom', path: '@/app/custom/page' },
-    { page: '/press', path: '@/app/press/page' },
-    { page: '/story', path: '@/app/story/page' },
-    { page: '/visit', path: '@/app/visit/page' },
+    { page: '/collection', path: '@/app/(site)/collection/page' },
+    { page: '/murals', path: '@/app/(site)/murals/page' },
+    { page: '/murals/trail', path: '@/app/(site)/murals/trail/page' },
+    { page: '/ar', path: '@/app/(site)/ar/page' },
+    { page: '/contact', path: '@/app/(site)/contact/page' },
+    { page: '/custom', path: '@/app/(site)/custom/page' },
+    { page: '/press', path: '@/app/(site)/press/page' },
+    { page: '/story', path: '@/app/(site)/story/page' },
+    { page: '/visit', path: '@/app/(site)/visit/page' },
   ];
 
   const out: Resolved[] = [];
@@ -63,7 +63,7 @@ beforeAll(async () => {
   }
 
   // Dynamic: /collection/[category]
-  const catMod = (await import('@/app/collection/[category]/page')) as {
+  const catMod = (await import('@/app/(site)/collection/[category]/page')) as {
     generateMetadata: (args: { params: Promise<{ category: string }> }) => Promise<Metadata>;
   };
   for (const c of COLLECTION_CATEGORIES) {
@@ -76,7 +76,7 @@ beforeAll(async () => {
   }
 
   // Dynamic: /collection/painting/[slug]
-  const paintMod = (await import('@/app/collection/painting/[slug]/page')) as {
+  const paintMod = (await import('@/app/(site)/collection/painting/[slug]/page')) as {
     generateMetadata: (args: { params: Promise<{ slug: string }> }) => Promise<Metadata>;
   };
   for (const p of catalogFixture.paintings) {

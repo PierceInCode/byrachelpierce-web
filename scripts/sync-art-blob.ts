@@ -25,7 +25,9 @@ import { createReadStream, statSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 
 const ART_DIR = 'public/art';
-const SUBDIRS = ['web', 'thumbs'];
+// web/ and thumbs/ hold the paintings; mosaic/ holds the home page's tile atlas and
+// site/ its photographs and logo (all gitignored, all served through artUrl()).
+const SUBDIRS = ['web', 'thumbs', 'mosaic', 'site'];
 
 interface LocalFile {
   // Matches the DB's web_image_path/thumb_path values exactly, e.g.
