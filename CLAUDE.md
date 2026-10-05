@@ -13,7 +13,7 @@ You are finishing this site to ship, following `docs/FINAL-BUILD-SPEC.md` ("the 
 2. **No secrets in the repo, in logs, or in your output.** A live Resend key and a Turso token were leaked before this plan existed; both rotations are the precedent. If you see a credential anywhere, stop and flag it.
 3. **Public content is honest.** No fabricated names/years/claims rendered as fact; unknown availability shows no claim; AR (when built) never estimates size (Architecture §4.4, §5.3, §13.2).
 4. **Tests send no real email** (`resend` mocked, key absent in CI) **and never touch real user data**.
-5. **No image binaries in git or in your context.** `public/art/` is gitignored; never read image files; artwork URLs only via `artUrl()` (R2+).
+5. **No image binaries in git.** `public/art/` is gitignored; artwork URLs only via `artUrl()` (R2+).
 6. **Gates are ground truth.** Done = the milestone's gate commands ran in this session and passed; paste output (via test-runner). Never claim a gate passes without running it.
 7. **Dependencies frozen** to `package.json` + the milestone's sanctioned list. Anything else: DECISIONS.md entry, operator rules, default no. `next-auth` stays exactly pinned.
 8. **Never edit `docs/`** except ingest reports under `docs/intake/`. Spec/Architecture problems → DECISIONS.md entry for the operator. Root `PROGRESS.md`, `DECISIONS.md`, `README.md` are yours to maintain.
@@ -32,6 +32,6 @@ Every session: this file, `PROGRESS.md`, Spec §0–§4. Then only:
 - **vercel-analyst** (Sonnet): delegate triage of deployed-vs-local divergence — SSG/dynamic rendering surprises, Vercel build failures, env/cookie/auth behavior differing on previews, Blob serving issues. Give it the symptom and the URLs; never paste raw build logs into the main thread.
 
 ## Context hygiene
-- Never read: image files, `*.db`, `package-lock.json`, `scripts/art-data.json` in full (use the fixtures), or `node_modules`.
+- Never read: `*.db`, `package-lock.json`, `scripts/art-data.json` in full (use the fixtures), or `node_modules`.
 - Read targeted line ranges; orient with `git diff --stat`.
 - If context runs low mid-milestone: commit WIP on the milestone branch, update `PROGRESS.md`, tell the operator to restart the session.
